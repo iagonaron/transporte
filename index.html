@@ -245,6 +245,11 @@
   /* ── diferencias ── */
   .difGrid{display:grid;grid-template-columns:1.15fr 1fr;gap:var(--pad);flex:1;min-height:0}
   .difCol{display:flex;flex-direction:column;gap:calc(var(--pad)*.55);min-height:0}
+  .difHead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .difEjTag{font-family:var(--disp);font-size:calc(var(--fs)*.78);font-weight:800;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--coral-hi)}
+  .difEjTag b{color:var(--steel-hi)}
+  #difOtro{flex:none}
   .pasosDif{display:flex;gap:6px;flex-wrap:wrap}
   .pasoD{cursor:pointer;border:1px solid var(--rule);border-radius:3px;background:linear-gradient(180deg,#241a12,#100c08);
     color:var(--dim);font-family:var(--disp);font-size:calc(var(--fs)*.8);letter-spacing:.1em;text-transform:uppercase;
@@ -257,10 +262,11 @@
   .difTxt i.az{color:var(--bajo);font-style:normal;font-weight:600}
   .difTxt u{color:var(--steel-hi);text-decoration:none;font-weight:600}
   #escalera{width:100%;flex:1;min-height:0;display:block}
+
   .ordenes{display:flex;gap:calc(var(--pad)*.6)}
   .orden{flex:1;padding:calc(var(--pad)*.55);border-radius:4px;border:1px solid var(--rule);background:rgba(20,14,10,.5)}
-  .orden h5{margin:0 0 6px;font-family:var(--disp);letter-spacing:.12em;text-transform:uppercase;
-    font-size:calc(var(--fs)*.78);color:var(--dim)}
+  .orden h5{margin:0 0 6px;font-family:var(--disp);letter-spacing:.08em;text-transform:uppercase;
+    font-size:calc(var(--fs)*.66);color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .orden.o-b h5{color:var(--bajo)} .orden.o-s h5{color:var(--alto)}
   .orden .fila{display:flex;gap:4px}
   .orden{position:relative} .orden.o-b{padding-bottom:calc(var(--pad)*.55 + 15px)}
@@ -439,13 +445,13 @@
 }
 
 .lmHead{display:flex;align-items:center;gap:14px}
-.lmHead .lmSep{width:1px;height:26px;background:var(--lm-line);flex:none}
-.lmHead .lmTitle{display:flex;flex-direction:column;line-height:1.1;min-width:0}
-.lmHead .lmTitle b{
+.lmSep{width:1px;height:26px;background:var(--lm-line);flex:none}
+.lmTitle{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+.lmTitle b{
   font-family:var(--lm-font);font-size:15px;font-weight:800;
   letter-spacing:.02em;color:#fff;white-space:nowrap;
 }
-.lmHead .lmTitle span{
+.lmTitle span{
   font-family:var(--lm-font);font-size:10px;font-weight:700;letter-spacing:.13em;
   text-transform:uppercase;color:var(--lm-muted2);margin-top:3px;white-space:nowrap;
 }
@@ -646,6 +652,7 @@ input[type=range]::-moz-range-thumb{
   border-radius:22px;
   box-shadow:0 26px 60px rgba(0,0,0,.66),0 0 0 1px rgba(255,255,255,.07);
 }
+
 
 :root{
   --lm-ink:#F2EDE6; --lm-muted:#C0B6AA; --lm-muted2:#8B8177;
@@ -927,8 +934,13 @@ input[type=range]::-moz-range-thumb{
     <small>al cambiar de armadura, algunas alteraciones accidentales deben modificarse</small></h2>
   <div class="difGrid">
     <div class="difCol">
+      <div class="difHead">
+        <span class="difEjTag" id="difEjTag"></span>
+        <button class="btn sm" id="difOtro">↻ Ver otro ejemplo</button>
+      </div>
       <div class="pasosDif" id="pasosDif"></div>
       <div class="difTxt" id="difTxt"></div>
+
       <canvas id="escalera"></canvas>
     </div>
     <div class="difCol">
@@ -941,6 +953,7 @@ input[type=range]::-moz-range-thumb{
         <div class="orden o-s" id="ordenS">
           <h5>Orden de sostenidos · diferencias ascendentes</h5>
           <div class="fila"></div>
+          <div class="ordFlecha">▲</div>
         </div>
       </div>
       <div class="atril difAtril" id="atrilDifOri"></div>
@@ -960,7 +973,7 @@ input[type=range]::-moz-range-thumb{
 
 <!-- ══════════ PORTADA ══════════ -->
 <div id="boot">
-  <img class="lmLogo" class="arte" id="bootArte" alt="Transporte">
+  <img class="arte lmLogo" id="bootArte" alt="Transporte">
   <h1>Transporte</h1>
   <h2>Unidad 9 · la misma música, <b>en otra altura</b></h2>
   <p class="lede">Por qué a veces hay que cambiar la altura de una obra, los instrumentos que nombran
@@ -1112,6 +1125,67 @@ function lapizSonido(dur, agudo){
   nb.start(t0); nb.stop(t0+dur+.08);
   SRCS.push(nb);
 }
+/* ── efectos de interfaz (no son notas: son sonidos) ────────────── */
+function fx(tipo, i){
+  if (!AC) return;
+  const t0 = AC.currentTime + .01;
+  const g  = AC.createGain(); g.connect(MASTER);
+  if (tipo === 'tic'){
+    /* clic seco que baja de tono en cada paso: un escalón */
+    const nb = AC.createBufferSource(); nb.buffer = ruidoBuf(.09);
+    const bp = AC.createBiquadFilter(); bp.type='bandpass'; bp.Q.value = 6;
+    bp.frequency.setValueAtTime(2400 - (i||0)*520, t0);
+    bp.frequency.exponentialRampToValueAtTime(Math.max(240, 900 - (i||0)*180), t0+.09);
+    g.gain.setValueAtTime(.0001, t0);
+    g.gain.exponentialRampToValueAtTime(.16, t0+.006);
+    g.gain.exponentialRampToValueAtTime(.0001, t0+.11);
+    nb.connect(bp); bp.connect(g); nb.start(t0); nb.stop(t0+.14); SRCS.push(nb);
+    /* golpecito grave, para que se sienta el peldaño */
+    const o = AC.createOscillator(), g2 = AC.createGain();
+    o.type='sine'; o.frequency.setValueAtTime(180 - (i||0)*26, t0);
+    o.frequency.exponentialRampToValueAtTime(70, t0+.13);
+    g2.gain.setValueAtTime(.0001, t0);
+    g2.gain.exponentialRampToValueAtTime(.09, t0+.008);
+    g2.gain.exponentialRampToValueAtTime(.0001, t0+.16);
+    o.connect(g2); g2.connect(MASTER); o.start(t0); o.stop(t0+.18); SRCS.push(o);
+  } else if (tipo === 'blip'){
+    /* aparece algo: barrido corto hacia arriba, sin altura reconocible */
+    const o = AC.createOscillator();
+    o.type='triangle';
+    o.frequency.setValueAtTime(520, t0);
+    o.frequency.exponentialRampToValueAtTime(1500, t0+.07);
+    g.gain.setValueAtTime(.0001, t0);
+    g.gain.exponentialRampToValueAtTime(.10, t0+.012);
+    g.gain.exponentialRampToValueAtTime(.0001, t0+.16);
+    o.connect(g); o.start(t0); o.stop(t0+.18); SRCS.push(o);
+    const nb = AC.createBufferSource(); nb.buffer = ruidoBuf(.06);
+    const hp = AC.createBiquadFilter(); hp.type='highpass'; hp.frequency.value = 3800;
+    const g3 = AC.createGain();
+    g3.gain.setValueAtTime(.05, t0); g3.gain.exponentialRampToValueAtTime(.0001, t0+.08);
+    nb.connect(hp); hp.connect(g3); g3.connect(MASTER); nb.start(t0); nb.stop(t0+.1); SRCS.push(nb);
+  } else if (tipo === 'foco'){
+    /* algo importante entra en escena: swoosh corto */
+    const nb = AC.createBufferSource(); nb.buffer = ruidoBuf(.42);
+    const bp = AC.createBiquadFilter(); bp.type='bandpass'; bp.Q.value = 1.6;
+    bp.frequency.setValueAtTime(420, t0);
+    bp.frequency.exponentialRampToValueAtTime(4200, t0+.30);
+    g.gain.setValueAtTime(.0001, t0);
+    g.gain.exponentialRampToValueAtTime(.11, t0+.10);
+    g.gain.exponentialRampToValueAtTime(.0001, t0+.42);
+    nb.connect(bp); bp.connect(g); nb.start(t0); nb.stop(t0+.45); SRCS.push(nb);
+  } else if (tipo === 'clac'){
+    /* decisión tomada: chasquido seco */
+    const nb = AC.createBufferSource(); nb.buffer = ruidoBuf(.05);
+    const bp = AC.createBiquadFilter(); bp.type='bandpass'; bp.Q.value = 2.4;
+    bp.frequency.value = 1100;
+    g.gain.setValueAtTime(.0001, t0);
+    g.gain.exponentialRampToValueAtTime(.19, t0+.004);
+    g.gain.exponentialRampToValueAtTime(.0001, t0+.07);
+    nb.connect(bp); bp.connect(g); nb.start(t0); nb.stop(t0+.09); SRCS.push(nb);
+  }
+}
+function fxA(tipo, i){ initAudio().then(() => { if (AC.state==='suspended') AC.resume(); fx(tipo, i); }); }
+
 let playing = null;
 function stopAll(){
   SRCS.forEach(s => { try{ s.stop(); }catch(e){} });
@@ -1231,14 +1305,20 @@ function renderFrase(id, contSel, opt){
         st.setNoteStartX(nsx0);
       }
       st.draw();
-      const ns = barNotes.map(([nn, dur]) => {
+      const forzadas = [];
+      const ns = barNotes.map(([nn, dur, acc], iN) => {
         const p = N(nn);
         const sn = new VF.StaveNote({keys:[p.vf], duration:dur, clef:S.clef||'treble', auto_stem:true});
         sn._midi = p.midi; sn._durB = DURB[dur];
+        if (acc) forzadas.push([sn, acc]);      /* alteración escrita a mano, aunque sobre */
         return sn;
       });
       const v = new VF.Voice({num_beats:BPB, beat_value:4}).addTickables(ns);
       VF.Accidental.applyAccidentals([v], S.key || 'C');
+      forzadas.forEach(([sn, acc]) => {
+        if (!sn.getModifiers().some(m => m.getCategory && m.getCategory() === 'Accidental'))
+          sn.addModifier(new VF.Accidental(acc), 0);
+      });
       const beams = VF.Beam.generateBeams(ns);
       new VF.Formatter().joinVoices([v]).format([v], w - (st.getNoteStartX()-st.getX()) - 22);
       const els = [], belms = [];
@@ -1820,20 +1900,74 @@ async function anotaAlteracion(){
 }
 
 /* ══════ 5 · LAS DIFERENCIAS ══════ */
-const DIF_PASOS = [
-  { t:'1 · Compara las armaduras',
-    txt:'De <b>Re M (2♯)</b> a <b>Fa M (1♭)</b>. Imagina que los sostenidos son <em>lo alto de una montaña</em> y los bemoles, <i class="az">las profundidades del mar</i>. La no-armadura de Do M es el nivel del mar.' },
-  { t:'2 · Cuenta los movimientos',
-    txt:'2♯ → 1♯ → 0 → 1♭: <u>tres movimientos</u>, todos hacia abajo. Tiene <b>3 diferencias descendentes</b> — descendentes porque pasa de sostenidos a bemoles.' },
-  { t:'3 · ¿A qué notas afectan?',
-    txt:'Descendentes → siguen el <i class="az">orden de bemoles</i>: las <u>3 primeras</u>, <b>SI · MI · LA</b>. Son las notas «vigiladas»: si aparece alguna de ellas <u>con alteración accidental</u>, habrá que retocarla.' },
-  { t:'4 · ¡Es un SI! → cámbiala',
-    txt:'Aquel <em>sol♯</em> del original, al transportar, se llama ahora <b>si</b>… ¡y <b>SI</b> es la primera de nuestras tres notas vigiladas! Así que <u>no puede quedarse con su ♯</u>: lo tachamos y le ponemos la alteración <u>inmediatamente inferior</u>, el <b>♮</b>. Míralo.' },
-  { t:'5 · ¿Por qué el becuadro?',
-    txt:'Porque las diferencias son <i class="az">descendentes</i> → se baja <u>un escalón</u> de alteración: <em>♯ → ♮</em> (y si hubiera sido ♮, pasaría a ♭). ¿Por qué no si♯? Respecto al <b>si♭</b> de la armadura, el <b>♮</b> ya sube ese semitono: si♯ sería pasarse.' }
+/* ═══════════ 5 · LAS DIFERENCIAS · dos ejemplos ═══════════
+   El mismo par de tonalidades, en los dos sentidos:
+     A · Re M → Fa M   3 descendentes   afectan SI·MI·LA   sol♯ → si♯ → si♮
+     B · Fa M → Re M   3 ascendentes    afectan FA·DO·SOL  si♮ → sol♮ → sol♯
+   La partitura corregida de un ejemplo es la original del otro.        */
+
+/* Fa M → Re M «en bruto»: el si♮ se copia tal cual y sale un sol♮ que sobra */
+const F_DIF_B_BRUTO = { key:'D', bars:[
+  [['D4','q'],['E4','8'],['F#4','8']],
+  [['G4','q'],['G4','8','n'],['A4','8']],
+  [['F#4','q'],['E4','q']],
+  [['D4','h']] ]};
+
+const NIVELES = ['4♯','3♯','2♯','1♯','0','1♭','2♭','3♭','4♭'];
+
+const EJ_DIF = [
+  { tag:'Ejemplo 1 · <b>Re M → Fa M</b> · descendentes',
+    ori:{key:'D', bars:F_MEN_ORI.bars,       label:'RE MAYOR · la original',                 cls:'A'},
+    bru:{key:'F', bars:F_DIF_BRUTO.bars,     label:'FA MAYOR · transportada, sin retocar',   cls:'B'},
+    de:'Re M', a:'Fa M', deArm:'2♯', aArm:'1♭', iDe:2, iA:5, dir:1, n:3,
+    sentido:'descendentes', signo:'−', orden:'B', ordenNom:'orden de bemoles',
+    notas:['SI','MI','LA'],
+    notaOri:'sol♯', notaBru:'si♯', notaOk:'si♮', grito:'SI', gritoBru:'¡un SI!',
+    glifo:'accidentalNatural', linea:2, dx:-19,
+    midiDe:74, midiA:65,
+    escalera:'♯ → ♮ → ♭', anterior:'anterior', arriba:'baja',
+    pie:'♯ → ♮  un escalón abajo' },
+
+  { tag:'Ejemplo 2 · <b>Fa M → Re M</b> · ascendentes',
+    ori:{key:'F', bars:F_MEN_TRA.bars,       label:'FA MAYOR · la original',                 cls:'B'},
+    bru:{key:'D', bars:F_DIF_B_BRUTO.bars,   label:'RE MAYOR · transportada, sin retocar',   cls:'A'},
+    de:'Fa M', a:'Re M', deArm:'1♭', aArm:'2♯', iDe:5, iA:2, dir:-1, n:3,
+    sentido:'ascendentes', signo:'+', orden:'S', ordenNom:'orden de sostenidos',
+    notas:['FA','DO','SOL'],
+    notaOri:'si♮', notaBru:'sol♮', notaOk:'sol♯', grito:'SOL', gritoBru:'¡un SOL!',
+    glifo:'accidentalSharp', linea:3, dx:-21,
+    midiDe:65, midiA:74,
+    escalera:'♭ → ♮ → ♯', anterior:'siguiente', arriba:'sube',
+    pie:'♮ → ♯  un escalón arriba' }
 ];
+let difEj = 0;
+const EJ = () => EJ_DIF[difEj];
+
+function difPasos(){
+  const E = EJ();
+  const camino = [];
+  for (let k = 0; k <= E.n; k++) camino.push(NIVELES[E.iDe + k*E.dir]);
+  const azul = t => `<i class="az">${t}</i>`, naranja = t => `<em>${t}</em>`;
+  const col = E.dir > 0 ? azul : naranja;
+  return [
+    { t:'1 · Compara las armaduras',
+      txt:`De <b>${E.de} (${E.deArm})</b> a <b>${E.a} (${E.aArm})</b>. Imagina que los sostenidos son ${naranja('lo alto de una montaña')} y los bemoles, ${azul('las profundidades del mar')}. La no-armadura de Do M es el nivel del mar.` },
+    { t:'2 · Cuenta los movimientos',
+      txt:`${camino.join(' → ')}: <u>${E.n} movimientos</u>, todos hacia ${E.dir>0?'abajo':'arriba'}. Tiene <b>${E.n} diferencias ${E.sentido}</b> — ${E.sentido} porque va ${E.dir>0?'de sostenidos a bemoles':'de bemoles a sostenidos'}.` },
+    { t:'3 · ¿A qué notas afectan?',
+      txt:`${E.sentido[0].toUpperCase()+E.sentido.slice(1)} → siguen el ${col(E.ordenNom)}: las <u>${E.n} primeras</u>, <b>${E.notas.join(' · ')}</b>. Son las notas «vigiladas»: si aparece alguna de ellas <u>con alteración accidental</u>, habrá que retocarla.` },
+    { t:`4 · ¡Es un ${E.grito}! → cámbiala`,
+      txt:`Aquel ${naranja(E.notaOri)} del original, al transportar, se llama ahora <b>${E.notaOk.slice(0,-1)}</b>… ¡y está entre nuestras tres notas vigiladas! Así que <u>no puede quedarse con la alteración copiada</u>: la tachamos y le ponemos la <u>inmediatamente ${E.dir>0?'inferior':'superior'}</u>, el <b>${E.notaOk.slice(-1)}</b>. Míralo.` },
+    { t:`5 · ¿Por qué el ${E.dir>0?'becuadro':'sostenido'}?`,
+      txt:`Porque <b>${E.notaOk.slice(0,-1).toUpperCase()}</b> es una de las <u>notas afectadas</u> y las diferencias son ${col(E.sentido)}: hay que cambiar su alteración <u>a la ${E.anterior}</u>. La escalera ${E.arriba} así — ${naranja(E.escalera)} —, y como venía con ${naranja(E.notaBru.slice(-1))}, la ${E.anterior} es el <b>${E.notaOk.slice(-1)}</b>. Pulsa <u>«Ver otro ejemplo»</u> para verlo al revés.` }
+  ];
+}
+
+let DIF_PASOS = [];
 let difPaso = 0, difCont = 0, difSeqTok = 0, escaleraRaf = 0, ballPos = 0;
-function initDif(){
+
+function pintaPasosDif(){
+  DIF_PASOS = difPasos();
   const cont = $('#pasosDif');
   cont.innerHTML = '';
   DIF_PASOS.forEach((p, i) => {
@@ -1842,42 +1976,61 @@ function initDif(){
     b.onclick = () => setDifPaso(i);
     cont.appendChild(b);
   });
-  $('#ordenB .fila').innerHTML = ['SI','MI','LA','RE','SOL','DO','FA'].map(n=>`<span class="nb">${n}</span>`).join('');
-  $('#ordenS .fila').innerHTML = ['FA','DO','SOL','RE','LA','MI','SI'].map(n=>`<span class="nb">${n}</span>`).join('');
+  $('#difEjTag').innerHTML = EJ().tag;
+}
+
+function pintaAtrilesDif(){
+  const E = EJ();
   const opt = { vbw:700, padTop:44, sysH:148, padBot:10 };
   renderFrase('difOri', '#atrilDifOri', Object.assign({}, opt, {
-    systems:[{ key:'D', bars:F_MEN_ORI.bars, label:'RE MAYOR · la original', labelCls:'A' }] }));
+    systems:[{ key:E.ori.key, bars:E.ori.bars, label:E.ori.label, labelCls:E.ori.cls }] }));
   renderFrase('difTra', '#atrilDifTra', Object.assign({}, opt, {
-    systems:[{ key:'F', bars:F_DIF_BRUTO.bars, label:'FA MAYOR · transportada, sin retocar', labelCls:'B' }] }));
-  setDifPaso(0);
+    systems:[{ key:E.bru.key, bars:E.bru.bars, label:E.bru.label, labelCls:E.bru.cls }] }));
 }
-function setDifPaso(i){
+
+function initDif(){
+  $('#ordenB .fila').innerHTML = ['SI','MI','LA','RE','SOL','DO','FA'].map(n=>`<span class="nb">${n}</span>`).join('');
+  $('#ordenS .fila').innerHTML = ['FA','DO','SOL','RE','LA','MI','SI'].map(n=>`<span class="nb">${n}</span>`).join('');
+  $('#difOtro').onclick = () => {
+    difEj = (difEj + 1) % EJ_DIF.length;
+    pintaPasosDif(); pintaAtrilesDif(); setDifPaso(0);
+  };
+  pintaPasosDif(); pintaAtrilesDif();
+  setDifPaso(0, true);
+}
+
+function cajaOrden(){ return EJ().orden === 'B' ? '#ordenB' : '#ordenS'; }
+
+function setDifPaso(i, mudo){
   difPaso = i;
   difSeqTok++;                       /* corta secuencias en curso */
   $$('#pasosDif .pasoD').forEach((b, j) => b.classList.toggle('on', j === i));
   $('#difTxt').innerHTML = DIF_PASOS[i].txt;
-  const flecha = $('#ordenB .ordFlecha');
+  const caja = cajaOrden();
+  const flecha = $(caja + ' .ordFlecha');
   if (i < 2){
-    $$('#ordenB .nb').forEach(el => el.classList.remove('on','act'));
-    if (flecha) flecha.style.opacity = 0;
+    $$('#ordenB .nb, #ordenS .nb').forEach(el => el.classList.remove('on','act'));
+    $$('.ordFlecha').forEach(f => f.style.opacity = 0);
   }
-  if (i === 0){ difCont = 0; pingArmaduras(); }
+  if (i === 0){ difCont = 0; if (!mudo) pingArmaduras(); }
   if (i === 1) animaConteo();
-  if (i >= 2) difCont = 3;
+  if (i >= 2) difCont = EJ().n;
   if (i === 2) animaOrden();
   if (i > 2){
-    $$('#ordenB .nb').forEach((el, j) => el.classList.toggle('on', j < 3));
+    $$(caja + ' .nb').forEach((el, j) => el.classList.toggle('on', j < EJ().n));
     if (flecha) flecha.style.opacity = 0;
   }
   drawEscalera();
-  marcaDif(i);
+  marcaDif(i, mudo);
 }
+
 /* ── sonidos de cada animación ── */
 function pingArmaduras(){
+  const E = EJ();
   initAudio().then(() => {
     if (AC.state === 'suspended') AC.resume();
-    playNote(74, AC.currentTime + .05, .7, .85);      /* re: salida */
-    playNote(65, AC.currentTime + .70, .9, .85);      /* fa: llegada */
+    playNote(E.midiDe, AC.currentTime + .05, .7, .85);      /* salida */
+    playNote(E.midiA,  AC.currentTime + .70, .9, .85);      /* llegada */
   });
 }
 function animaConteo(){
@@ -1888,17 +2041,17 @@ function animaConteo(){
     [1,2,3].forEach(kk => setTimeout(() => {
       if (tk !== difSeqTok) return;
       difCont = kk;
-      playNote([74,71,67][kk-1], AC.currentTime + .02, .55, .95);
+      fx('tic', kk-1);
       drawEscalera();
     }, 420 + (kk-1)*820));
   });
 }
 function animaOrden(){
   const tk = ++difSeqTok;
-  const cells = $$('#ordenB .nb');
+  const caja = cajaOrden();
+  const cells = $$(caja + ' .nb');
   cells.forEach(c => c.classList.remove('on','act'));
-  const flecha = $('#ordenB .ordFlecha');
-  const midis = [71, 64, 69];        /* si · mi · la */
+  const flecha = $(caja + ' .ordFlecha');
   initAudio().then(() => {
     if (AC.state === 'suspended') AC.resume();
     [0,1,2].forEach(i => setTimeout(() => {
@@ -1911,7 +2064,7 @@ function animaOrden(){
         flecha.style.left = (c.offsetLeft + c.offsetWidth/2) + 'px';
         flecha.style.top  = (c.offsetTop + c.offsetHeight) + 'px';
       }
-      playNote(midis[i], AC.currentTime + .02, .75, .95);
+      fx('blip');
     }, 300 + i*780));
   });
 }
@@ -1946,49 +2099,54 @@ function circulaNota(id, idx, txt, dur){
   return {cx, cy, bb};
 }
 let difToken = 0;
-async function marcaDif(paso){
+async function marcaDif(paso, mudo){
+  const E = EJ();
   const tk = ++difToken;
   limpiaAnot('difOri'); limpiaAnot('difTra');
   const sc = SCORES.difTra;
+  if (!sc) return;
+  const st = sc.systems[0].staves[0];
   const bbQ = sc.systems[0].notes[4].el.getBBox();
+  const yL  = st.getYForLine(E.linea);
+
   if (paso < 3){
-    /* mientras no lo tocamos: el ♯ con su interrogación latiendo */
     const q = anotaTexto('difTra', bbQ.x + 4, bbQ.y - 12, '?', 30);
     q.setAttribute('class', 'trazoTxt pulseQ');
     return;
   }
-  /* la misma nota, en las dos partituras */
-  circulaNota('difOri', 4, 'sol♯');
-  circulaNota('difTra', 4, '¡un SI!');
-  if (AC){
-    if (AC.state === 'suspended') AC.resume();
-    playNote(68, AC.currentTime + .05, .6, .9);       /* sol♯ */
-    playNote(71, AC.currentTime + .75, .8, .9);       /* si */
+
+  /* ── paso 5: el cambio YA está hecho; solo se explica ── */
+  if (paso >= 4){
+    circulaNota('difOri', 4, E.notaOri, 1);
+    circulaNota('difTra', 4, E.notaOk, 1);
+    const ax4 = bbQ.x + 8;
+    anotaPath('difTra', `M ${ax4-9} ${yL-13} L ${ax4+9} ${yL+13}`);
+    anotaPath('difTra', `M ${ax4+9} ${yL-13} L ${ax4-9} ${yL+13}`);
+    anotaGlifo('difTra', E.glifo, bbQ.x + E.dx, yL, 32);
+    anotaTexto('difTra', bbQ.x + 2, yL + 50, E.pie, 17);
+    return;
   }
+
+  /* ── paso 4: la decisión, animada ── */
+  circulaNota('difOri', 4, E.notaOri);
+  circulaNota('difTra', 4, E.gritoBru);
+  if (!mudo) fxA('foco');
   await espera(1000);
   if (tk !== difToken) return;
-  /* la decisión: fuera el ♯, entra el ♮ */
-  const st = sc.systems[0].staves[0];
   const bb = sc.systems[0].notes[4].el.getBBox();
-  const yL = st.getYForLine(2);
   const ax = bb.x + 8;
   await trazo('difTra', `M ${ax-9} ${yL-13} L ${ax+9} ${yL+13}`, 300);
   if (tk !== difToken) return;
   await trazo('difTra', `M ${ax+9} ${yL-13} L ${ax-9} ${yL+13}`, 300);
   if (tk !== difToken) return;
   await espera(120);
-  await escribeGlifo('difTra', 'accidentalNatural', bb.x - 19, yL, 32, 560);
+  await escribeGlifo('difTra', E.glifo, bb.x + E.dx, yL, 32, 560);
   if (tk !== difToken) return;
   lapizFuera('difTra');
-  if (paso >= 4){
-    anotaTexto('difTra', bb.x + 2, yL + 50, '♯ → ♮  un escalón abajo', 17);
-    if (AC){
-      playNote(72, AC.currentTime + .05, .55, .85);   /* lo que sonaría si♯ */
-      playNote(71, AC.currentTime + .80, .8, .95);    /* si♮ */
-    }
-  }
+  if (!mudo) fxA('clac');
 }
 function drawEscalera(){
+  const E = EJ();
   const cv = $('#escalera'); if (!cv) return;
   const r = cv.getBoundingClientRect();
   if (r.width < 20) return;
@@ -1997,8 +2155,7 @@ function drawEscalera(){
   const c = cv.getContext('2d'); c.scale(dpr, dpr);
   const W = r.width, H = r.height;
   c.clearRect(0,0,W,H);
-  const niveles = ['4♯','3♯','2♯','1♯','0','1♭','2♭','3♭','4♭'];
-  const yOf = i => 24 + i*(H-48)/(niveles.length-1);
+  const yOf = i => 24 + i*(H-48)/(NIVELES.length-1);
   const gr = c.createLinearGradient(0,0,0,H);
   gr.addColorStop(0,'rgba(245,167,66,.14)');
   gr.addColorStop(.5,'rgba(20,16,12,0)');
@@ -2010,41 +2167,40 @@ function drawEscalera(){
   c.fillStyle = 'rgba(160,190,210,.65)'; c.font = '10px Avenir Next, sans-serif'; c.textAlign = 'right';
   c.fillText('nivel del mar (Do M)', W-16, yMar-5);
   c.textAlign = 'left';
-  niveles.forEach((n, i) => {
+  NIVELES.forEach((n, i) => {
     const y = yOf(i);
     c.strokeStyle = 'rgba(200,170,140,.22)';
     c.beginPath(); c.moveTo(46, y); c.lineTo(W-40, y); c.stroke();
-    const esRe = (n === '2♯'), esFa = (n === '1♭');
-    c.font = `${esRe||esFa ? '700 13px' : '11px'} Menlo, monospace`;
+    const esDe = (i === E.iDe), esA = (i === E.iA);
+    c.font = `${esDe||esA ? '700 13px' : '11px'} Menlo, monospace`;
     c.fillStyle = i < 4 ? 'rgba(245,190,110,.9)' : i === 4 ? '#C8BCA8' : 'rgba(120,190,230,.9)';
     c.fillText(n, 14, y+4);
-    if (esRe){ c.fillStyle = '#FFD9A8'; c.font = '700 12px Futura, Avenir Next, sans-serif'; c.fillText('RE M · salida', 52, y-7); }
-    if (esFa){ c.fillStyle = '#BFE4F7'; c.font = '700 12px Futura, Avenir Next, sans-serif'; c.fillText('FA M · llegada', 52, y+18); }
+    if (esDe){ c.fillStyle = '#FFD9A8'; c.font = '700 12px Futura, Avenir Next, sans-serif';
+               c.fillText(E.de + ' · salida', 52, E.dir > 0 ? y-7 : y+18); }
+    if (esA) { c.fillStyle = '#BFE4F7'; c.font = '700 12px Futura, Avenir Next, sans-serif';
+               c.fillText(E.a + ' · llegada', 52, E.dir > 0 ? y+18 : y-7); }
   });
-  const iRe = 2;
-  /* la bolita se desliza hacia el escalón contado */
   const objetivo = (difPaso === 0) ? 0 : difCont;
   ballPos += (objetivo - ballPos) * 0.14;
   const moviendo = Math.abs(objetivo - ballPos) > 0.004;
   if (!moviendo) ballPos = objetivo;
-  const paso = (yOf(iRe+1) - yOf(iRe));
-  const yB = yOf(iRe) + paso*ballPos;
+  const salto = (yOf(E.iDe + E.dir) - yOf(E.iDe));
+  const yB = yOf(E.iDe) + salto*ballPos;
   const xB = W*0.62;
-  /* estela: −1 −2 −3 */
   for (let kk = 1; kk <= difCont; kk++){
-    const yk = yOf(iRe + kk);
+    const yk = yOf(E.iDe + kk*E.dir);
     c.strokeStyle = 'rgba(232,113,78,.45)'; c.lineWidth = 1.4;
-    c.beginPath(); c.moveTo(xB, yOf(iRe+kk-1)); c.lineTo(xB, yk); c.stroke();
+    c.beginPath(); c.moveTo(xB, yOf(E.iDe + (kk-1)*E.dir)); c.lineTo(xB, yk); c.stroke();
     c.beginPath(); c.arc(xB, yk, 4.5, 0, 7); c.stroke();
     c.fillStyle = '#FFB894';
     c.font = '700 17px Menlo, monospace';
-    c.fillText('−' + kk, xB + 16, yk + 6);
+    c.fillText(E.signo + kk, xB + 16, yk + 6);
   }
   c.beginPath(); c.arc(xB, yB, 9, 0, 7);
   c.fillStyle = '#E8714E'; c.shadowColor = '#E8714E'; c.shadowBlur = 14; c.fill(); c.shadowBlur = 0;
-  if (difCont >= 3){
+  if (difCont >= E.n){
     c.fillStyle = '#FFD9A8'; c.font = '700 13px Futura, Avenir Next, sans-serif'; c.textAlign = 'center';
-    c.fillText('3 diferencias descendentes', xB + 10, yOf(iRe+3) + 34);
+    c.fillText(E.n + ' diferencias ' + E.sentido, xB + 10, yOf(E.iDe + E.n*E.dir) + (E.dir > 0 ? 34 : -22));
     c.textAlign = 'left';
   }
   if (moviendo && !escaleraRaf){
