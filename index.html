@@ -1011,7 +1011,7 @@ function N(s){
   return { vf: m[1].toLowerCase()+alt+'/'+oct, midi: 12*(oct+1)+PC[m[1]]+shift };
 }
 const DURB = {h:2, q:1, '8':0.5};
-const BPB = 2;
+const BPB = 2;   /* por defecto; cada sistema puede traer el suyo en S.bpb */
 
 /* ── audio ── */
 const SAMPLE_MIDI = {A1:33,C2:36,Eb2:39,Gb2:42,A2:45,C3:48,Eb3:51,Gb3:54,A3:57,C4:60,Eb4:63,Gb4:66,A4:69,C5:72,Eb5:75,Gb5:78,A5:81,C6:84};
@@ -1313,7 +1313,7 @@ function renderFrase(id, contSel, opt){
         if (acc) forzadas.push([sn, acc]);      /* alteración escrita a mano, aunque sobre */
         return sn;
       });
-      const v = new VF.Voice({num_beats:BPB, beat_value:4}).addTickables(ns);
+      const v = new VF.Voice({num_beats:(S.bpb||BPB), beat_value:4}).addTickables(ns);
       VF.Accidental.applyAccidentals([v], S.key || 'C');
       forzadas.forEach(([sn, acc]) => {
         if (!sn.getModifiers().some(m => m.getCategory && m.getCategory() === 'Accidental'))
@@ -1337,7 +1337,7 @@ function renderFrase(id, contSel, opt){
       });
       let tb = 0;
       ns.forEach((n, i) => {
-        sys.notes.push({midi:n._midi, t0:(bi*BPB)+tb, durB:n._durB, el:els[i], bar:bi});
+        sys.notes.push({midi:n._midi, t0:(bi*(S.bpb||BPB))+tb, durB:n._durB, el:els[i], bar:bi});
         tb += n._durB;
       });
       sys.beams = (sys.beams||[]).concat(belms);
@@ -1906,38 +1906,51 @@ async function anotaAlteracion(){
      B · Fa M → Re M   3 ascendentes    afectan FA·DO·SOL  si♮ → sol♮ → sol♯
    La partitura corregida de un ejemplo es la original del otro.        */
 
-/* Fa M → Re M «en bruto»: el si♮ se copia tal cual y sale un sol♮ que sobra */
-const F_DIF_B_BRUTO = { key:'D', bars:[
-  [['D4','q'],['E4','8'],['F#4','8']],
-  [['G4','q'],['G4','8','n'],['A4','8']],
-  [['F#4','q'],['E4','q']],
-  [['D4','h']] ]};
+/* Ejemplo 2 · otra melodía, en 3/4, y dos tonalidades con bemoles.
+   Mi♭ M (3♭) → Fa M (1♭): 3♭ → 2♭ → 1♭, dos movimientos hacia arriba.  */
+const F_DIF_B_ORI = { key:'Eb', bpb:3, bars:[
+  [['Eb4','q'],['G4','q'],['F4','q']],
+  [['G4','q'],['B4','8'],['C5','8'],['D5','q']],
+  [['C5','q'],['Bb4','q'],['Ab4','q']],
+  [['G4','q'],['Eb4','h']] ]};
+/* «en bruto»: el si♮ se copia tal cual y sale un do♮ que sobra */
+const F_DIF_B_BRUTO = { key:'F', bpb:3, bars:[
+  [['F4','q'],['A4','q'],['G4','q']],
+  [['A4','q'],['C5','8','n'],['D5','8'],['E5','q']],
+  [['D5','q'],['C5','q'],['Bb4','q']],
+  [['A4','q'],['F4','h']] ]};
 
 const NIVELES = ['4♯','3♯','2♯','1♯','0','1♭','2♭','3♭','4♭'];
 
 const EJ_DIF = [
   { tag:'Ejemplo 1 · <b>Re M → Fa M</b> · descendentes',
-    ori:{key:'D', bars:F_MEN_ORI.bars,       label:'RE MAYOR · la original',                 cls:'A'},
-    bru:{key:'F', bars:F_DIF_BRUTO.bars,     label:'FA MAYOR · transportada, sin retocar',   cls:'B'},
-    de:'Re M', a:'Fa M', deArm:'2♯', aArm:'1♭', iDe:2, iA:5, dir:1, n:3,
+    ori:{key:'D', bpb:2, time:'2/4', bars:F_MEN_ORI.bars,
+         label:'RE MAYOR · la original',                      cls:'A'},
+    bru:{key:'F', bpb:2, time:'2/4', bars:F_DIF_BRUTO.bars,
+         label:'FA MAYOR · transportada, sin retocar',        cls:'B'},
+    de:'Re M', a:'Fa M', deArm:'2♯', aArm:'1♭', iDe:2, iA:5, dir:1, n:3, idx:4,
     sentido:'descendentes', signo:'−', orden:'B', ordenNom:'orden de bemoles',
     notas:['SI','MI','LA'],
     notaOri:'sol♯', notaBru:'si♯', notaOk:'si♮', grito:'SI', gritoBru:'¡un SI!',
     glifo:'accidentalNatural', linea:2, dx:-19,
     midiDe:74, midiA:65,
     escalera:'♯ → ♮ → ♭', anterior:'anterior', arriba:'baja',
+    porque:'porque pasa de sostenidos a bemoles',
     pie:'♯ → ♮  un escalón abajo' },
 
-  { tag:'Ejemplo 2 · <b>Fa M → Re M</b> · ascendentes',
-    ori:{key:'F', bars:F_MEN_TRA.bars,       label:'FA MAYOR · la original',                 cls:'B'},
-    bru:{key:'D', bars:F_DIF_B_BRUTO.bars,   label:'RE MAYOR · transportada, sin retocar',   cls:'A'},
-    de:'Fa M', a:'Re M', deArm:'1♭', aArm:'2♯', iDe:5, iA:2, dir:-1, n:3,
+  { tag:'Ejemplo 2 · <b>Mi♭ M → Fa M</b> · ascendentes',
+    ori:{key:'Eb', bpb:3, time:'3/4', bars:F_DIF_B_ORI.bars,
+         label:'MI BEMOL MAYOR · la original',                cls:'B'},
+    bru:{key:'F',  bpb:3, time:'3/4', bars:F_DIF_B_BRUTO.bars,
+         label:'FA MAYOR · transportada, sin retocar',        cls:'A'},
+    de:'Mi♭ M', a:'Fa M', deArm:'3♭', aArm:'1♭', iDe:7, iA:5, dir:-1, n:2,
     sentido:'ascendentes', signo:'+', orden:'S', ordenNom:'orden de sostenidos',
-    notas:['FA','DO','SOL'],
-    notaOri:'si♮', notaBru:'sol♮', notaOk:'sol♯', grito:'SOL', gritoBru:'¡un SOL!',
-    glifo:'accidentalSharp', linea:3, dx:-21,
-    midiDe:65, midiA:74,
+    notas:['FA','DO'],
+    notaOri:'si♮', notaBru:'do♮', notaOk:'do♯', grito:'DO', gritoBru:'¡un DO!',
+    glifo:'accidentalSharp', linea:1.5, dx:-21, idx:4,
+    midiDe:63, midiA:65,
     escalera:'♭ → ♮ → ♯', anterior:'siguiente', arriba:'sube',
+    porque:'porque va hacia <u>menos bemoles</u>: aunque las dos tonalidades tengan bemoles, el movimiento es hacia el lado de los sostenidos',
     pie:'♮ → ♯  un escalón arriba' }
 ];
 let difEj = 0;
@@ -1953,7 +1966,7 @@ function difPasos(){
     { t:'1 · Compara las armaduras',
       txt:`De <b>${E.de} (${E.deArm})</b> a <b>${E.a} (${E.aArm})</b>. Imagina que los sostenidos son ${naranja('lo alto de una montaña')} y los bemoles, ${azul('las profundidades del mar')}. La no-armadura de Do M es el nivel del mar.` },
     { t:'2 · Cuenta los movimientos',
-      txt:`${camino.join(' → ')}: <u>${E.n} movimientos</u>, todos hacia ${E.dir>0?'abajo':'arriba'}. Tiene <b>${E.n} diferencias ${E.sentido}</b> — ${E.sentido} porque va ${E.dir>0?'de sostenidos a bemoles':'de bemoles a sostenidos'}.` },
+      txt:`${camino.join(' → ')}: <u>${E.n} movimientos</u>, todos hacia ${E.dir>0?'abajo':'arriba'}. Tiene <b>${E.n} diferencias ${E.sentido}</b> — ${E.sentido} ${E.porque}.` },
     { t:'3 · ¿A qué notas afectan?',
       txt:`${E.sentido[0].toUpperCase()+E.sentido.slice(1)} → siguen el ${col(E.ordenNom)}: las <u>${E.n} primeras</u>, <b>${E.notas.join(' · ')}</b>. Son las notas «vigiladas»: si aparece alguna de ellas <u>con alteración accidental</u>, habrá que retocarla.` },
     { t:`4 · ¡Es un ${E.grito}! → cámbiala`,
@@ -1983,9 +1996,11 @@ function pintaAtrilesDif(){
   const E = EJ();
   const opt = { vbw:700, padTop:44, sysH:148, padBot:10 };
   renderFrase('difOri', '#atrilDifOri', Object.assign({}, opt, {
-    systems:[{ key:E.ori.key, bars:E.ori.bars, label:E.ori.label, labelCls:E.ori.cls }] }));
+    systems:[{ key:E.ori.key, bpb:E.ori.bpb, time:E.ori.time, bars:E.ori.bars,
+               label:E.ori.label, labelCls:E.ori.cls }] }));
   renderFrase('difTra', '#atrilDifTra', Object.assign({}, opt, {
-    systems:[{ key:E.bru.key, bars:E.bru.bars, label:E.bru.label, labelCls:E.bru.cls }] }));
+    systems:[{ key:E.bru.key, bpb:E.bru.bpb, time:E.bru.time, bars:E.bru.bars,
+               label:E.bru.label, labelCls:E.bru.cls }] }));
 }
 
 function initDif(){
@@ -2038,7 +2053,7 @@ function animaConteo(){
   difCont = 0; ballPos = 0; drawEscalera();
   initAudio().then(() => {
     if (AC.state === 'suspended') AC.resume();
-    [1,2,3].forEach(kk => setTimeout(() => {
+    [1,2,3].slice(0, EJ().n).forEach(kk => setTimeout(() => {
       if (tk !== difSeqTok) return;
       difCont = kk;
       fx('tic', kk-1);
@@ -2054,7 +2069,7 @@ function animaOrden(){
   const flecha = $(caja + ' .ordFlecha');
   initAudio().then(() => {
     if (AC.state === 'suspended') AC.resume();
-    [0,1,2].forEach(i => setTimeout(() => {
+    [0,1,2].slice(0, EJ().n).forEach(i => setTimeout(() => {
       if (tk !== difSeqTok) return;
       const c = cells[i];
       c.classList.add('on','act');
@@ -2106,7 +2121,7 @@ async function marcaDif(paso, mudo){
   const sc = SCORES.difTra;
   if (!sc) return;
   const st = sc.systems[0].staves[0];
-  const bbQ = sc.systems[0].notes[4].el.getBBox();
+  const bbQ = sc.systems[0].notes[E.idx].el.getBBox();
   const yL  = st.getYForLine(E.linea);
 
   if (paso < 3){
@@ -2117,8 +2132,8 @@ async function marcaDif(paso, mudo){
 
   /* ── paso 5: el cambio YA está hecho; solo se explica ── */
   if (paso >= 4){
-    circulaNota('difOri', 4, E.notaOri, 1);
-    circulaNota('difTra', 4, E.notaOk, 1);
+    circulaNota('difOri', E.idx, E.notaOri, 1);
+    circulaNota('difTra', E.idx, E.notaOk, 1);
     const ax4 = bbQ.x + 8;
     anotaPath('difTra', `M ${ax4-9} ${yL-13} L ${ax4+9} ${yL+13}`);
     anotaPath('difTra', `M ${ax4+9} ${yL-13} L ${ax4-9} ${yL+13}`);
@@ -2128,12 +2143,12 @@ async function marcaDif(paso, mudo){
   }
 
   /* ── paso 4: la decisión, animada ── */
-  circulaNota('difOri', 4, E.notaOri);
-  circulaNota('difTra', 4, E.gritoBru);
+  circulaNota('difOri', E.idx, E.notaOri);
+  circulaNota('difTra', E.idx, E.gritoBru);
   if (!mudo) fxA('foco');
   await espera(1000);
   if (tk !== difToken) return;
-  const bb = sc.systems[0].notes[4].el.getBBox();
+  const bb = sc.systems[0].notes[E.idx].el.getBBox();
   const ax = bb.x + 8;
   await trazo('difTra', `M ${ax-9} ${yL-13} L ${ax+9} ${yL+13}`, 300);
   if (tk !== difToken) return;
