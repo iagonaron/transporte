@@ -18,12 +18,14 @@
   const V = () => B.viento;
 
   B.PJ = {
-    NOA: { nombre: 'Noa', color: '#7fd4ff', lado: 'izq', alto: .86, _: 'neutra', poses: ['neutra', 'aburrida', 'pulsera_fastidio', 'pulsera_interes', 'traviesa', 'sorpresa', 'pensativa', 'emocion'] },
-    AMARO: { nombre: 'Dra. Amaro', color: '#c9b6ff', lado: 'der', alto: .84, _: 'explica', poses: ['explica', 'tableta', 'alarma', 'helada'] },
+    NOA: { nombre: 'Noa', color: '#7fd4ff', lado: 'izq', alto: .86, _: 'neutra', poses: ['neutra', 'aburrida', 'pulsera_fastidio', 'pulsera_interes', 'traviesa', 'sorpresa', 'pensativa', 'emocion'],
+      mira: { neutra: 'izq', aburrida: 'izq', traviesa: 'izq', sorpresa: 'izq', pensativa: 'izq', emocion: 'izq', pulsera_fastidio: 'frente', pulsera_interes: 'frente' } },
+    AMARO: { nombre: 'Dra. Amaro', color: '#c9b6ff', lado: 'der', alto: .84, _: 'explica', poses: ['explica', 'tableta', 'alarma', 'helada'],
+      mira: { explica: 'izq', tableta: 'der', alarma: 'der', helada: 'der' } },   // explica ya la volteó C4 en el fichero
     MADRE: { nombre: 'Mamá', color: '#ffc48a', lado: 'der', alto: .8, marco: 'llamada', _: 'llama', poses: ['llama', 'decepcion'] },
-    PIANISTA: { nombre: 'Pianista', color: '#ffe08a', lado: 'der', alto: .8, _: 'sonrie', poses: ['sonrie', 'resopla'] },
-    TALLADOR: { nombre: 'Tallador', color: '#e9b07a', lado: 'der', alto: .84, _: 'talla', poses: ['toca', 'talla', 'sorpresa', 'sonrie'] },
-    NINA: { nombre: 'Niña', color: '#ffd1a1', lado: 'der', alto: .74, _: 'toca', poses: ['toca', 'frustrada', 'feliz', 'senala'] }
+    PIANISTA: { nombre: 'Pianista', color: '#ffe08a', lado: 'der', alto: .8, _: 'sonrie', poses: ['sonrie', 'resopla'], mira: { sonrie: 'izq', resopla: 'der' } },
+    TALLADOR: { nombre: 'Tallador', color: '#e9b07a', lado: 'der', alto: .84, _: 'talla', poses: ['toca', 'talla', 'sorpresa', 'sonrie'], mira: { toca: 'izq', talla: 'frente', sorpresa: 'der', sonrie: 'izq' } },
+    NINA: { nombre: 'Niña', color: '#ffd1a1', lado: 'der', alto: .74, _: 'toca', poses: ['toca', 'frustrada', 'feliz', 'senala'], mira: { toca: 'frente', frustrada: 'frente', feliz: 'der', senala: 'der' } }
   };
 
   /* el tema de Noa v4 (C4, 2-nov 15:53): 6/8, Mi m → Sol M, corchea a 170. [nota de CONCIERTO, corcheas]. El saxo alto lo lee 6.ª M más aguda.
@@ -63,28 +65,35 @@
   };
   /* paisaje sonoro (Splice, s1/sfx/): ambientes en bucle con fundido entre planos y golpes en su momento */
   const SF = n => 'sfx/' + n + '.mp3';
+  const SFo = n => B.existe(SF(n)) ? SF(n) : SF(n + '_sint');   // el bueno si ya está; si no, el marcador sintetizado
   const AMB = {
     aula: { src: SF('amb_aula'), vol: .3 }, ciudad: { src: SF('amb_ciudad2100'), vol: .42 }, mar: { src: SF('amb_mar_noche'), vol: .3 },
     lab: { src: SF('amb_laboratorio'), vol: .36 }, labBajo: { src: SF('amb_laboratorio'), vol: .16 }, paleo: { src: SF('amb_paleolitico'), vol: .42 },
     fuego: { src: SF('amb_fuego'), vol: .3 }, fuegoBajo: { src: SF('amb_fuego'), vol: .14 }, paleoBajo: { src: SF('amb_paleolitico'), vol: .18 },
-    orquesta: { src: SF('amb_orquesta_afinando'), vol: .34 }, orquestaBajo: { src: SF('amb_orquesta_afinando'), vol: .08 }
+    orquesta: { src: SF('amb_orquesta_afinando'), vol: .34 }, orquestaBajo: { src: SF('amb_orquesta_afinando'), vol: .08 },
+    pasillo: { src: SF('amb_pasillo'), vol: .42 },
+    grillos: { src: [SF('amb_grillos'), SF('amb_grillos_sint')], vol: .2 }, viento: { src: [SF('amb_viento_juncos'), SF('amb_viento_juncos_sint')], vol: .22 }, ciudadLejos: { src: SF('amb_ciudad2100'), vol: .3 }
   };
   /* música (Suno, s1/mus/); mientras no llegue, el tema v4 sintetizado (cuerdas + piano, bajo); en el Paleolítico, solo ambiente */
   const SINT = { src: 'mus/t1_tema_sint.mp3', vol: .26 };
   const MUS = {
     coruna: { src: [{ src: 'mus/mus_coruna2100.mp3', vol: .5 }, SINT] },
-    paleo: { src: [{ src: 'mus/mus_paleolitico.mp3', vol: .45 }] },
+    paleo: { src: [{ src: 'mus/mus_paleolitico.mp3', vol: .45 }] }, paleoBajo: { src: [{ src: 'mus/mus_paleolitico.mp3', vol: .16 }] },   // misma pista: solo baja (no se corta)
     cierre: { src: [{ src: 'mus/mus_cierre.mp3', vol: .6 }, { src: 'mus/t1_tema_sint.mp3', vol: .34 }] },
-    ensayo: { src: 'mus/t1_ensayo.mp3', vol: .8, bucle: false }
+    ensayo: { src: 'mus/t1_ensayo.mp3', vol: .8, bucle: false },
+    entrada: { src: 'mus/t1_entrada.mp3', vol: .62, bucle: false },   // el saxo de Noa que se acerca (compases 11–16): ciudad → pasillo → manos
+    tension: { src: [{ src: 'mus/mus_tension.mp3', vol: .42 }, { src: 'mus/t1_tension_sint.mp3', vol: .3 }] },   // desde que Noa entra en la máquina hasta el salto
+    tensionBaja: { src: [{ src: 'mus/mus_tension.mp3', vol: .26 }, { src: 'mus/t1_tension_sint.mp3', vol: .2 }] }
   };
 
   /* fondos (C4, s1/img/t1/) con sustitutos mientras falten; la «vida» va con cada encuadre */
   const VIDA = {
-    aula: [{ tipo: 'polvo', zona: [.42, .02, .52, .8], n: 22, color: '#ffe2b8' }, { tipo: 'parpadeo', zona: [.42, .37, .13, .25], color: '#9fe4ff' },
-      { tipo: 'luces', zona: [.69, .2, .27, .07], n: 14, color: '#cfe9ff' }],
+    aula: [{ tipo: 'polvo', zona: [.42, .02, .52, .8], n: 22, color: '#ffe2b8' }, { tipo: 'atril', q: [.46, .385, .545, .38, .50, .585, .405, .60] },
+      { tipo: 'faro', zona: [.565, .062, .1, 0] }, { tipo: 'luces', zona: [.69, .2, .27, .07], n: 14, color: '#cfe9ff' }],
     conserv: [{ tipo: 'luces', zona: [.3, .05, .7, .35], n: 22, color: '#ffe9c0' }, { tipo: 'drones', zona: [.35, .0, .5, .08], n: 3 }, { tipo: 'polvo', zona: [.3, .4, .7, .5], n: 10, color: '#fff0d0' }],
-    corunaEntera: [{ tipo: 'faro', zona: [.183, .098, .4, 0] }, { tipo: 'drones', zona: [.25, .03, .75, .22], n: 7 }, { tipo: 'luces', zona: [.26, .28, .6, .1], n: 26, color: '#a8d4ff' },
-      { tipo: 'reflejos', zona: [.05, .55, .95, .2], n: 24, color: '#bfe0ff' }],
+    corunaEntera: [{ tipo: 'faro', zona: [.163, .305, .4, 0] }, { tipo: 'drones', zona: [.2, .03, .75, .22], n: 6 }, { tipo: 'luces', zona: [.33, .36, .6, .12], n: 26, color: '#a8d4ff' },
+      { tipo: 'luces', zona: [.8, .42, .16, .08], n: 12, color: '#cfe9ff' }, { tipo: 'respira', zona: [.82, .44, .05, .06], color: '#9fe4ff', vel: 3 },
+      { tipo: 'leds', p: [[.52, .32, '#ff5a5a'], [.94, .23]], f: 3 }, { tipo: 'reflejos', zona: [.05, .52, .85, .25], n: 24, color: '#bfe0ff' }],
     lab: [{ tipo: 'anillos', zona: [.38, .05, .35, .62], n: 3 }, { tipo: 'onda', zona: [.765, .215, .07, .075] }, { tipo: 'onda', zona: [.89, .415, .08, .055], color: '#7fffd0', tam: 1.5 },
       { tipo: 'polvo', zona: [0, 0, 1, 1], n: 18, color: '#cfe8ff' }, { tipo: 'luces', zona: [.66, .55, .3, .2], n: 10, color: '#58c8ff' }],
     paleo: [{ tipo: 'chispas', zona: [.68, .48, .12, .24], n: 16, color: '#ffb35a' }, { tipo: 'reflejos', zona: [.55, .28, .45, .12], n: 20, color: '#ffd9a0' },
@@ -101,14 +110,16 @@
   /* ocultaPj: personajes que YA salen en la lámina → no se les pone la pose encima (Iago/C4: nunca el mismo personaje dos veces).
      Encuadres «sin gente» (zoom) para las frases con reacción: labCentro (la máquina), pruebaAmaro (sin Amaro), tallador (sin Noa). */
   const IMG = {
-    aula: { src: 'img/t1/aula2100.webp', ocultaPj: ['NOA', 'PIANISTA'] },
-    conserv: { src: 'img/t1/conservatorio2100.webp', ocultaPj: ['NOA'] },
-    riazor: { src: 'img/t1/dron_riazor.webp', vida: [{ tipo: 'luces', zona: [.55, .3, .42, .25], n: 30, color: '#a8d4ff' }, { tipo: 'drones', zona: [0, .0, 1, .18], n: 6 },
-      { tipo: 'reflejos', zona: [0, .4, .38, .45], n: 20, color: '#bfe0ff' }, { tipo: 'faro', zona: [.126, .172, .12, 0] }] },
-    orzan: { src: 'img/t1/coruna2100.webp', mueve: true, vida: VIDA.corunaEntera },
-    torre: { src: 'img/t1/dron_torre.webp', vida: [{ tipo: 'faro', zona: [.282, .115, .42, 0] }, { tipo: 'drones', zona: [.3, .0, .7, .25], n: 5 },
-      { tipo: 'luces', zona: [.35, .3, .65, .12], n: 22, color: '#a8d4ff' }, { tipo: 'reflejos', zona: [.3, .42, .7, .18], n: 22, color: '#bfe0ff' }] },
-    lab: { src: 'img/t1/laboratorio.webp', ocultaPj: ['NOA', 'AMARO'] },
+    aula: { src: 'img/t1/aula2100.webp', ocultaPj: ['NOA', 'PIANISTA'], vida: VIDA.aula },
+    conserv: { src: 'img/t1/conservatorio2100.webp', ocultaPj: ['NOA'], vida: VIDA.conserv },
+    riazor: { src: 'img/t1/dron_riazor.webp', vida: [{ tipo: 'faro', zona: [.107, .393, .25, 0] }, { tipo: 'luces', zona: [.56, .28, .42, .08], n: 20, color: '#cfe9ff' },
+      { tipo: 'pulso', zona: [.6, .37, .08, .1], color: '#9fe4ff', vel: .6 }, { tipo: 'respira', zona: [.6, .37, .08, .1], color: '#9fe4ff', vel: 3 },
+      { tipo: 'leds', p: [[.735, .1, '#ff5a5a'], [.495, .25], [.36, .32]], f: 3 }, { tipo: 'reflejos', zona: [0, .52, .7, .4], n: 22, color: '#bfe0ff' }] },
+    orzan: { src: 'img/t1/coruna2100.webp', vida: VIDA.corunaEntera },   // la vista aprobada de la portada (Monte de San Pedro)
+    torre: { src: 'img/t1/dron_torre.webp', vida: [{ tipo: 'faro', zona: [.36, .114, .42, 0] }, { tipo: 'drones', zona: [.45, .0, .55, .25], n: 4 },
+      { tipo: 'luces', zona: [.42, .38, .58, .12], n: 22, color: '#a8d4ff' }, { tipo: 'respira', zona: [.84, .47, .1, .07], color: '#9fe4ff', vel: 3 },
+      { tipo: 'reflejos', zona: [.72, .55, .28, .2], n: 16, color: '#bfe0ff' }] },
+    lab: { src: 'img/t1/laboratorio.webp', ocultaPj: ['NOA', 'AMARO'], vida: VIDA.lab },
     labCentro: { src: 'img/t1/laboratorio.webp', zoom: 2, cx: .55, cy: .4,
       vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 3 }, { tipo: 'polvo', zona: [0, 0, 1, 1], n: 18, color: '#cfe8ff' }] },
     pruebaAmaro: { src: 'img/t1/prueba.webp', zoom: 1.25, cx: .4, cy: .4, ocultaPj: ['NOA'],
@@ -119,29 +130,98 @@
     tallador: [{ src: 'img/t1/tallador.webp', vida: VIDA.paleoCerca }, { src: 'img/t1/paleolitico.webp', zoom: 1.6, cx: .68, cy: .5, vida: VIDA.paleoCerca, ocultaPj: ['TALLADOR', 'NINA'] }],
     trompa: [{ src: 'img/t1/viaje_trompa_s18.webp', ajuste: 'contain', ocultaPj: ['NOA'] }],
     clarinete: [{ src: 'img/t1/viaje_clarinete_s19.webp', ajuste: 'contain', ocultaPj: ['NOA'] }],
-    orquesta: { src: 'img/t1/orquesta2100.webp', ocultaPj: ['NOA'] },
+    orquesta: { src: 'img/t1/orquesta2100.webp', ocultaPj: ['NOA'], vida: VIDA.orquesta },
     fotoPadre: { src: 'img/t1/foto_padre_clarinete.webp', vida: VIDA.fotoReal },
     definicion: { src: 'img/t1/definicion.webp', vida: [{ tipo: 'polvo', zona: [0, 0, 1, 1], n: 20, color: '#ffe2b8' }, { tipo: 'respira', zona: [.25, .2, .5, .6], color: '#58b8ff' },
       { tipo: 'reflejos', zona: [0, .82, 1, .15], n: 16, color: '#ffd9a0' }] },
     cierre: { src: 'img/t1/foto_padre_clarinete.webp', luz: .78, vida: VIDA.fotoReal }
   };
+  /* láminas nuevas (PLANOS-T1.md): ninguna imagen más de ~7 s. Si el fichero aún no está, se queda la lámina anterior.
+     ocultaPj: quien ya sale en la lámina no lleva la pose encima. */
+  const N = k => 'img/t1/' + k + '.webp';
+  const O = function () { return [].concat.apply([], arguments); };   // lámina con sustitutas: la primera que exista
+  const POLVO = c => [{ tipo: 'polvo', zona: [0, 0, 1, 1], n: 14, color: c || '#ffe2b8' }];
+  Object.assign(IMG, {
+    pasillo: [{ src: N('pasillo2100'), vida: [{ tipo: 'onda', zona: [.272, .33, .042, .05], color: '#9fe4ff', tam: 1.5 }, { tipo: 'parpadeo', zona: [.268, .29, .05, .13], color: '#9fe4ff' },
+      { tipo: 'pulso', zona: [.745, .2, .06, .18], color: '#9fe4ff', vel: .5 }, { tipo: 'parpadeo', zona: [.955, .42, .045, .09], color: '#9fe4ff' }].concat(POLVO()) },
+      { src: 'img/t1/conservatorio2100.webp', zoom: 1.35, cx: .5, cy: .45, ocultaPj: ['NOA'], vida: POLVO() }],
+    aulaManos: [{ src: N('aula_manos'), ocultaPj: ['NOA'], vida: [{ tipo: 'leds', p: [[.25, .637]], f: 1.6 }].concat(POLVO()) }, { src: 'img/t1/aula2100.webp', zoom: 2.2, cx: .3, cy: .62, ocultaPj: ['NOA'], vida: POLVO() }],
+    aulaPianista: { src: N('aula_pianista'), ocultaPj: ['PIANISTA', 'NOA'], vida: [{ tipo: 'atril', q: [.125, .296, .239, .293, .179, .607, .052, .637] }, { tipo: 'faro', zona: [.357, .086, .1, 0] }].concat(POLVO()) },
+    aulaNoaPapel: { src: N('aula_noa_papel'), ocultaPj: ['NOA'], vida: [{ tipo: 'atril', q: [.729, .422, .904, .415, .867, .807, .683, .815] }, { tipo: 'respira', zona: [.655, .08, .04, .06], color: '#ffe9b0', vel: 1.5 },
+      { tipo: 'leds', p: [[.215, .805]], f: 1.4 }].concat(POLVO()) },
+    aulaAtriles: { src: N('aula_atriles'), vida: [{ tipo: 'parpadeo', zona: [.1, .2, .8, .55], color: '#9fe4ff' }].concat(POLVO('#cfe8ff')) },
+    aulaPulsera: { src: N('aula_pulsera'), ocultaPj: ['NOA'], vida: [{ tipo: 'vibra', zona: [.415, .27, .2, .36] }, { tipo: 'respira', zona: [.81, .05, .05, .08], color: '#ffe9b0', vel: 1.5 }] },
+    aulaNoaLlamada: { src: N('aula_noa_llamada'), ocultaPj: ['NOA', 'PIANISTA'], vida: [{ tipo: 'vibra', zona: [.48, .55, .15, .22] }, { tipo: 'faro', zona: [.66, .13, .06, 0] }].concat(POLVO()) },
+    aulaTeclas: { src: N('aula_teclas'), ocultaPj: ['PIANISTA', 'NOA'], vida: POLVO() },
+    aulaSale: { src: N('aula_sale'), ocultaPj: ['NOA', 'PIANISTA'], vida: [{ tipo: 'atril', q: [.52, .407, .595, .40, .56, .57, .47, .575], vel: 2 }, { tipo: 'faro', zona: [.60, .10, .1, 0] }, { tipo: 'leds', p: [[.24, .50]], f: 3 }].concat(POLVO()) },
+    corunaPlaza: { src: N('coruna_plaza'), vida: [{ tipo: 'parpadeo', zona: [.09, .2, .04, .18], color: '#9fe4ff' }, { tipo: 'leds', p: [[.13, .25], [.33, .27], [.41, .265], [.52, .29], [.57, .27], [.89, .32], [.97, .23], [.83, .33]], f: 1.3, tam: 1.3 },
+      { tipo: 'leds', p: [[.645, .09, '#ff5a5a'], [.65, .205]], f: 3 }].concat(POLVO('#fff0d0')) },
+    corunaPrisa: { src: N('coruna_prisa'), ocultaPj: ['NOA'], vida: [{ tipo: 'faro', zona: [.09, .18, .08, 0] }, { tipo: 'leds', p: [[.148, .578], [.395, .712], [.675, .437], [.71, .29], [.27, .225]], f: 2.6 },
+      { tipo: 'parpadeo', zona: [.915, .335, .065, .08], color: '#9fe4ff' }, { tipo: 'onda', zona: [.925, .36, .045, .03], color: '#9fe4ff', tam: 1.2 }, { tipo: 'luces', zona: [0, 0, 1, .1], n: 14, color: '#a8d4ff' }] },
+    riazorMarcador: { src: N('riazor_marcador'), vida: [{ tipo: 'barrido', zona: [.40, .215, .42, .43], n: 5 }, { tipo: 'pulso', zona: [.2, .25, .19, .4], color: '#9fe4ff', vel: .45 },
+      { tipo: 'respira', zona: [.24, .3, .11, .26], color: '#cfefff', vel: 3.2 }, { tipo: 'luces', zona: [.82, .35, .18, .3], n: 14, color: '#dfefff' }] },
+    orzanCancion: { src: N('orzan_cancion'), vida: [{ tipo: 'parpadeo', zona: [.5, .03, .34, .43], color: '#9fe4ff' }, { tipo: 'notas', zona: [.545, .125, .25, .09], n: 6, sesgo: -.1 },
+      { tipo: 'notas', zona: [.54, .295, .25, .09], n: 6, sesgo: -.1, color: '#ffe2a8' }, { tipo: 'faro', zona: [.928, .225, .08, 0] }, { tipo: 'reflejos', zona: [.5, .5, .5, .2], n: 16, color: '#bfe0ff' }] },
+    orzanAfina: { src: N('orzan_afina'), vida: [{ tipo: 'aguja', zona: [.704, .305, 0, .112], dx: .004 }, { tipo: 'parpadeo', zona: [.62, .11, .2, .22], color: '#9fe4ff' },
+      { tipo: 'faro', zona: [.913, .235, .08, 0] }, { tipo: 'reflejos', zona: [.7, .42, .3, .2], n: 14, color: '#bfe0ff' }] },
+    cocheLluvia: { src: N('coche_lluvia'), vida: [{ tipo: 'lluvia', zona: [0, 0, 1, 1], n: 150 }, { tipo: 'leds', p: [[.68, .405, '#ff3030']], f: 2.4, tam: 2.4 }, { tipo: 'respira', zona: [.5, .58, .17, .07], color: '#7fe4ff', vel: 1.2 },
+      { tipo: 'faro', zona: [.158, .37, .06, 0] }, { tipo: 'reflejos', zona: [.3, .65, .7, .3], n: 22, color: '#9fc8ff' }] },
+    labHolomapa: { src: N('lab_holomapa'), vida: [{ tipo: 'globo', zona: [.45, .07, .44, .73] }, { tipo: 'pulso', zona: [.67, .26, .04, .05], color: '#ffe2a8', vel: .8 },
+      { tipo: 'leds', p: [[.62, .43, '#ffe2a8'], [.74, .42, '#ffe2a8'], [.57, .53, '#ffe2a8'], [.81, .51, '#ffe2a8'], [.52, .43, '#ffe2a8']], f: 1.8 },
+      { tipo: 'chispas', zona: [.6, .5, .14, .32], n: 14, color: '#9fe4ff' }, { tipo: 'onda', zona: [.86, .6, .13, .07], color: '#7fe4ff', tam: 1.4 }].concat(POLVO('#cfe8ff')) },
+    pruebaConsola: { src: N('prueba_consola'), vida: [{ tipo: 'traza', zona: [.40, .48, .33, .07], periodo: .16 }, { tipo: 'parpadeo', zona: [.38, .33, .36, .25], color: '#9fe4ff' },
+      { tipo: 'respira', zona: [.47, .59, .15, .06], color: '#9fe4ff', vel: 2 }, { tipo: 'leds', p: [[.775, .43], [.81, .52], [.86, .46], [.915, .41]], f: 1.5 }].concat(POLVO('#cfe8ff')) },
+    moduloHumo: { src: N('modulo_humo'), vida: [{ tipo: 'humo', zona: [.28, .0, .28, .45], n: 12 }, { tipo: 'arco', zona: [.22, .38, .05, .09] }, { tipo: 'chispas', zona: [.2, .35, .14, .3], n: 20, color: '#ffd28a' },
+      { tipo: 'leds', p: [[.204, .445], [.204, .47], [.204, .5], [.204, .53], [.204, .555], [.414, .47], [.414, .49], [.305, .565], [.39, .565]], color: '#ff2a2a', f: 4 }, { tipo: 'respira', zona: [0, 0, 1, 1], color: '#ff3b3b', vel: 3 }] },
+    pruebaAlarma: [{ src: N('prueba_alarma'), vida: [{ tipo: 'faro', zona: [.87, .15, .3, 0], color: '#ff4a3a', vel: 3.5 }, { tipo: 'respira', zona: [0, 0, 1, 1], color: '#ff3b3b', vel: 3 },
+        { tipo: 'parpadeo', zona: [.40, .37, .35, .2], color: '#ff6a5a' }, { tipo: 'leds', p: [[.775, .43], [.81, .52], [.86, .46], [.915, .41]], f: 4 }] },
+      { src: 'img/t1/prueba.webp', zoom: 1.25, cx: .4, cy: .4, luz: .75, ocultaPj: ['NOA'], vida: [{ tipo: 'respira', zona: [0, 0, 1, 1], color: '#ff3b3b', vel: 3 }] }],
+    pruebaNoa: { src: N('prueba_noa_traviesa'), ocultaPj: ['NOA'], vida: [{ tipo: 'respira', zona: [.0, .55, .7, .4], color: '#58c8ff', vel: 1.6 }, { tipo: 'leds', p: [[.815, .555], [.815, .58]], color: '#ff4a3a', f: 3 },
+      { tipo: 'polvo', zona: [.1, .1, .8, .8], n: 16, color: '#cfe8ff' }] },
+    llegadaCerca: { src: 'img/t1/llegada.webp', zoom: 1.3, cx: .5, cy: .4, ocultaPj: ['NOA'], vida: [{ tipo: 'reflejos', zona: [0, .5, 1, .3], n: 16, color: '#ffd9a0' }] },
+    paleoLejos: [{ src: N('paleo_lejos'), ocultaPj: ['NOA'], vida: [{ tipo: 'chispas', zona: [.55, .45, .1, .15], n: 10, color: '#ffb35a' }, { tipo: 'reflejos', zona: [0, .6, 1, .25], n: 16, color: '#ffd9a0' }] },
+      { src: 'img/t1/paleolitico.webp', vida: VIDA.paleo }],
+    paleoPadreHija: { src: N('paleo_padre_hija'), ocultaPj: ['TALLADOR', 'NINA'], vida: VIDA.paleoCerca },
+    paleoTalla: { src: N('paleo_talla'), ocultaPj: ['TALLADOR'], vida: [{ tipo: 'chispas', zona: [.2, .5, .3, .4], n: 8, color: '#ffb35a' }].concat(POLVO()) },
+    paleoAcerca: { src: N('paleo_acerca'), ocultaPj: ['NOA'], vida: [{ tipo: 'reflejos', zona: [0, .1, 1, .2], n: 14, color: '#ffd9a0' }, { tipo: 'chispas', zona: [.7, .4, .2, .3], n: 8, color: '#ffb35a' }] },
+    paleoNoaMira: { src: N('paleo_noa_mira'), ocultaPj: ['NOA'], vida: [{ tipo: 'reflejos', zona: [.65, .5, .35, .2], n: 16, color: '#ffd9a0' }, { tipo: 'polvo', zona: [.6, .1, .4, .6], n: 10, color: '#ffe2b8' }] },
+    paleoPulsera: { src: N('paleo_pulsera_radio'), ocultaPj: ['NOA'], vida: [{ tipo: 'parpadeo', zona: [.40, .33, .16, .42], color: '#9fe4ff' }, { tipo: 'arco', zona: [.49, .45, .05, .12], color: '#9fe4ff' },
+      { tipo: 'chispas', zona: [.42, .33, .16, .4], n: 10, color: '#bfeeff' }, { tipo: 'chispas', zona: [.85, .62, .15, .38], n: 14, color: '#ffb35a' }] },
+    labRegistro: { src: N('lab_registro'), vida: [{ tipo: 'parpadeo', zona: [.36, .14, .6, .52], color: '#9fe4ff' },   // los tres puntos se encienden con las claves de t1_023 (−40 000, s. XVIII, s. XIX)
+      { tipo: 'leds', sec: true, tes: [.7, 3.3, 4.9], p: [[.415, .437, '#bff6ff'], [.75, .415, '#bff6ff'], [.867, .407, '#bff6ff']], tam: 4 },
+      { tipo: 'traza', zona: [.40, .62, .52, .025], periodo: .17 }].concat(POLVO('#cfe8ff')) },
+    orquestaNoa: { src: N('orquesta_noa_saxo'), ocultaPj: ['NOA'], vida: [{ tipo: 'respira', zona: [.79, .04, .05, .08], color: '#ffe9b0', vel: 1.5 }, { tipo: 'polvo', zona: [0, 0, 1, .8], n: 16, color: '#ffe8c0' }] },
+    defAbsoluto: { src: N('def_absoluto'), vida: POLVO() },
+    defDosFormas: { src: N('def_dos_formas'), ocultaPj: ['NOA'], vida: [{ tipo: 'atril', q: [.28, .53, .47, .52, .45, .78, .22, .83], n: 3 },
+      { tipo: 'polvo', zona: [.52, 0, .48, 1], n: 18, color: '#ffd98a' }, { tipo: 'respira', zona: [.55, .05, .42, .8], color: '#ffcf7a', vel: 1.2 }] },
+    cierreLab: { src: 'img/t1/laboratorio.webp', zoom: 2, cx: .55, cy: .4, luz: .5, vida: [{ tipo: 'apaga', zona: [.2, .05, .6, .9], dur: 9 }, { tipo: 'polvo', zona: [0, 0, 1, 1], n: 12, color: '#cfe8ff' }] },   // mientras no llegue cierre_noa_foto: la máquina, de noche, apagándose
+    cierreNoa: { src: N('cierre_noa_foto'), ocultaPj: ['NOA'], vida: [{ tipo: 'apaga', zona: [0, 0, .4, .5], dur: 9, color: '#58c8ff' }, { tipo: 'respira', zona: [.86, .06, .06, .08], color: '#ffd9a0', vel: 1.4 },
+      { tipo: 'polvo', zona: [0, 0, .5, .8], n: 12, color: '#cfe8ff' }] }   // la luz del Transportador se va apagando
+  });
 
+  B._IMG = IMG;   // (para las pruebas: comprobar la «vida» de cada lámina)
   /* sonidos de plano: la equivocación del prólogo, la flauta del tallador, la trompa con sus tonos y los dos clarinetes */
   const equivoca = c => { B.musicaCorta(); const t = B.ac().currentTime + .02; V().nota('saxo', 73, t, .62, .85); [48, 64, 67, 71].forEach(m => V().piano(m, t + .01, .9, .2)); };
   const flautaDibujo = (base, veces) => { const e8 = B.TEMA.corchea, sube = { 5: 0, 4: 2, 3: 3, 2: 5, 1: 7, 0: 9 }; let t = B.ac().currentTime + .05;
     for (let v = 0; v < (veces || 1); v++) { DIBUJO.forEach((k, i) => { V().nota('flauta', base + sube[k], t, RITMO[i] * e8 * .95, .7); t += RITMO[i] * e8; }); t += 2 * e8; } };
+  const sacude = () => { ['fondo', 'capas'].forEach(id => { const e = document.getElementById(id); e.classList.remove('sacude'); void e.offsetWidth; e.classList.add('sacude'); }); };
+  const alarmaRoja = () => { document.getElementById('efecto').className = 'ef-alarma'; };
   const frase = (tipo, notas, t, d, vel) => { const t0 = B.ac().currentTime + (t || 0); notas.forEach((m, i) => V().nota(tipo, m, t0 + i * d, d * (i === notas.length - 1 ? 2.2 : .95), vel || .75)); };
 
   B.sesion({
     titulo: 'Transporte 1', subtitulo: 'El mismo dibujo, a otra altura', sup: 'Unidad 9 · 2.º GP',
     recursos: [FL.grande.img, FL.mediana.img, FL.pequena.img, 'img/t1/inst_saxo.webp', 'img/t1/inst_clarinete.webp', 'img/t1/inst_trompa.webp',
       SF('sfx_pulsera_vibra'), SF('sfx_notificacion'), SF('sfx_llave_saxo'), SF('sfx_estuche_cierra'), SF('sfx_pasos_rapidos'), SF('sfx_puerta_scifi'), SF('sfx_maquina_arranca'),
-      SF('sfx_anillos_giran'), SF('sfx_alarma'), SF('sfx_salto_tiempo'), SF('sfx_llegada'), SF('sfx_radio_interferencia'), SF('sfx_tallar_cana')]
+      SF('sfx_anillos_giran'), SF('sfx_alarma'), SF('sfx_salto_tiempo'), SF('sfx_llegada'), SF('sfx_radio_interferencia'), SF('sfx_tallar_cana'),
+      SFo('sfx_zumbido_sube'), SFo('sfx_chispazo'), SFo('sfx_humo'), SFo('sfx_impacto')].concat(Object.keys(IMG).map(k => B.primero(IMG[k])).filter(q => q && !q.falta).map(q => q.src))
       .concat(B.viento.SAX_RUTAS, B.viento.UI_RUTAS),
     escenas: [
-      /* 0 · Arranque */
-      { id: 'e0', titulo: 'Arranque', planos: [
-        { id: 'p0', nombre: 'Negro', negro: true, efecto: 'pulso', auto: 3.2, amb: [], mus: false, sfx: [{ src: SF('sfx_llave_saxo'), t: .6 }] }
+      /* 0 · Entrada sin palabras (brief 3, C): la ciudad → el pasillo del conservatorio → las manos de Noa; su saxo se acerca */
+      { id: 'e0', titulo: 'Entrada', planos: [
+        { id: 'p0', nombre: 'Negro', negro: true, efecto: 'pulso', auto: 1.4, amb: [], mus: false, sfx: [{ src: SF('sfx_llave_saxo'), t: .3, vol: .5 }] },
+        { id: 'p0a', nombre: 'A Coruña 2100', fondoVid: 'vid/portada_coruna2100.mp4', img: IMG.orzan, pj: null, auto: 5.5, amb: [AMB.ciudadLejos], mus: MUS.entrada },
+        { id: 'p0b', nombre: 'Pasillo del conservatorio · 2100', img: IMG.pasillo, desc: 'Puertas de aulas; detrás, gente estudiando', pj: null, auto: 5.5, amb: [AMB.pasillo] },
+        { id: 'p0c', nombre: 'Las manos de Noa', img: IMG.aulaManos, desc: 'Detalle: los dedos de Noa en las llaves del saxo', pj: null, auto: 3.2, amb: [{ src: SF('amb_aula'), vol: .18 }] }
       ] },
       /* 1 · Prólogo: el aula */
       { id: 'e1', titulo: 'El aula', planos: [
@@ -150,89 +230,102 @@
           al: [{ t: .15 + 6 * 60 / 170, fn: equivoca }] },   // se equivoca en un sostenido al empezar el 2.º compás (Do♯ en vez de Do)
         { id: 'p1a', nombre: 'Aula de estudio · 2100', img: IMG.aula, amb: [AMB.aula], vida: VIDA.aula,
           lineas: [
-            { id: 't1_001', quien: 'PIANISTA', pj: { q: 'PIANISTA', pose: 'sonrie' }, poses: [{ en: .5, pose: 'resopla' }], texto: '¿Otra vez desde el principio? Yo estoy en mi menor; no sé cómo te aclaras con tantos sostenidos.' },
-            { id: 't1_002', quien: 'NOA', pj: { q: 'NOA', pose: 'aburrida' }, poses: [{ en: .78, pose: 'pensativa' }], texto: 'Ni yo. Mi papel dice do sostenido menor. Cuatro sostenidos. Y luego suena igual que lo tuyo. No tiene sentido.' }
-          ],
-          inter: { tipo: 'prologo', titulo: 'El tema de Noa · dos papeles', compases: 8,
-            cartel: 'Mira las dos partituras: arriba, el <b>saxo alto</b> en Do♯ menor (4♯); abajo, el <b>piano</b> en Mi menor (1♯). Pulsa <b>▶ Las dos</b> y escucha.',
-            pregunta: '¿Por qué dos partituras distintas suenan igual? Guárdate la pregunta.' } },
-        { id: 'p1b', nombre: 'Aula · la pulsera', img: IMG.aula, amb: [AMB.aula], vida: VIDA.aula, pj: null, antes: 1.5,
+            { id: 't1_001', quien: 'PIANISTA', img: IMG.aulaPianista, pj: { q: 'PIANISTA', pose: 'sonrie' }, texto: 'No te preocupes, Noa, es normal: tienes muchas alteraciones.' },
+            { id: 't1_002', quien: 'NOA', img: IMG.aulaNoaPapel, imgs: [{ en: .55, img: IMG.aulaAtriles }], pj: { q: 'NOA', pose: 'aburrida' }, poses: [{ en: .6, pose: 'pensativa' }], texto: 'Pero si tu partitura está en mi menor, con un solo sostenido… ¿por qué tengo yo tantos?' },
+            { id: 't1_002b', quien: 'PIANISTA', img: IMG.aulaPianista, pj: { q: 'PIANISTA', pose: 'sonrie' }, texto: 'Ah, eso es porque tu saxo…',
+              sfx: [{ src: SF('sfx_pulsera_vibra'), en: .9 }], auto: .2 }   // la pulsera la corta en seco: sigue sola a la llamada
+          ] },
+        { id: 'p1b', nombre: 'Aula · la pulsera', img: O(IMG.aulaPulsera, IMG.aula), amb: [AMB.aula], vida: VIDA.aula, pj: null, antes: 1,
           aviso: { de: 'Mamá', txt: 'Llamada entrante' }, sfx: [{ src: SF('sfx_pulsera_vibra'), t: 0 }],
           lineas: [
             { id: 't1_003', quien: 'MADRE', filtro: 'telefono', pj: { q: 'MADRE', pose: 'llama' }, aviso: { de: 'Mamá', txt: 'En llamada' }, texto: 'Hola, cariño… ¿Vienes esta tarde? Podemos dar un paseo por el Orzán.' },
-            { id: 't1_004', quien: 'NOA', pj: { q: 'MADRE', pose: 'llama' }, poses: [{ en: .9, q: 'MADRE', pose: 'decepcion' }], aviso: { de: 'Mamá', txt: 'En llamada' },
+            { id: 't1_004', quien: 'NOA', img: IMG.aulaNoaLlamada, pj: { q: 'MADRE', pose: 'llama' }, poses: [{ en: .9, q: 'MADRE', pose: 'decepcion' }], aviso: { de: 'Mamá', txt: 'En llamada' },
               sfx: [{ src: SF('sfx_notificacion'), en: .92 }], texto: 'Ahora no puedo, mamá. Estoy practicando.', espera: 1.2 }
           ] },
-        { id: 'p1c', nombre: 'Aula · retoman el ensayo', img: IMG.aula, amb: [AMB.aula], vida: VIDA.aula, mus: MUS.ensayo, auto: 7.5, pj: null },
-        { id: 'p1d', nombre: 'Aula · mensaje del laboratorio', img: IMG.aula, amb: [AMB.aula], vida: VIDA.aula,
+        /* tras colgar, retoman el ensayo: el interactivo de las dos partituras (la duda de Noa se queda sin resolver) */
+        { id: 'p1c', nombre: 'Aula · retoman el ensayo', img: IMG.aula, amb: [AMB.aula], vida: VIDA.aula, mus: false, auto: 2.4, pj: null,
+          inter: { tipo: 'prologo', titulo: 'El tema de Noa · dos papeles', compases: 8,
+            cartel: 'Mira las dos partituras: arriba, el <b>saxo alto</b> en Do♯ menor (4♯); abajo, el <b>piano</b> en Mi menor (1♯), con sus dos manos. Pulsa <b>▶ Las dos</b> y escucha.',
+            pregunta: '¿Por qué dos partituras distintas suenan igual? Guárdate la pregunta.' } },
+        { id: 'p1d', nombre: 'Aula · mensaje del laboratorio', img: O(IMG.aulaPulsera, IMG.aula), amb: [AMB.aula], vida: VIDA.aula,
           lineas: [
             { id: 't1_005', quien: 'AMARO', nombre: 'Laboratorio · Amaro', filtro: 'telefono', mus: false, pj: { q: 'NOA', pose: 'pulsera_interes' },
               aviso: { de: 'Laboratorio · Amaro', txt: 'Hoy es el día. Te esperamos en la Torre.', tipo: 'lab' },
               sfx: [{ src: SF('sfx_pulsera_vibra'), t: 0 }], texto: 'Noa. Hoy es el día. Te esperamos en la Torre.' }
           ] },
-        { id: 'p1e', nombre: 'Aula · sale corriendo', img: IMG.aula, amb: [AMB.aula], vida: VIDA.aula, pj: null, auto: 2.6,
+        { id: 'p1e', nombre: 'Aula · sale corriendo', img: O(IMG.aulaSale, IMG.aula), amb: [AMB.aula], vida: VIDA.aula, pj: null, auto: 2.6,
           sfx: [{ src: SF('sfx_estuche_cierra'), t: .1 }, { src: SF('sfx_pasos_rapidos'), t: .8 }, { src: SF('sfx_puerta_scifi'), t: 1.8 }] }
       ] },
-      /* 2 · Coruña 2100 */
+      /* 2 · Coruña 2100 (vista aprobada de la portada; láminas de calle para que ninguna dure más de ~7 s) */
       { id: 'e2', titulo: 'A Coruña, 2100', planos: [
         { id: 'p2a', nombre: 'Conservatorio 2100', img: IMG.conserv, desc: 'Fachada real modernizada', amb: [AMB.ciudad], mus: MUS.coruna, pj: null, vida: VIDA.conserv, antes: 2.2,
-          lineas: [{ id: 't1_006', quien: 'NARRADOR', texto: 'A Coruña, año 2100. Las máquinas hacen casi todo el trabajo, y la gente dedica sus días a lo que antes no tenía tiempo: tocar, bailar, pintar.', claves: { claves: ['A Coruña · 2100'], ts: [0] } },
-            { id: 't1_007', quien: 'NARRADOR', texto: 'Y aun así, todo el mundo sigue yendo con prisa a todas partes.', espera: 1.5 }] },
+          lineas: [{ id: 't1_006', quien: 'NARRADOR', imgs: [{ en: .4, img: IMG.corunaPlaza }], texto: 'A Coruña, año 2100. Las máquinas hacen casi todo el trabajo, y la gente dedica sus días a lo que antes no tenía tiempo: tocar, bailar, pintar.', claves: { claves: ['A Coruña · 2100'], ts: [0] } },
+            { id: 't1_007', quien: 'NARRADOR', img: IMG.corunaPrisa, texto: 'Y aun así, todo el mundo sigue yendo con prisa a todas partes.', espera: 1.5 }] },
         { id: 'p2b', fondoVid: 'vid/dron_coruna.mp4', nombre: 'Riazor 2100 · dron', img: IMG.riazor, desc: 'Estadio blanquiazul de noche, sin escudos reales', amb: [AMB.ciudad], pj: null, antes: 2.5,
-          lineas: [{ id: 't1_008', quien: 'NARRADOR', texto: 'Riazor brilla toda la noche: el Depor es líder y va a por su décima Liga.', espera: 1.5 }] },
-        { id: 'p2c', fondoVid: 'vid/dron_coruna.mp4', nombre: 'Playa del Orzán 2100 · dron', img: IMG.orzan, amb: [AMB.ciudad, AMB.mar], pj: null, antes: 2,
-          lineas: [{ id: 't1_009', quien: 'NARRADOR', texto: 'Pero hay cosas que ya nadie sabe hacer a mano. Si una canción no te queda bien, la IA la cambia por ti. Si tu instrumento no está afinado, lo afina ella.', claves: { claves: ['Nadie sabe hacer nada a mano'], ts: [1.2] }, espera: 1.2 }] },
-        { id: 'p2d', fondoVid: 'vid/dron_coruna.mp4', nombre: 'La Torre de noche · dron', img: IMG.torre, desc: 'La Torre de Hércules, igual que siempre, con la ciudad futurista detrás', amb: [AMB.mar, { src: SF('amb_ciudad2100'), vol: .2 }], pj: null, antes: 2.5,
-          lineas: [{ id: 't1_010', quien: 'NARRADOR', texto: 'La ciudad está irreconocible. Solo una cosa sigue exactamente igual que hace dos mil años.', espera: 2.5 }] }
+          lineas: [{ id: 't1_008', quien: 'NARRADOR', imgs: [{ en: .45, img: IMG.riazorMarcador }], texto: 'Riazor brilla toda la noche: el Depor es líder y va a por su décima Liga.', espera: 1.5 }] },
+        { id: 'p2c', fondoVid: 'vid/portada_coruna2100.mp4', nombre: 'Playa del Orzán 2100', img: IMG.orzan, amb: [AMB.ciudad, AMB.mar], pj: null, antes: 2,
+          lineas: [{ id: 't1_009', quien: 'NARRADOR', imgs: [{ en: .31, img: IMG.orzanCancion }, { en: .63, img: IMG.orzanAfina }], texto: 'Pero hay cosas que ya nadie sabe hacer a mano. Si una canción no te queda bien, la inteligencia artificial la cambia por ti. Si tu instrumento no está afinado, lo afina ella.', claves: { claves: ['Nadie sabe hacer nada a mano'], ts: [1.2] }, espera: 1.2 }] },
+        { id: 'p2d', fondoVid: 'vid/portada_coruna2100.mp4', nombre: 'La ciudad y la Torre', img: IMG.orzan, desc: 'La ciudad irreconocible → la Torre de Hércules, igual que siempre', amb: [AMB.mar, { src: SF('amb_ciudad2100'), vol: .2 }], pj: null, antes: 2.5,
+          lineas: [{ id: 't1_010', quien: 'NARRADOR', imgs: [{ en: .35, img: IMG.torre }], texto: 'La ciudad está irreconocible. Solo una cosa sigue exactamente igual que hace dos mil años.', espera: 2.5 }] }
       ] },
       /* 3 · El laboratorio */
       { id: 'e3', titulo: 'El laboratorio', planos: [
         { id: 'p3a', nombre: 'Laboratorio bajo la Torre', img: IMG.lab, desc: 'Piedra romana y cables; el Transportador en el centro; la foto del padre en una mesa',
           amb: [AMB.lab], mus: MUS.coruna, pj: null, vida: VIDA.lab, sfx: [{ src: SF('sfx_puerta_scifi'), t: .2 }], antes: 2,
           lineas: [
-            { id: 't1_011', quien: 'NARRADOR', texto: 'Debajo de la Torre trabaja un laboratorio que no aparece en ningún mapa. Hacen lo único que la IA todavía no sabe hacer: una máquina que viaja como viaja el sonido, en ondas.', claves: { claves: ['El Transportador'], ts: [7.5] } },
-            { id: 't1_012', quien: 'NARRADOR', texto: 'La empezó el padre de Noa. No llegó a terminarla: hace tres años, un coche sin conductor tomó una mala decisión.', espera: .8 },
-            { id: 't1_013', quien: 'AMARO', img: IMG.labCentro, pj: { q: 'AMARO', pose: 'explica' }, poses: [{ en: .62, pose: 'tableta' }], texto: 'El Transportador te llevará al otro lado de la sala. Solo eso. Si funciona, mañana podríamos ir de la Torre a cualquier sitio del mundo en un instante. Pero solo a otro lugar: la misma hora, el mismo día.' },
-            { id: 't1_014', quien: 'NOA', pj: { q: 'NOA', pose: 'neutra' }, texto: 'Le prometí que sería yo quien la probara.' }
+            { id: 't1_011', quien: 'NARRADOR', imgs: [{ en: .46, img: IMG.labCentro }], texto: 'Debajo de la Torre trabaja un laboratorio que no aparece en ningún mapa. Hacen lo único que la inteligencia artificial todavía no sabe hacer: una máquina que viaja como viaja el sonido, en ondas.', claves: { claves: ['El Transportador'], ts: [8.4] } },
+            { id: 't1_012', quien: 'NARRADOR', img: IMG.fotoPadre, imgs: [{ en: .47, img: IMG.cocheLluvia }], texto: 'La empezó el padre de Noa. No llegó a terminarla: hace tres años, un coche sin conductor tomó una mala decisión.', espera: .8 },
+            { id: 't1_013', quien: 'AMARO', img: IMG.labCentro, imgs: [{ en: .53, img: IMG.labHolomapa }], pj: { q: 'AMARO', pose: 'explica' }, poses: [{ en: .62, pose: 'tableta' }], texto: 'El Transportador te llevará fuera de la Torre, a treinta metros de aquí. Solo eso. Si funciona, mañana podríamos ir de la Torre a cualquier sitio del mundo en un instante. Pero solo a otro lugar: la misma hora, el mismo día.' },
+            { id: 't1_014', quien: 'NOA', img: IMG.fotoPadre, pj: { q: 'NOA', pose: 'neutra' }, texto: 'Le prometí que sería yo quien la probara.' }
           ] },
         { id: 'p3b', nombre: 'Detalle · el módulo', img: IMG.modulo, desc: 'Noa conecta a escondidas un viejo módulo con una pegatina gastada', amb: [AMB.lab], pj: null, auto: 3.8,
           sfx: [{ src: SF('sfx_ui_clic'), t: 1.3 }, { src: SF('sfx_destello'), t: 1.6 }] }
       ] },
-      /* 4 · La prueba: calibrar */
+      /* 4 · La prueba: calibrar (octavas) → el módulo de Noa revienta → alarma. Tensión continua hasta el salto. */
       { id: 'e4', titulo: 'La prueba', planos: [
-        { id: 'p4a', nombre: 'El Transportador', img: IMG.pruebaAmaro, desc: 'Noa dentro de la máquina; Amaro en la consola', amb: [AMB.lab], mus: false,
-          lineas: [{ id: 't1_015', quien: 'AMARO', pj: { q: 'AMARO', pose: 'tableta' }, poses: [{ en: .45, pose: 'explica' }], texto: 'Frecuencia base: doscientos veinte hercios. Coloca sus múltiplos exactos: por dos, por tres, por cuatro y por cinco.' }],
-          inter: { tipo: 'calibrar', base: 220, multiplos: [2, 3, 4, 5], inicio: [347, 512, 1003, 871],
-            cartel: 'Calibra el Transportador: la base es <b>220 Hz</b>. Mueve cada deslizador hasta su múltiplo <b>exacto</b> (×2, ×3, ×4, ×5). Usa − y + para afinar de 1 en 1.',
-            destino: 'Destino: Laboratorio · 0 m', alarma: 'Coordenada temporal: activada', textoFin: 'Calibración perfecta. Pero… ¿qué es esa línea roja?',
+        { id: 'p4a', nombre: 'El Transportador', img: IMG.pruebaAmaro, desc: 'Noa dentro de la máquina; Amaro en la consola', amb: [AMB.lab], mus: MUS.tension,
+          lineas: [{ id: 't1_015', quien: 'AMARO', imgs: [{ en: .5, img: IMG.pruebaConsola }], pj: { q: 'AMARO', pose: 'tableta' }, poses: [{ en: .45, pose: 'explica' }], texto: 'Frecuencia base: doscientos veinte hercios. Coloca sus octavas: por dos, por cuatro, por ocho y por dieciséis.' }],
+          inter: { tipo: 'calibrar', base: 220, multiplos: [2, 4, 8, 16], inicio: [583, 1130, 2210, 2905],
+            cartel: 'Calibra el Transportador: la base es <b>220 Hz</b>. Mueve cada deslizador hasta su octava <b>exacta</b> (×2, ×4, ×8, ×16). Usa − y + para afinar de 1 en 1.',
+            destino: 'Destino: exterior de la Torre · 30 m', alarma: 'Coordenada temporal: activada', textoFin: 'Calibración perfecta. Pero… ¿qué es esa línea roja?',
             sfxActiva: [SF('sfx_maquina_arranca'), SF('sfx_anillos_giran')], sfxAlarma: SF('sfx_alarma') },
           despues: [
-            { id: 't1_016', quien: 'AMARO', pj: { q: 'AMARO', pose: 'explica' }, texto: 'Calibración perfecta. Destino: el laboratorio, a cero metros. Adelante.' },
+            { id: 't1_016', quien: 'AMARO', img: IMG.pruebaConsola, pj: { q: 'AMARO', pose: 'explica' }, texto: 'Calibración perfecta. Destino: fuera de la Torre, a treinta metros. Adelante.' }
+          ] },
+        { id: 'p4b', nombre: 'El módulo revienta', img: IMG.pruebaAmaro, amb: [AMB.lab], pj: null, auto: 6, imgs: [{ t: 3.9, img: IMG.moduloHumo }],   // riser 4,3 s → golpe a 3,9 s
+          sfx: [{ src: SFo('sfx_zumbido_sube'), t: 0, vol: .75 }, { src: SFo('sfx_chispazo'), t: 3.68, vol: .85 }, { src: SFo('sfx_impacto'), t: 3.9, vol: .75 }, { src: SFo('sfx_humo'), t: 4.05, vol: .6 }],
+          al: [{ t: 3.9, fn: sacude }, { t: 3.95, fn: alarmaRoja }] },
+        { id: 'p4c', nombre: 'Alarma', img: IMG.pruebaAlarma, amb: [AMB.lab], pj: null, efecto: 'alarma', sfx: [{ src: SF('sfx_alarma'), t: .1, vol: .35 }],
+          lineas: [
             { id: 't1_017', quien: 'AMARO', pj: { q: 'AMARO', pose: 'alarma' }, texto: '¿Qué es esto? ¡Noa, sal de ahí!' },
-            { id: 't1_018', quien: 'NOA', pj: { q: 'NOA', pose: 'traviesa' }, texto: 'Todavía no.', espera: .6 }
+            { id: 't1_018', quien: 'NOA', img: IMG.pruebaNoa, pj: { q: 'NOA', pose: 'traviesa' }, texto: 'Todavía no.', espera: .6 }
           ] }
       ] },
       /* 5 · El salto: vídeo de Runway; mientras, túnel propio con el contador */
       { id: 'e5', titulo: 'El salto', planos: [
-        { id: 'p5', nombre: 'El salto', video: 'vid/salto.mp4', tunel: { de: 2100, a: -40000 }, dur: 7, mus: false, amb: [], desc: 'Runway 1080p: el anillo se dispara, túnel, contador 2100 → −40 000',
+        { id: 'p5', nombre: 'El salto', video: 'vid/salto.mp4', tunel: { de: 2100, a: -40000 }, dur: 7, mus: MUS.tensionBaja, amb: [], desc: 'Runway 1080p: el anillo se dispara, túnel, contador 2100 → −40 000',
           sfx: [{ src: SF('sfx_salto_tiempo'), t: 0 }] }
       ] },
       /* 6 · Paleolítico */
       { id: 'e6', titulo: 'Paleolítico', planos: [
-        { id: 'p6a0', nombre: 'La llegada', video: 'vid/llegada.mp4', img: IMG.llegada, desc: 'Noa aparece junto al río, entre anillos de luz', amb: [AMB.paleo, AMB.fuego], mus: MUS.paleo, pj: null, auto: 5.5,
+        { id: 'p6a0', nombre: 'La llegada', video: 'vid/llegada.mp4', img: IMG.llegada, desc: 'Noa aparece junto al río, entre anillos de luz; se recoge el moño (v2, 5,0 s)', amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento], mus: MUS.paleo, pj: null, auto: 5, dur: 5,
           sfx: [{ src: SF('sfx_llegada'), t: 0 }] },
-        { id: 'p6a', nombre: 'La llegada · −40 000', img: IMG.llegada, amb: [AMB.paleo, AMB.fuego], mus: MUS.paleo, pj: null, antes: 1.2,
+        { id: 'p6a', nombre: 'La llegada · −40 000', img: IMG.llegada, amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento], mus: MUS.paleo, pj: null, antes: 1.2,
           lineas: [
-            { id: 't1_019', quien: 'NOA', texto: 'Demasiado lejos… mucho más de lo que calculé.', claves: { claves: ['−40 000 años'], ts: [0] }, espera: .8 }
+            { id: 't1_019', quien: 'NOA', texto: 'Demasiado antiguo… creo que he calculado mal el tiempo.', claves: { claves: ['−40 000 años'], ts: [0] }, espera: .8 },
+            { id: 't1_019b', quien: 'NARRADOR', img: IMG.llegadaCerca, texto: 'Al parecer, el Transportador no la ha llevado a treinta metros… sino cuarenta mil años atrás.' },
+            { id: 't1_019c', quien: 'NARRADOR', img: IMG.paleoLejos, imgs: [{ en: .45, img: IMG.paleoPadreHija }], texto: 'Junto al fuego hay un padre y su hija. Hace cuarenta mil años, las personas ya eran como nosotros: el mismo cuerpo, la misma voz… y las mismas ganas de hacer música.' },
+            { id: 't1_019d', quien: 'NARRADOR', img: O(IMG.paleoTalla, IMG.tallador), imgs: [{ en: .5, img: IMG.paleoAcerca }], texto: 'Él talla flautas con las cañas del río. Noa se acerca despacio, sin hacer ruido, para escucharlas.',
+              sfx: [{ src: SF('sfx_tallar_cana'), en: .03, vol: .6 }, { src: SF('sfx_pasos_juncos'), en: .5 }, { src: SF('sfx_pasos_juncos_sint'), en: .5, vol: .7 }].filter(x => B.existe(x.src)).slice(0, 2) }
           ] },
-        { id: 'p6b', nombre: 'El tallador de flautas', img: IMG.tallador, desc: 'Un hombre talla tres flautas de caña junto al fuego y toca la grande', amb: [AMB.paleo, AMB.fuego],
-          pj: { q: 'TALLADOR', pose: 'talla' }, auto: 7.2, sfx: [{ src: SF('sfx_tallar_cana'), t: .2 }],
+        { id: 'p6b', nombre: 'El tallador de flautas', img: IMG.tallador, desc: 'Un hombre talla tres flautas de caña junto al fuego y toca la grande', amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento],
+          pj: { q: 'TALLADOR', pose: 'talla' }, auto: 7.2, sfx: [{ src: SF('sfx_tallar_cana'), t: .2 }], imgs: [{ t: 5.2, img: IMG.paleoNoaMira }],
           poses: [{ t: 1.6, q: 'TALLADOR', pose: 'toca' }, { t: 5.2, q: 'NOA', pose: 'sorpresa' }],
           al: [{ t: 1.8, fn: () => flautaDibujo(FL.grande.base, 2) }] }
       ] },
       /* 7 · Tres flautas */
       { id: 'e7', titulo: 'Tres flautas', planos: [
-        { id: 'p7', nombre: 'Las tres flautas', img: IMG.tallador, pj: null, amb: [AMB.paleoBajo, AMB.fuegoBajo], mus: false,
+        { id: 'p7', nombre: 'Las tres flautas', img: IMG.tallador, pj: null, amb: [AMB.paleoBajo, AMB.fuegoBajo, AMB.grillos], mus: MUS.paleoBajo,
           inter: { tipo: 'flautas', flautas: [FL.grande, FL.mediana, FL.pequena], digitaciones: DIBUJO, ritmo: RITMO,
             cartel: 'Tapa los mismos agujeros en las tres flautas y escucha. Pulsa <b>▶ Dibujo</b> en cada una: los dedos hacen lo mismo… ¿y el sonido?',
             reto: 'Reto: escucha A, B y C y ponlas en orden, <b>de la más grave a la más aguda</b>.',
@@ -240,16 +333,16 @@
       ] },
       /* 8 · Tocar juntos */
       { id: 'e8', titulo: 'Tocar juntos', planos: [
-        { id: 'p8a', nombre: 'El tallador y la niña', img: IMG.tallador, amb: [AMB.paleo, AMB.fuego], pj: { q: 'NINA', pose: 'senala' }, auto: 2.6,
+        { id: 'p8a', nombre: 'El tallador y la niña', img: IMG.tallador, mus: MUS.paleo, amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento], pj: { q: 'NINA', pose: 'senala' }, auto: 2.6,
           poses: [{ t: 1.5, q: 'TALLADOR', pose: 'sonrie' }] },
-        { id: 'p8', nombre: 'El tallador y la niña', img: IMG.tallador, desc: 'El tallador con la flauta grande y una niña con la pequeña', pj: null, amb: [AMB.paleoBajo, AMB.fuegoBajo],
+        { id: 'p8', nombre: 'El tallador y la niña', mus: MUS.paleoBajo, img: IMG.tallador, desc: 'El tallador con la flauta grande y una niña con la pequeña', pj: null, amb: [AMB.paleoBajo, AMB.fuegoBajo, AMB.grillos],
           inter: { tipo: 'juntos', flautas: [FL.grande, FL.pequena], quienG: 'Él · grande', quienP: 'Ella · pequeña', digitaciones: DIBUJO, ritmo: RITMO,
             cartel: 'Él toca la grande y ella la pequeña. Escucha qué pasa si los dos tapan los mismos agujeros. Después, <b>elige con qué digitación tiene que empezar la pequeña</b> para que suene igual que la grande.',
             titOpciones: 'La pequeña empieza con…', bien: '¡Ahora suenan igual! (la pequeña, una octava más aguda)', mal: 'Todavía no suenan igual. Prueba otra digitación.' } },
-        { id: 'p8b', nombre: 'El tallador y la niña', img: IMG.tallador, amb: [AMB.paleo, AMB.fuego], pj: { q: 'NINA', pose: 'feliz' }, antes: 1.6,
+        { id: 'p8b', nombre: 'El tallador y la niña', mus: MUS.paleo, img: IMG.tallador, amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento], pj: { q: 'NINA', pose: 'feliz' }, antes: 1.6,
           lineas: [
-            { id: 't1_020', quien: 'NOA', pj: { q: 'NOA', pose: 'sorpresa' }, poses: [{ en: .55, pose: 'pensativa' }], texto: 'Ella toca otros agujeros… pero suena lo mismo. Como yo con el piano.' },
-            { id: 't1_021', quien: 'AMARO', nombre: 'Radio · Amaro', filtro: 'radio', estilo: 'radio', pj: { q: 'NOA', pose: 'sorpresa' }, sfx: [{ src: SF('sfx_radio_interferencia'), t: 0 }], texto: 'Noa… ¿me oyes? … Te traemos de vuelta…' }
+            { id: 't1_020', quien: 'NOA', img: IMG.paleoNoaMira, pj: { q: 'NOA', pose: 'sorpresa' }, poses: [{ en: .55, pose: 'pensativa' }], texto: 'Ella toca otros agujeros… pero suena lo mismo. Como yo con el piano.' },
+            { id: 't1_021', quien: 'AMARO', img: IMG.paleoPulsera, nombre: 'Radio · Amaro', filtro: 'radio', estilo: 'radio', pj: { q: 'NOA', pose: 'sorpresa' }, sfx: [{ src: SF('sfx_radio_interferencia'), t: 0 }], texto: 'Noa… ¿me oyes? … Te traemos de vuelta…' }
           ] }
       ] },
       /* 9 · Viaje de vuelta: paradas relámpago (túnel propio en los tramos) */
@@ -270,10 +363,10 @@
       /* 10 · Por fin entiende su saxo */
       { id: 'e10', titulo: 'Afinar con el oboe', planos: [
         { id: 'p10a', nombre: 'Laboratorio · el registro', img: IMG.labCentro, amb: [AMB.lab], mus: false,
-          lineas: [{ id: 't1_023', quien: 'AMARO', pj: { q: 'AMARO', pose: 'tableta' }, poses: [{ en: .22, pose: 'helada' }], texto: 'Esto no puede ser. Se suponía que solo viajaba en el espacio… Según el registro has estado en el mismo sitio, pero hace cuarenta mil años. Y luego en el siglo dieciocho. Y en el diecinueve.', claves: { claves: ['−40 000', 's. XVIII', 's. XIX'], ts: [7, 9.6, 11.2] } }] },
+          lineas: [{ id: 't1_023', quien: 'AMARO', imgs: [{ en: .5, img: IMG.labRegistro }], pj: { q: 'AMARO', pose: 'tableta' }, poses: [{ en: .22, pose: 'helada' }], texto: 'Esto no puede ser. Se suponía que solo viajaba en el espacio… Según el registro has estado en el mismo sitio, pero hace cuarenta mil años. Y luego en el siglo dieciocho. Y en el diecinueve.', claves: { claves: ['−40 000', 's. XVIII', 's. XIX'], ts: [7, 9.6, 11.2] } }] },
         { id: 'p10a2', nombre: 'Laboratorio · Noa calla', img: IMG.labCentro, amb: [AMB.lab], pj: { q: 'NOA', pose: 'neutra' }, auto: 2.4 },
         { id: 'p10b', nombre: 'Ensayo de orquesta · 2100', img: IMG.orquesta, desc: 'Esa tarde, en el conservatorio: el oboe da el La', amb: [AMB.orquesta], ambInter: [AMB.orquestaBajo], pj: { q: 'NOA', pose: 'pensativa' }, vida: VIDA.orquesta, antes: 2,
-          lineas: [{ id: 't1_024', quien: 'NOA', estilo: 'interior', nombre: 'Noa (piensa)', texto: 'Mi saxo no se equivoca de nombre. Es como la flauta pequeña: con la misma digitación suena a otra altura. Por eso mi papel lleva otra armadura.' }],
+          lineas: [{ id: 't1_024', quien: 'NOA', imgs: [{ en: .45, img: IMG.orquestaNoa }], estilo: 'interior', nombre: 'Noa (piensa)', texto: 'Mi saxo no se equivoca de nombre. Es como la flauta pequeña: con la misma digitación suena a otra altura. Por eso mi papel lleva otra armadura.' }],
           inter: { tipo: 'oboe', fondo: IMG.orquesta,
             cartel: 'El oboe da el <b>La</b>. Elige en el teclado la nota <b>escrita</b> que tiene que tocar cada instrumento para que suene La. Escucha y pulsa <b>Comprobar</b>.',
             fin: 'Los tres afinados con el oboe: cada uno lee otra nota, pero todos suenan La.',
@@ -283,7 +376,7 @@
               { id: 'trompa', nombre: 'Trompa en Fa', sub: 'suena una 5.ª justa más grave', timbre: 'trompa', pasos: 4, semis: 7, texto: '¿Y la <b>trompa en Fa</b>? ¿Qué nota escrita suena La?', bien: '¡Mi! La trompa en Fa lee Mi y suena La.', mal: 'Todavía no suena La. Prueba otra nota.' }
             ] },
           despues: [
-            { id: 't1_029', quien: 'NARRADOR', voz: false, amb: [AMB.orquestaBajo], texto: 'Por eso las dos partituras del principio suenan igual: el saxo alto suena una sexta mayor más grave de lo que lee. Noa lee Do♯ menor y suena Mi menor, como el piano.', claves: { claves: ['Saxo: Do♯ m (escrito)', '=', 'Piano: Mi m (suena)'], ts: [2, 2.6, 3.2] } }
+            { id: 't1_029', quien: 'NARRADOR', voz: false, img: IMG.orquesta, imgs: [{ en: .5, img: O(IMG.aulaAtriles, IMG.orquestaNoa) }], amb: [AMB.orquestaBajo], texto: 'Por eso las dos partituras del principio suenan igual: el saxo alto suena una sexta mayor más grave de lo que lee. Noa lee Do♯ menor y suena Mi menor, como el piano.', claves: { claves: ['Saxo: Do♯ m (escrito)', '=', 'Piano: Mi m (suena)'], ts: [2, 2.6, 3.2] } }
           ] }
       ] },
       /* 11 · Definición */
@@ -291,15 +384,15 @@
         { id: 'p11', nombre: 'Definición', img: IMG.definicion, desc: 'Fondo sobrio (pentagrama de luz)', mus: false, amb: [AMB.labBajo], pj: null,
           lineas: [
             { id: 't1_025', quien: 'NARRADOR', texto: 'Transportar es escribir o interpretar una obra en una tonalidad distinta, más grave o más aguda.', claves: { claves: ['Transportar', 'otra tonalidad', 'más grave o más aguda'], ts: [0, 3.4, 5.2] } },
-            { id: 't1_026', quien: 'NARRADOR', texto: 'Ojo: el transporte es absoluto. El modo no cambia.', claves: { claves: ['Absoluto', 'el modo no cambia'], ts: [1.2, 2.8] } },
-            { id: 't1_027', quien: 'NARRADOR', texto: 'Hay dos formas de hacerlo: escribiéndolo de nuevo, o en tu cabeza mientras tocas.', claves: { claves: ['Escrito', 'Mental'], ts: [2.4, 4] } }
+            { id: 't1_026', quien: 'NARRADOR', img: IMG.defAbsoluto, texto: 'Ojo: el transporte es absoluto. El modo no cambia.', claves: { claves: ['Absoluto', 'el modo no cambia'], ts: [1.2, 2.8] } },
+            { id: 't1_027', quien: 'NARRADOR', img: IMG.defDosFormas, texto: 'Hay dos formas de hacerlo: escribiéndolo de nuevo, o en tu cabeza mientras tocas.', claves: { claves: ['Escrito', 'Mental'], ts: [2.4, 4] } }
           ] }
       ] },
       /* 12 · Cierre */
       { id: 'e12', titulo: 'Cierre', planos: [
         { id: 'p12', nombre: 'Laboratorio de noche · la foto', img: IMG.cierre, desc: 'De noche, a solas, Noa mira la foto de su padre con el clarinete', amb: [AMB.labBajo], mus: MUS.cierre, antes: 2.2,
           pj: { q: 'NOA', pose: 'emocion', lado: 'der' },
-          lineas: [{ id: 't1_028', quien: 'NOA', pj: { q: 'NOA', pose: 'emocion', lado: 'der' }, texto: 'Papá… he conseguido que la máquina no solo me lleve a otro lugar, sino a otra época. Te prometo que conseguiré que me lleve hasta ti.', espera: 2.5 }] }
+          lineas: [{ id: 't1_028', quien: 'NOA', imgs: [{ en: .5, img: O(IMG.cierreNoa, IMG.cierreLab) }], pj: { q: 'NOA', pose: 'emocion', lado: 'der' }, texto: 'Papá… he conseguido que la máquina no solo me lleve a otro lugar, sino a otra época. Te prometo que conseguiré que me lleve hasta ti.', espera: 2.5 }] }
       ] }
     ]
   });
