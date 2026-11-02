@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<!-- controles.js (Modulación) va PRIMERO: la pausa general envuelve el reloj, los temporizadores y el AudioContext -->
+<script src="js/controles.js?v=1"></script>
+<link rel="icon" href="../s1/img/t1/icono.webp" type="image/webp">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Transporte 2 · La misma canción, más grave</title>
+<link rel="stylesheet" href="css/tr.css?v=1">
+<script>window.MOD_VOLVER = '../prueba.html'; window.MOD_BASE = '../s1/';   /* el piano por muestras se comparte con T1 */</script>
+</head>
+<body>
+<div class="app">
+  <div id="escena">
+    <div id="fondo"></div>
+    <canvas id="vida" aria-hidden="true"></canvas>
+    <div id="efecto" aria-hidden="true"></div>
+    <div id="capas"></div>
+    <div id="lamina" aria-hidden="true"></div>
+    <div id="inter"></div>
+    <div id="video"></div>
+    <div id="blanco" aria-hidden="true"></div>
+    <div id="dialogo" aria-live="polite"><span id="dQuien"></span><p id="dTexto"></p><div class="nav"><button id="bCont" class="prim" type="button" disabled>Continuar ▶</button></div></div>
+    <div id="barra"></div>
+    <div id="cartel"></div>
+    <div class="cab">
+      <div class="marca"><b id="marcaTit">Transporte 2</b><small id="marcaSub"></small></div>
+      <div id="puntos" aria-hidden="true"></div>
+      <div class="fila"></div>
+    </div>
+    <div id="inicio" role="button" tabindex="0" aria-label="Pulsa para empezar la sesión">
+      <div class="rueda">
+        <svg viewBox="0 0 560 560" aria-hidden="true"><circle cx="280" cy="280" r="270" fill="none" stroke="#63e6ff" stroke-width="2" opacity=".35"/><circle cx="280" cy="280" r="250" fill="none" stroke="#63e6ff" stroke-width="5" stroke-dasharray="4 14" opacity=".7"/><circle cx="280" cy="280" r="226" fill="none" stroke="#ffb547" stroke-width="2" opacity=".5" stroke-dasharray="380 1040" transform="rotate(-90 280 280)"/></svg>
+        <span class="sup" id="iSup"></span><span class="hz">440 Hz</span><h1 id="iTit">Transporte 2</h1><span class="sub" id="iSub"></span>
+      </div>
+      <span class="start">Pulsa para empezar</span>
+      <div class="sigue"><button type="button" class="prim" id="bSigue">▶ Seguir donde lo dejaste</button><button type="button" id="bDesde0">↺ Empezar desde el principio</button></div>
+      <span class="estado" id="iEstado">Cargando…</span><span class="pista">clic o cualquier tecla</span>
+    </div>
+  </div>
+</div>
+<script src="data/recursos.js"></script>
+<script src="js/nucleo.js?v=1"></script>
+<script src="js/sonido.js?v=1"></script>
+<script src="js/vexflow.js"></script>
+<script src="js/viento.js?v=1"></script>
+<script src="js/pauta.js?v=1"></script>
+<script src="js/vida.js?v=1"></script>
+<script src="js/tunel.js?v=1"></script>
+<script src="js/capas.js?v=1"></script>
+<script src="js/motor.js?v=1"></script>
+<script src="js/rueda.js?v=1"></script>
+<script src="js/escrito.js?v=1"></script>
+<script src="js/lamina.js?v=1"></script>
+<script src="js/inter.js?v=1"></script>
+<script src="data/t2.js?v=1"></script>
+<script>document.getElementById('escena').classList.add('en-marcha');</script>
+</body>
+</html>
