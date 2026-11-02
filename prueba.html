@@ -56,7 +56,12 @@ a.nodo.off .t,a.nodo.off .hz{color:#5b6d93}
   <a class="nodo off" aria-disabled="true" style="left:1140px"><span class="hz">880 Hz</span><span class="t">?</span><span class="d">Transporte 3</span></a>
   <a class="nodo off" aria-disabled="true" style="left:1500px"><span class="hz">1760 Hz</span><span class="t">?</span><span class="d">Transporte 4</span></a>
 </div>
+<div id="destello" aria-hidden="true" style="position:fixed;inset:0;z-index:99;background:#fff;opacity:0;pointer-events:none;transition:opacity 1.4s ease-out"></div>
 <script>
+/* al llegar desde una sesión por el teletransporte (?tp=1): un destello blanco que se disuelve */
+(function(){ if (!/[?&]tp=1/.test(location.search)) return; var d = document.getElementById('destello'); d.style.transition = 'none'; d.style.opacity = '1';
+  try { history.replaceState(history.state, '', location.pathname + location.hash); } catch (e) {}
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ d.style.transition = 'opacity 1.4s ease-out'; d.style.opacity = '0'; }); }); })();
 /* los enlaces llevan la cuenta (#c=…) a cada sesión */
 [].forEach.call(document.querySelectorAll('a.nodo[data-ir]'), function(a){ a.href = a.getAttribute('data-ir') + location.hash; });
 /* el escenario 1920×1080 se escala para caber entero */
