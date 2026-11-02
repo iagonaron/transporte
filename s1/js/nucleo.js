@@ -263,6 +263,9 @@ window.TR = window.TR || {};
   B.progreso = {
     leer() { return B.lee(KP, { escenas: {}, ultima: 0 }); },
     escena(i, id) { const p = this.leer(); p.ultima = i; p.escenas[id] = 1; B.guarda(KP, p); },
-    fin() { const p = this.leer(); p.terminada = 1; B.guarda(KP, p); }
+    fin() { const p = this.leer(); p.terminada = 1; B.guarda(KP, p); },
+    /* «Seguir donde lo dejaste»: el último plano empezado (null al terminar la sesión) */
+    plano(e, k) { const p = this.leer(); p.punto = e == null ? null : { e: e, k: k }; B.guarda(KP, p); },
+    donde() { const p = this.leer(); return p.punto && typeof p.punto.e === 'number' ? p.punto : null; }
   };
 })(window.TR);

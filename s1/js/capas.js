@@ -37,10 +37,19 @@
     return d;
   }
   C.oculta = [];   // personajes que ya salen grandes en la lámina sustituta: no se les pone la pose encima
+  /* pjPedido: el personaje que pide la frase aunque ahora no se vea (porque la lámina ya lo lleva). Si la frase cambia a
+     una lámina sin él (img / imgs de la línea), vuelve a salir con la última pose pedida. */
+  let pjPedido = null;
+  const quitaVisual = () => { B.$$('.tr-pj', capa).forEach(e => e.remove()); pjEl = null; pjAct = null; capa.classList.remove('pj-izq', 'pj-der'); };
   function ponPj(o) {
     asegura();
-    if (o && C.oculta.indexOf(o.q || (pjAct && pjAct.q)) >= 0) o = null;
-    if (!o) { B.$$('.tr-pj', capa).forEach(e => e.remove()); pjEl = null; pjAct = null; capa.classList.remove('pj-izq', 'pj-der'); return; }
+    if (o) {
+      const q0 = o.q || (pjAct && pjAct.q) || (pjPedido && pjPedido.q);
+      const n = Object.assign({}, pjPedido && pjPedido.q === q0 ? pjPedido : {}); Object.keys(o).forEach(k => { if (o[k] !== undefined) n[k] = o[k]; }); n.q = q0;
+      pjPedido = q0 ? n : null; o = pjPedido ? Object.assign({}, pjPedido) : null;
+    } else pjPedido = null;
+    if (o && C.oculta.indexOf(o.q) >= 0) { quitaVisual(); return; }
+    if (!o) { quitaVisual(); return; }
     const q = o.q || (pjAct && pjAct.q); if (!q) return;
     const p = PJ(q) || {};
     const pose = o.pose || (pjAct && pjAct.q === q && pjAct.pose) || p._ || 'explica';
@@ -51,7 +60,9 @@
     pjAct = { q: q, pose: pose, lado: lado, alto: alto };
     const pon = (nodo) => {
       if (!pjAct || pjAct.q !== q || pjAct.pose !== pose) return;   // ya se pidió otra pose
-      const w = B.el('div', 'tr-pj ' + lado + (marco ? ' marco-' + marco : ''));   // marco 'llamada': la cara en la pantalla de la pulsera w.style.setProperty('--alto', alto); w.dataset.pose = q + '_' + pose;
+      /* cada personaje mira hacia el centro (hacia quien le habla): si la pose mira hacia fuera, se voltea */
+      const mira = (p.mira || {})[pose], quiere = lado === 'izq' ? 'der' : 'izq';
+      const w = B.el('div', 'tr-pj ' + lado + (marco ? ' marco-' + marco : '') + (!marco && mira && mira !== 'frente' && mira !== quiere ? ' espejo' : ''));   // marco 'llamada': la cara en la pantalla de la pulsera w.style.setProperty('--alto', alto); w.dataset.pose = q + '_' + pose;
       w.appendChild(nodo);
       capa.appendChild(w);
       B.$$('.tr-pj', capa).forEach(e => { if (e !== w) e.remove(); });
@@ -62,6 +73,12 @@
     decod(src).then(im => pon(im ? im.cloneNode() : marcador(q, pose, src)));
   }
   C.pj = ponPj;
+  /* tras cambiar de lámina: esconde al personaje si la lámina ya lo lleva, o lo devuelve si no */
+  C.aplicaOculta = function () {
+    asegura();
+    if (pjAct && C.oculta.indexOf(pjAct.q) >= 0) { quitaVisual(); return; }
+    if (!pjAct && pjPedido && C.oculta.indexOf(pjPedido.q) < 0) ponPj(Object.assign({}, pjPedido));
+  };
   C.pjActual = () => pjAct;
 
   /* ── palabras clave ── */

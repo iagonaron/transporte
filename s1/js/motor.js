@@ -13,6 +13,16 @@
   const AULA = B.param('aula') === '1';
   const RAPIDO = B.param('rapido') === '1';   // solo para probar: texto al instante y frases de 0,3 s
   M.aula = AULA;
+  /* el profe (cuenta Protester: llega con «#c=<uuid>» desde prueba.html, como en 4 Sabores): los puntitos de arriba
+     son clicables y saltan a cualquier escena o plano. Se recuerda en esta pestaña (sessionStorage). */
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const PROF = (function () {
+    let si = false;
+    try { const q = {}; (location.hash || '').replace(/^#/, '').split('&').forEach(x => { const i = x.indexOf('='); if (i > 0) q[x.slice(0, i)] = decodeURIComponent(x.slice(i + 1)); }); si = UUID.test(q.c || ''); } catch (e) { }
+    try { if (si) sessionStorage.setItem('tr_prof', '1'); else si = sessionStorage.getItem('tr_prof') === '1'; } catch (e) { }
+    return si || B.param('profe') === '1';
+  })();
+  M.prof = PROF;
   let S = null, ctl = null, escIdx = 0;
   const $ = id => document.getElementById(id);
 
@@ -44,9 +54,21 @@
     } else { nuevo.classList.add('marca'); nuevo.innerHTML = '<div><b>' + B.esc(o.nombre || 'Lámina') + '</b><small>' + B.esc(q.src) + '</small>' + (o.desc ? '<span>' + B.esc(o.desc) + '</span>' : '') + '</div>'; }
     f.appendChild(nuevo);
     B.$$('.lam', f).forEach(e => { if (e !== nuevo) e.remove(); });
-    if (B.capas) { B.capas.oculta = (q && !q.falta && q.ocultaPj) || []; const a = B.capas.pjActual(); if (a && B.capas.oculta.indexOf(a.q) >= 0) B.capas.pj(null); }
+    if (B.capas) { B.capas.oculta = (q && !q.falta && q.ocultaPj) || []; B.capas.aplicaOculta(); }
     return q;
   };
+  /* cambio de lámina DENTRO del plano (img / imgs de la línea, imgs del plano): instantáneo, como las poses.
+     Si el fichero falta, se queda la lámina anterior (sin marcador). La «vida» pasa a la de la lámina nueva, o se quita. */
+  M.cambia = function (src, o) {
+    const q = src ? B.primero(src) : null;
+    if (!q || q.falta) return null;
+    const ant = fondoAct, r = M.fondo(src, o || {});
+    if (fondoAct !== ant) { if (vfondo) fondoVideo(null); B.vida.pon((r && r.vida) || []); }   // el vídeo de fondo (si lo había) deja paso a la lámina nueva
+    return r;
+  };
+  function programaImgs(lista, dur, c) {
+    B.arr(lista).forEach(x => { const t = x.t != null ? x.t : (x.en || 0) * dur; B.espera(Math.max(0, t), c).then(ok => ok && M.cambia(x.img)); });
+  }
   /* vídeo de fondo en bucle, mudo (p. ej. el dron sobre Coruña): si no está, se queda la lámina */
   let vfondo = null;
   let vfondoSrc = null;
@@ -77,6 +99,7 @@
     /* reacciones y sucesos del plano (sin frase): poses [{t, q, pose}] y al [{t, fn}] */
     if (p.poses) B.capas.linea({ poses: p.poses, mantenClaves: true }, p.auto || 4, ctl);
     B.arr(p.al).forEach(x => B.espera(x.t || 0, ctl).then(ok => ok && x.fn(ctl)));
+    programaImgs(p.imgs, p.auto || 4, ctl);   // imgs del plano: [{t (s desde que empieza el plano) | en (fracción de auto), img}]
     pintaTit(p);
   }
   function pintaTit(p) { const e = S.escenas[escIdx]; $('marcaSub').textContent = e ? e.titulo : ''; }
@@ -116,7 +139,8 @@
     const txt = l.texto || '';
     const durTxt = Math.max(1.6, txt.length * .062);
     const dur = RAPIDO ? .3 : (hayVoz ? B.buf[vozSrc].duration : durTxt) + (l.espera || 0);
-    if (l.img) { const qi = M.fondo(l.img, { nombre: l.imgNombre || l.img, desc: l.imgDesc }); if (l.vida === undefined && qi && !qi.falta && qi.vida && !(vfondo && vfondoSrc)) B.vida.pon(qi.vida); }
+    if (l.img) M.cambia(l.img);
+    programaImgs(l.imgs, dur, c);
     if (l.mus !== undefined) { if (l.mus === false) B.musicaCorta(); else B.musica(l.mus); }
     if (l.amb !== undefined) B.ambiente(l.amb);
     if (l.vida !== undefined) B.vida.pon(l.vida);
@@ -268,31 +292,69 @@
     if (p.despues) paso = paso.then(ok => ok ? (caja(true), lineas(p.despues, c)) : false);
     return paso;
   }
-  function escena(i) {
+  function escena(i, k0) {
     if (ctl) ctl.matar();
     ctl = B.control(); const c = ctl;
     escIdx = i;
     const e = S.escenas[i]; if (!e) return fin();
     B.progreso.escena(i, e.id);
     pintaPuntos();
-    let k = 0;
-    const sig = () => { if (c.muerto) return; if (k >= e.planos.length) return escena(i + 1); const p = e.planos[k++]; plano(p, c).then(ok => { if (ok) sig(); }); };
+    let k = Math.max(0, Math.min((k0 || 0), e.planos.length - 1));
+    const sig = () => { if (c.muerto) return; if (k >= e.planos.length) return escena(i + 1); B.progreso.plano(i, k); const p = e.planos[k++]; plano(p, c).then(ok => { if (ok) sig(); }); };
     sig();
   }
+  /* saltar (profe) o seguir donde se dejó: limpia lo que hubiera en pantalla y pone la música y el ambiente que tocan en ese punto */
+  function sonidoEn(i, k) {
+    let mus = null, amb = [];
+    for (let a = 0; a < S.escenas.length; a++) for (let b = 0; b < S.escenas[a].planos.length; b++) {
+      if (a > i || (a === i && b >= k)) return { mus: mus, amb: amb };
+      const p = S.escenas[a].planos[b];
+      if (p.mus === false) mus = null; else if (p.mus) mus = p.mus;
+      if (p.amb !== undefined) amb = p.amb;
+      B.arr(p.lineas).concat(B.arr(p.despues)).forEach(l => { if (l.mus === false) mus = null; else if (l.mus) mus = l.mus; if (l.amb !== undefined) amb = l.amb; });
+    }
+    return { mus: mus, amb: amb };
+  }
+  function salta(i, k) {
+    if (ctl) ctl.matar();
+    M.terminado = false; M.finInter(); caja(false); B.capas.limpia(); B.vida.quita();
+    const cv = $('video'); cv.classList.remove('on'); cv.innerHTML = ''; $('cartel').classList.remove('on'); $('cartel').innerHTML = '';
+    if (window.TR.viento) B.viento.parar();
+    const p = (S.escenas[i] || {}).planos ? S.escenas[i].planos[k || 0] : null;
+    const so = sonidoEn(i, k || 0);
+    if (!p || p.mus === undefined) B.musica(so.mus && so.mus.bucle === false ? null : so.mus);
+    if (!p || p.amb === undefined) B.ambiente(so.amb);
+    escena(i, k || 0);
+  }
+  M.salta = salta;
   M.escena = escena;
   M.actual = () => escIdx;
   function pintaPuntos() {
     const d = $('puntos'); if (!d) return; d.innerHTML = '';
-    S.escenas.forEach((e, i) => { const s = B.el('i', i < escIdx ? 'ya' : (i === escIdx ? 'act' : '')); s.title = e.titulo; d.appendChild(s); });
+    d.classList.toggle('saltar', PROF);
+    S.escenas.forEach((e, i) => {
+      const s = B.el('i', i < escIdx ? 'ya' : (i === escIdx ? 'act' : '')); s.title = e.titulo; d.appendChild(s);
+      if (PROF) s.addEventListener('click', ev => { ev.stopPropagation(); menuPlanos(i); });
+    });
+  }
+  /* profe: al pulsar un puntito, la lista de planos de esa escena */
+  function menuPlanos(i) {
+    const d = $('puntos'), viejo = B.$('.saltos', d); if (viejo) { viejo.remove(); if (+viejo.dataset.e === i) return; }
+    const e = S.escenas[i], m = B.el('div', 'saltos'); m.dataset.e = i;
+    m.appendChild(B.el('b', '', (i + 1) + ' · ' + e.titulo));
+    e.planos.forEach((p, k) => { const b = B.el('button', '', p.nombre || p.id); b.type = 'button'; b.addEventListener('click', ev => { ev.stopPropagation(); m.remove(); salta(i, k); }); m.appendChild(b); });
+    d.appendChild(m);
+    const cierra = ev => { if (!m.contains(ev.target)) { m.remove(); document.removeEventListener('pointerdown', cierra, true); } };
+    setTimeout(() => document.addEventListener('pointerdown', cierra, true), 0);
   }
   function fin() {
-    caja(false); B.capas.limpia(); B.vida.quita(); B.progreso.fin();
+    caja(false); B.capas.limpia(); B.vida.quita(); B.progreso.fin(); B.progreso.plano(null);
     const capa = $('cartel'); capa.innerHTML = '';
     const box = B.el('div', 'cart fin');
     box.innerHTML = '<p class="sup">' + B.esc(S.titulo) + '</p><h2>' + B.esc(S.subtitulo || '') + '</h2>';
     const b = B.el('button', 'prim', 'Cerrar sesión'); b.type = 'button';
     b.addEventListener('click', () => { location.href = (window.MOD_VOLVER || '../prueba.html') + location.hash; });
-    const r = B.el('button', '', '↺ Repetir'); r.type = 'button'; r.addEventListener('click', () => { capa.classList.remove('on'); escena(0); });
+    const r = B.el('button', '', '↺ Repetir'); r.type = 'button'; r.addEventListener('click', () => { capa.classList.remove('on'); salta(0, 0); });
     const f = B.el('div', 'fila'); f.appendChild(r); f.appendChild(b); box.appendChild(f);
     capa.appendChild(box); capa.classList.add('on');
     M.terminado = true;
@@ -325,7 +387,16 @@
     if (AULA) document.body.classList.add('aula');
     B.ac();
     const ini = $('inicio'), est = $('iEstado');
-    let cargado = false, pulsado = false;
+    let cargado = false, pulsado = false, desde = null;
+    const g = B.progreso.donde();   // { e, k } del último plano, si quedó a medias
+    const nPunto = B.param('escena') ? null : (g && (g.e > 0 || g.k > 0) && g.e < S.escenas.length ? g : null);
+    if (nPunto) {
+      ini.classList.add('con-sigue');
+      const t = S.escenas[nPunto.e] ? S.escenas[nPunto.e].titulo : '';
+      $('bSigue').title = 'Escena ' + (nPunto.e + 1) + ' · ' + t;
+      $('bSigue').addEventListener('click', ev => { ev.stopPropagation(); desde = nPunto; pulsa(); });
+      $('bDesde0').addEventListener('click', ev => { ev.stopPropagation(); desde = { e: 0, k: 0 }; pulsa(); });
+    }
     const piano = window.Sonido ? Sonido.listo() : Promise.resolve();
     Promise.all([piano, B.precarga(recursos(), pr => {
       const k = pr.total ? Math.min(99, Math.round(pr.bytes / pr.total * 100)) : 99;
@@ -341,8 +412,9 @@
       ini.classList.add('va');
       if (cargado) arranca(); else est.textContent = est.textContent || 'Cargando…';
     };
-    ini.addEventListener('click', pulsa);
-    document.addEventListener('keydown', function k(ev) { if (ini.classList.contains('fuera')) return document.removeEventListener('keydown', k); if (ev.key === 'Enter' || ev.key === ' ') pulsa(); });
+    ini.addEventListener('click', () => { if (!nPunto) pulsa(); });
+    document.addEventListener('keydown', function k(ev) { if (ini.classList.contains('fuera')) return document.removeEventListener('keydown', k); if (ev.key === 'Enter' || ev.key === ' ') { if (nPunto && !desde) desde = nPunto; pulsa(); } });
+    M._desde = () => desde;
     /* Continuar: botón, clic en la caja, Intro o espacio */
     $('bCont').addEventListener('click', ev => { ev.stopPropagation(); if (esperaSigue) esperaSigue(); });
     $('dialogo').addEventListener('click', () => { if (esperaSigue) esperaSigue(); });
@@ -358,6 +430,8 @@
     try { B.ac().resume(); } catch (e) { }
     ini.classList.add('sale');
     setTimeout(() => { ini.classList.add('fuera'); }, 1200);
+    const d = M._desde && M._desde();
+    if (d && (d.e > 0 || d.k > 0)) return salta(d.e, d.k);
     const n = parseInt(B.param('escena') || '0', 10) || 0;
     escena(Math.max(0, Math.min(S.escenas.length - 1, n)));
   }

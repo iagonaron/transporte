@@ -3,7 +3,7 @@
    y después abajo, junto a los botones; «Continuar» se enciende cuando ya se puede seguir).
    Cada uno: TR.inter.<tipo>(cfg, control) → Promise (true = terminado). Los datos (textos, notas) van en data/t1.js.
      prologo   · dos partituras (saxo alto en Do♯ m, piano en Mi m) que suenan igual, con cursor
-     calibrar  · frecuencia base 220 Hz y sus múltiplos exactos ×2 ×3 ×4 ×5 → la máquina se activa
+     calibrar  · frecuencia base 220 Hz y sus octavas exactas ×2 ×4 ×8 ×16 → la máquina se activa (la base suena todo el rato y cada octava colocada se suma, bajito)
      flautas   · tres flautas, la misma digitación: el mismo dibujo a tres alturas + reto de ordenarlas
      juntos    · la grande y la pequeña: qué digitación hace que suenen igual (a la octava)
      oboe      · el La del oboe: qué nota escrita toca el saxo alto, el clarinete en Si♭ y la trompa en Fa
@@ -25,24 +25,39 @@
     return B.TEMA.mel.slice(0, n || B.TEMA.mel.length).map(cm => cm.map(n => ({ k: trans ? T.transporta(n[0], trans[0], trans[1]) : n[0], d: n[1] })));
   }
 
-  /* ════════ a · PRÓLOGO: dos partituras que suenan igual ════════ */
+  /* ════════ a · PRÓLOGO: saxo alto (Do♯ m, escrito) + piano en sistema doble (Mi m) que suenan igual ════════
+     El piano se escribe tal cual lo toca toca(): mano izquierda, el bajo en negras con puntillo (clave de fa);
+     mano derecha, el arpegio de corcheas (clave de sol). «Continuar» se puede pulsar desde el principio (solo es escuchar). */
+  const sube8 = k => { const n = T.lee(k); return T.escribe(n.l, n.a, n.o + 1); };
+  const arpegio = a => [sube8(a[1])].concat(a[2], a[2].slice(1, -1).reverse());   // la misma secuencia que suena
+  function pianoEscrito(n) {
+    const md = [], mi = [];
+    B.TEMA.acordes.slice(0, n).forEach(bar => {
+      const cd = [], ci = [];
+      bar.forEach(a => { const seq = arpegio(a); for (let k = 0; k < a[0]; k++) cd.push({ k: seq[k % seq.length], d: 1 }); for (let o = 0; o < a[0]; o += 3) ci.push({ k: a[1], d: 3 }); });
+      md.push(cd); mi.push(ci);
+    });
+    return { md: md, mi: mi };
+  }
   I.prologo = function (cfg, c) {
     const p = panel('i-prologo');
     p.appendChild(el('h3', '', cfg.titulo || 'El tema de Noa'));
     const cont = el('div', 'partitura'); p.appendChild(cont);
     const NC = cfg.compases || 8;
-    const sax = { nombre: 'Saxo alto', sub: 'en Mi♭ · Do♯ m', corto: 'Sax.', armadura: 'C#m', compases: compases([5, 9], NC) };
-    const pia = { nombre: 'Piano', sub: 'Mi m', corto: 'Pno.', armadura: 'Em', compases: compases(null, NC) };
-    const R = B.pauta.dibuja(cont, { ancho: 1720, compas: CMP(), grupos: GRP(), sistemas: [[0, NC / 2 - 1], [NC / 2, NC - 1]], pentas: [sax, pia], sepPe: 118, sepSis: 34 });
-    const cur = el('div', 'cursor'); cont.appendChild(cur); cur.style.height = (R.alto1 - 10) + 'px';
+    const pz = pianoEscrito(NC);
+    const sax = { nombre: 'Saxo alto', sub: 'en Mi♭ · Do♯ m', corto: 'Sax.', armadura: 'C#m', clave: 'treble', compases: compases([5, 9], NC) };
+    const md = { nombre: 'Piano', sub: 'Mi m', corto: 'Pno.', armadura: 'Em', clave: 'treble', nomDy: 44, compases: pz.md };
+    const mi = { nombre: '', armadura: 'Em', clave: 'bass', compases: pz.mi };
+    const R = B.pauta.dibuja(cont, { ancho: 1740, compas: CMP(), grupos: GRP(), sistemas: [[0, NC / 2 - 1], [NC / 2, NC - 1]], pentas: [sax, md, mi],
+      seps: [0, 112, 200], sepPe: 96, sepSis: 4, llave: [1, 2], unidos: [[0], [1, 2]], corchete: true });
+    const cur = el('div', 'cursor'); cont.appendChild(cur);
     let sonando = null, oido = false;
     const bAmbas = btn('▶ Las dos', 'prim', () => toca('ambas')), bSax = btn('Solo saxo', '', () => toca('saxo')), bPia = btn('Solo piano', '', () => toca('piano')), bPara = btn('■', 'cuad', () => para(), 'Parar');
-    return M().cartel(cfg.cartel, { botones: [bAmbas, bSax, bPia, bPara] }).then(() => {
-      return new Promise(res => {
-        c.alMorir.push(() => { para(); res(false); });
-        I._prologoFin = () => { oido = true; M().barraTexto(cfg.pregunta); M().esperaSigue(c).then(ok => { para(); res(ok); }); };
-      });
-    });
+    return M().cartel(cfg.cartel, { botones: [bAmbas, bSax, bPia, bPara] }).then(() => new Promise(res => {
+      c.alMorir.push(() => { para(); res(false); });
+      I._prologoFin = () => { if (oido) return; oido = true; if (cfg.pregunta) M().barraTexto(cfg.pregunta); };
+      M().esperaSigue(c).then(ok => { para(); res(ok); });   // desde el principio
+    }));
     function para() { if (sonando) { sonando.vivo = false; sonando = null; } V().parar(); cur.classList.remove('on'); B.$$('.act', cont).forEach(e => e.classList.remove('act')); }
     function toca(que) {
       para();
@@ -56,23 +71,32 @@
       }));
       /* el piano: bajo en cada parte y arpegio en corcheas (como la maqueta v4 de C4) */
       if (que !== 'saxo') { let tc = 0; B.TEMA.acordes.slice(0, NC).forEach(bar => bar.forEach(a => {
-        const d = a[0], bajo = T.midi(a[1]), ton = a[2].map(T.midi), seq = [bajo + 12].concat(ton, ton.slice(1, -1).reverse());
-        (d === 6 ? [0, 3] : [0]).forEach(o => V().piano(bajo, t0 + (tc + o) * e8, 3 * e8 * .95, que === 'ambas' ? .3 : .36));
+        const d = a[0], bajo = T.midi(a[1]), seq = arpegio(a).map(T.midi);
+        for (let o = 0; o < d; o += 3) V().piano(bajo, t0 + (tc + o) * e8, 3 * e8 * .95, que === 'ambas' ? .3 : .36);
         for (let k = 0; k < d; k++) V().piano(seq[k % seq.length], t0 + (tc + k) * e8 + .005, e8 * 1.3, (k % 3 === 0 ? .2 : .14) * (que === 'ambas' ? 1 : 1.2));
         tc += d; })); }
       const total = t;
+      const pes = que === 'saxo' ? [0] : que === 'piano' ? [1, 2] : [0, 1, 2], guia = que === 'piano' ? 1 : 0;
       cur.classList.add('on');
-      let ant = null;
+      let antG = null, antSet = '';
       (function mira() {
         if (!yo.vivo) return;
         const e = (B.ac().currentTime - t0) / e8;
-        if (e >= total) { para(); if (!oido && I._prologoFin) I._prologoFin(); return; }
-        const n = R.notas.find(x => x.pe === 0 && e >= x.t0 && e < x.t0 + x.d);
-        if (n && n !== ant) {
-          B.$$('.act', cont).forEach(x => x.classList.remove('act'));
-          R.notas.forEach(x => { if (x.t0 === n.t0 && x.el) x.el.classList.add('act'); });
-          cur.style.left = (n.x - 4) + 'px'; cur.style.top = (6 + n.sis * (R.alto1 + R.sepSis) - 4) + 'px';
-          ant = n;
+        if (e >= total) { para(); if (I._prologoFin) I._prologoFin(); return; }
+        if (e >= 0) {
+          const act = R.notas.filter(x => pes.indexOf(x.pe) >= 0 && e >= x.t0 && e < x.t0 + x.d);
+          const clave = act.map(x => R.notas.indexOf(x)).join();
+          if (clave !== antSet) {
+            B.$$('.act', cont).forEach(x => x.classList.remove('act'));
+            act.forEach(x => x.el && x.el.classList.add('act'));
+            antSet = clave;
+          }
+          const g = act.find(x => x.pe === guia);
+          if (g && g !== antG) {
+            const top = 10 + 6 + g.sis * (R.alto1 + R.sepSis) + 14;
+            cur.style.left = (14 + g.x - 4) + 'px'; cur.style.top = top + 'px'; cur.style.height = (R.alto1 - 30) + 'px';
+            antG = g;
+          }
         }
         requestAnimationFrame(mira);
       })();
@@ -81,7 +105,27 @@
 
   /* ════════ b · CALIBRAR EL TRANSPORTADOR ════════ */
   I.calibrar = function (cfg, c) {
-    const base = cfg.base || 220, mult = cfg.multiplos || [2, 3, 4, 5], ini = cfg.inicio || [347, 512, 1003, 871];
+    const base = cfg.base || 220, mult = cfg.multiplos || [2, 4, 8, 16], ini = cfg.inicio || [583, 1130, 2210, 2905];
+    const maxHz = base * (Math.max.apply(null, mult) + 1);
+    /* el acorde de octavas: la base suena desde que aparece el interactivo; cada octava colocada se queda sonando.
+       Ganancia repartida y menor cuanto más aguda (1760/3520 no chillan), con fundido al entrar y al salir. */
+    const AC = B.ac(), coro = AC.createGain(); coro.gain.setValueAtTime(0, AC.currentTime); coro.gain.linearRampToValueAtTime(1, AC.currentTime + 1.6); coro.connect(B.bus.inst);
+    const GAN = f => .05 * Math.pow(220 / f, .75);   // 220 → .05 · 440 → .03 · 880 → .018 · 1760 → .011 · 3520 → .006
+    const voces = {};
+    function vozOn(f) {
+      if (voces[f]) return; const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime;
+      o.type = 'sine'; o.frequency.value = f; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(GAN(f), t + .6);
+      o.connect(g); g.connect(coro); o.start(); voces[f] = { o: o, g: g };
+    }
+    function vozOff(f) { const v = voces[f]; if (!v) return; delete voces[f]; const t = AC.currentTime; v.g.gain.cancelScheduledValues(t); v.g.gain.setValueAtTime(v.g.gain.value, t); v.g.gain.linearRampToValueAtTime(0, t + .3); v.o.stop(t + .35); }
+    let coroVivo = true;
+    function coroFuera(fd) {
+      if (!coroVivo) return; coroVivo = false; const t = AC.currentTime; fd = fd || 1.2;
+      coro.gain.cancelScheduledValues(t); coro.gain.setValueAtTime(coro.gain.value, t); coro.gain.linearRampToValueAtTime(0, t + fd);
+      Object.keys(voces).forEach(f => voces[f].o.stop(t + fd + .05)); setTimeout(() => { try { coro.disconnect(); } catch (e) { } }, (fd + .2) * 1000);
+    }
+    c.alMorir.push(() => coroFuera(.4));
+    vozOn(base);
     const p = panel('i-calibrar');
     const izq = el('div', 'cal-maq'), der = el('div', 'cal-filas'); p.appendChild(izq); p.appendChild(der);
     /* la máquina: cuatro anillos concéntricos que se encienden */
@@ -92,18 +136,19 @@
     const tb = document.createElementNS(NS, 'text'); tb.setAttribute('class', 'tbase'); tb.setAttribute('y', 10); tb.textContent = base + ' Hz'; svg.appendChild(tb);
     izq.appendChild(svg);
     const pant = el('div', 'cal-pant'); pant.innerHTML = '<div>Frecuencia base · <b>' + base + ' Hz</b></div>'; izq.appendChild(pant);
-    const bBase = btn('🔊 Base ' + base + ' Hz', '', () => { const o = V().seno(base, .16); setTimeout(() => o.parar(.3), 1100); });
+    const bBase = btn('🔊 Base ' + base + ' Hz', '', () => { const o = V().seno(base, .12); setTimeout(() => o.parar(.3), 1100); });
     let hechos = mult.map(() => false), activa = false;
     const filas = mult.map((m, i) => {
       const f = el('div', 'cal-fila'), lab = el('b', 'mx', '×' + m), menos = btn('−', 'cuad', () => mueve(-1), 'Bajar 1 Hz'), mas = btn('+', 'cuad', () => mueve(1), 'Subir 1 Hz');
-      const sl = el('input'); sl.type = 'range'; sl.min = base; sl.max = base * 6; sl.step = 1; sl.value = ini[i];
+      const sl = el('input'); sl.type = 'range'; sl.min = base; sl.max = maxHz; sl.step = 1; sl.value = ini[i];
       const hz = el('span', 'hz'), luz = el('i', 'luz');
       f.appendChild(lab); f.appendChild(menos); f.appendChild(sl); f.appendChild(mas); f.appendChild(hz); f.appendChild(luz); der.appendChild(f);
       let osc = null, tCorta = null;
-      const suena = () => { if (activa) return; if (!osc) osc = V().seno(+sl.value, .15); else osc.frec(+sl.value); clearTimeout(tCorta); tCorta = setTimeout(() => { if (osc) { osc.parar(.25); osc = null; } }, 420); };
+      const volMov = () => .15 * Math.pow(440 / Math.max(440, +sl.value), .5);   // el que se mueve, por encima, pero sin chillar arriba
+      const suena = () => { if (activa) return; if (!osc) osc = V().seno(+sl.value, volMov()); else osc.frec(+sl.value); clearTimeout(tCorta); tCorta = setTimeout(() => { if (osc) { osc.parar(.25); osc = null; } }, 420); };
       const pinta = () => { hz.textContent = sl.value + ' Hz'; const ok = +sl.value === base * m; f.classList.toggle('ok', ok); anillos[i].classList.toggle('on', ok);
-        if (ok && !hechos[i]) { hechos[i] = true; V().ui('anillo'); } if (!ok) hechos[i] = false; revisa(); };
-      function mueve(d) { if (activa) return; sl.value = B.clamp(+sl.value + d, base, base * 6); suena(); pinta(); }
+        if (ok && !hechos[i]) { hechos[i] = true; V().ui('anillo'); vozOn(base * m); } if (!ok && hechos[i]) { hechos[i] = false; vozOff(base * m); } revisa(); };
+      function mueve(d) { if (activa) return; sl.value = B.clamp(+sl.value + d, base, maxHz); suena(); pinta(); }
       sl.addEventListener('input', () => { suena(); pinta(); });
       sl.addEventListener('keydown', ev => ev.stopPropagation());
       c.alMorir.push(() => { if (osc) osc.parar(.05); });
@@ -117,14 +162,14 @@
       filas.forEach(x => { x.sl.disabled = true; });
       svg.classList.add('gira'); p.classList.add('activa'); V().ui('enciende');
       B.arr(cfg.sfxActiva).forEach((x, k) => B.espera(k * .6, c).then(ok => ok && B.sfx(x, .8)));
-      const C = B.ac(); mult.concat([1]).forEach((m, k) => { const o = V().seno(base * m, .05 / (k + 1)); setTimeout(() => o.parar(.8), 2600); });
-      pant.innerHTML = '<div>' + B.esc(cfg.destino || 'Destino: Laboratorio · 0 m') + '</div>';
+      coro.gain.linearRampToValueAtTime(1.6, AC.currentTime + .8);   // el acorde completo crece al activarse
+      pant.innerHTML = '<div>' + B.esc(cfg.destino || 'Destino: exterior de la Torre · 30 m') + '</div>';
       B.espera(1.8, c).then(ok => {
         if (!ok) return;
         const al = el('div', 'alarma', B.esc(cfg.alarma || 'Coordenada temporal: activada')); pant.appendChild(al); p.classList.add('rojo');
         if (cfg.sfxAlarma) B.sfx(cfg.sfxAlarma, .7); else V().ui('mal');
         M().barraTexto(cfg.textoFin || 'Calibración perfecta.');
-        M().esperaSigue(c).then(ok2 => fin && fin(ok2));
+        M().esperaSigue(c).then(ok2 => { coroFuera(1.5); if (fin) fin(ok2); });
       });
     }
     return M().cartel(cfg.cartel, { botones: [bBase] }).then(() => new Promise(res => { fin = res; c.alMorir.push(() => res(false)); }));
@@ -205,34 +250,83 @@
       return api;
     });
     let res0 = null;
+    /* reto de ARRASTRAR (Iago, 2-nov): las tres flautas, desordenadas y dibujadas al mismo tamaño (que decida el oído);
+       al pasar o tocar cada una suena; se arrastran a tres huecos (de grave a agudo, izquierda → derecha) y se comprueba.
+       Pointer events (ratón y táctil), Chrome 94. ↶ devuelve la última colocada; ⟲ empieza de nuevo. */
     function reto() {
       if (p.classList.contains('en-reto')) return;
       p.classList.add('en-reto');
       M().barraTexto(cfg.reto);
       const caja = el('div', 'fl-reto'); p.appendChild(caja);
       const orden = [0, 1, 2].sort(() => Math.random() - .5); if (orden.join() === '0,1,2') orden.reverse();
-      const fichas = el('div', 'fichas'), huecos = el('div', 'huecos'); caja.appendChild(fichas); caja.appendChild(huecos);
-      const pos = [];
-      ['A', 'B', 'C'].forEach((L, j) => {
-        const fi = orden[j], f = F[fi], card = el('div', 'ficha');
-        card.appendChild(btn('🔊 ' + L, '', () => { const t0 = B.ac().currentTime + .05; let t = 0; digs.forEach((k, q) => { V().nota('flauta', f.base + SUBE[k], t0 + t * E8(), ritmo[q] * E8() * .95, .8); t += ritmo[q]; }); }, 'Escuchar la flauta ' + L));
-        card.appendChild(btn('Poner', 'poner', b => { if (pos.indexOf(fi) >= 0 || pos.length >= 3) return; pos.push(fi); b.disabled = true; card.classList.add('usada'); pintaH(); }, 'Poner la flauta ' + L + ' en el siguiente hueco'));
-        card.dataset.l = L; card.dataset.f = fi; fichas.appendChild(card);
+      B._flOrden = orden;   // (solo para las pruebas automáticas)
+      const origen = el('div', 'fl-origen'), huecos = el('div', 'huecos'); caja.appendChild(origen); caja.appendChild(huecos);
+      const hs = ['Más grave', '', 'Más aguda'].map(t => { const h = el('div', 'hueco'); h.appendChild(el('small', '', t || '·')); huecos.appendChild(h); return h; });
+      const sitio = [], colocadas = [];   // sitio[j] = hueco (k) o null; colocadas = pila para deshacer
+      let hecho = false, sonandoHasta = 0;
+      const suenaF = fi => { const ahora = B.ac().currentTime; if (ahora < sonandoHasta) return; const f = F[fi], t0 = ahora + .03; let t = 0;
+        digs.forEach((k, q) => { V().nota('flauta', f.base + SUBE[k], t0 + t * E8(), ritmo[q] * E8() * .95, .8); t += ritmo[q]; }); sonandoHasta = t0 + t * E8(); };
+      const cartas = ['A', 'B', 'C'].map((L, j) => {
+        const fi = orden[j], f = F[fi], card = el('div', 'fl-carta');
+        const base = el('div', 'fl-base'); base.appendChild(el('b', 'fl-letra', L)); origen.appendChild(base);
+        card.appendChild(img(f.img, 'fl-cimg', 'Flauta ' + L)); card.appendChild(el('b', 'fl-letra', L));
+        card.setAttribute('role', 'button'); card.setAttribute('aria-label', 'Flauta ' + L + ': arrástrala a su hueco'); card.tabIndex = 0;
+        base.appendChild(card); sitio[j] = null;
+        card.addEventListener('pointerenter', ev => { if (ev.pointerType === 'mouse' && !arr) suenaF(fi); });
+        let arr = null;
+        card.addEventListener('pointerdown', ev => {
+          if (hecho) return; ev.preventDefault(); ev.stopPropagation();
+          suenaF(fi);
+          const k = B.$('#escena').getBoundingClientRect().width / 1920;
+          arr = { x: ev.clientX, y: ev.clientY, k: k, id: ev.pointerId };
+          try { card.setPointerCapture(ev.pointerId); } catch (e) { }
+          card.classList.add('arrastra');
+        });
+        card.addEventListener('pointermove', ev => { if (!arr || ev.pointerId !== arr.id) return; card.style.transform = 'translate(' + ((ev.clientX - arr.x) / arr.k) + 'px,' + ((ev.clientY - arr.y) / arr.k) + 'px) scale(1.04)'; });
+        const suelta = ev => {
+          if (!arr) return; const a = arr; arr = null;
+          try { card.releasePointerCapture(a.id); } catch (e) { }
+          card.classList.remove('arrastra');
+          const x = ev.clientX, y = ev.clientY;
+          const hk = hs.findIndex(h => { const r = h.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; });
+          if (hk >= 0 && (sitio.indexOf(hk) < 0 || sitio[j] === hk)) { pon(j, hk); B.sfx('sfx/sfx_anillo_encaja.mp3', .8); }
+          else if (Math.abs(x - a.x) + Math.abs(y - a.y) > 12) { vuelve(j); V().ui('mal'); }
+          else card.style.transform = '';
+        };
+        card.addEventListener('pointerup', suelta); card.addEventListener('pointercancel', suelta);
+        return { card: card, base: base, fi: fi, L: L };
       });
-      const hs = ['Más grave', '', 'Más aguda'].map((t, k) => { const h = el('div', 'hueco'); h.appendChild(el('small', '', t || '·')); h.appendChild(el('b', '', '?')); huecos.appendChild(h); return h; });
-      function pintaH() {
-        hs.forEach((h, k) => { const fi = pos[k]; B.$('b', h).textContent = fi == null ? '?' : B.$('.ficha[data-f="' + fi + '"]', fichas).dataset.l; h.classList.toggle('lleno', fi != null); });
-        if (pos.length === 3) comprueba();
+      function pon(j, hk) {
+        const ct = cartas[j]; ct.card.style.transform = '';
+        const prev = sitio[j]; sitio[j] = hk; hs[hk].appendChild(ct.card); hs[hk].classList.add('lleno');
+        if (prev != null && prev !== hk) hs[prev].classList.remove('lleno');
+        const i = colocadas.indexOf(j); if (i >= 0) colocadas.splice(i, 1); colocadas.push(j);
+        pinta();
       }
+      function vuelve(j) {
+        const ct = cartas[j]; ct.card.style.transform = '';
+        if (sitio[j] != null) hs[sitio[j]].classList.remove('lleno');
+        sitio[j] = null; ct.base.appendChild(ct.card);
+        const i = colocadas.indexOf(j); if (i >= 0) colocadas.splice(i, 1);
+        pinta();
+      }
+      const bDes = btn('↶', 'cuad', () => { if (hecho || !colocadas.length) return; vuelve(colocadas[colocadas.length - 1]); }, 'Deshacer: devuelve la última flauta');
+      const bOtra = btn('⟲', 'cuad', () => { if (hecho) return; cartas.forEach((x, j) => vuelve(j)); }, 'Empezar de nuevo');
+      const bComp = btn('Comprobar', '', () => comprueba());
+      const fila = B.$('#barra .bb'), sig = B.$('#bInterSig');
+      [bDes, bOtra, bComp].forEach(b => fila.insertBefore(b, sig));
+      function pinta() { const n = sitio.filter(x => x != null).length; bComp.disabled = hecho || n < 3; bDes.disabled = hecho || !colocadas.length; bOtra.disabled = hecho || !n; }
+      pinta();
       function comprueba() {
-        const bien = pos.join() === '0,1,2';
-        if (bien) {
-          V().ui('ok'); caja.classList.add('bien');
-          hs.forEach((h, k) => { B.$('b', h).textContent = F[k].nombre; });
+        if (hecho || sitio.filter(x => x != null).length < 3) return;
+        const mal = cartas.map((ct, j) => j).filter(j => sitio[j] !== cartas[j].fi);   // hueco k = flauta k (0 grande = más grave)
+        if (!mal.length) {
+          hecho = true; V().ui('ok'); caja.classList.add('bien'); pinta();
+          hs.forEach((h, k) => h.appendChild(el('span', 'fl-nombre', F[k].nombre)));
           M().barraTexto(cfg.bien); M().esperaSigue(c).then(ok => res0 && res0(ok));
         } else {
           V().ui('mal'); caja.classList.add('mal'); M().barraTexto(cfg.mal);
-          setTimeout(() => { caja.classList.remove('mal'); pos.length = 0; B.$$('.ficha', fichas).forEach(x => { x.classList.remove('usada'); B.$('.poner', x).disabled = false; }); pintaH(); }, 1400);
+          setTimeout(() => { caja.classList.remove('mal'); mal.forEach(vuelve); }, 900);
         }
       }
     }
