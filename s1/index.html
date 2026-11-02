@@ -7,8 +7,7 @@
 <link rel="icon" href="img/t1/icono.webp" type="image/webp">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Transporte 1 · El mismo dibujo, a otra altura</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="css/tr.css?v=2">
+<link rel="stylesheet" href="css/tr.css?v=3">
 <script>window.MOD_VOLVER = '../prueba.html'; window.MOD_BASE = '';</script>
 </head>
 <body>
@@ -29,23 +28,28 @@
       <div class="fila"></div>
     </div>
     <div id="inicio" role="button" tabindex="0" aria-label="Pulsa para empezar la sesión">
-      <span class="sup" id="iSup"></span><h1 id="iTit">Transporte 1</h1><span class="sub" id="iSub"></span>
-      <span class="start">▶ Pulsa para empezar</span><span class="estado" id="iEstado">Cargando…</span><span class="pista">clic o cualquier tecla</span>
+      <div class="rueda">
+        <svg viewBox="0 0 560 560" aria-hidden="true"><circle cx="280" cy="280" r="270" fill="none" stroke="#63e6ff" stroke-width="2" opacity=".35"/><circle cx="280" cy="280" r="250" fill="none" stroke="#63e6ff" stroke-width="5" stroke-dasharray="4 14" opacity=".7"/><circle cx="280" cy="280" r="226" fill="none" stroke="#ffb547" stroke-width="2" opacity=".5" stroke-dasharray="380 1040" transform="rotate(-90 280 280)"/></svg>
+        <span class="sup" id="iSup"></span><span class="hz">220 Hz</span><h1 id="iTit">Transporte 1</h1><span class="sub" id="iSub"></span>
+      </div>
+      <span class="start">Pulsa para empezar</span>
+      <div class="sigue"><button type="button" class="prim" id="bSigue">▶ Seguir donde lo dejaste</button><button type="button" id="bDesde0">↺ Empezar desde el principio</button></div>
+      <span class="estado" id="iEstado">Cargando…</span><span class="pista">clic o cualquier tecla</span>
     </div>
   </div>
 </div>
 <script src="data/recursos.js"></script>
-<script src="js/nucleo.js?v=2"></script>
+<script src="js/nucleo.js?v=3"></script>
 <script src="js/sonido.js?v=2"></script>
 <script src="js/vexflow.js"></script>
 <script src="js/viento.js?v=2"></script>
-<script src="js/pauta.js?v=2"></script>
+<script src="js/pauta.js?v=3"></script>
 <script src="js/vida.js?v=2"></script>
 <script src="js/tunel.js?v=2"></script>
-<script src="js/capas.js?v=2"></script>
-<script src="js/motor.js?v=2"></script>
-<script src="js/inter.js?v=2"></script>
-<script src="data/t1.js?v=2"></script>
+<script src="js/capas.js?v=3"></script>
+<script src="js/motor.js?v=3"></script>
+<script src="js/inter.js?v=3"></script>
+<script src="data/t1.js?v=3"></script>
 <script>document.getElementById('escena').classList.add('en-marcha');</script>
 </body>
 </html>
