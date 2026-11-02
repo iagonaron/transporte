@@ -82,7 +82,8 @@
       }));
     };
     if (q && !q.falta) decod(B.img[q.src] || q.src).then(pinta); else pinta();
-    if (B.capas) { B.capas.oculta = (q && !q.falta && q.ocultaPj) || []; B.capas.aplicaOculta(); }
+    /* la pose del personaje que la lámina nueva ya lleva se va con el MISMO fundido que el fondo (Iago, 2-nov: Noa no desaparece de golpe) */
+    if (B.capas) { B.capas.oculta = (q && !q.falta && q.ocultaPj) || []; B.capas.aplicaOculta(M._congelado ? 0 : fd); }
     return q;
   };
   /* cambio de lámina DENTRO del plano (img / imgs de la línea, imgs del plano): instantáneo, como las poses.
@@ -100,16 +101,25 @@
   /* vídeo de fondo en bucle, mudo (p. ej. el dron sobre Coruña): si no está, se queda la lámina */
   let vfondo = null;
   let vfondoSrc = null;
+  let esperaVF = null;   // se resuelve cuando el vídeo de fondo nuevo ya se está viendo (el túnel congelado no se retira antes)
   function fondoVideo(src) {
     if (src && src === vfondoSrc && vfondo) return;
+    esperaVF = null;
     vfondoSrc = src && B.hayVideo(src) ? src : null;
     if (vfondo) { const v = vfondo; vfondo = null; const quita = () => { try { v.pause(); } catch (e) { } v.remove(); }; if (pendiente) alPintar.push(quita); else quita(); }
     if (!src || !B.hayVideo(src)) return;
+    let sueltaVF = null; esperaVF = new Promise(r => { sueltaVF = r; setTimeout(r, 1800); });
     B.precargaVideo(src).then(url => {
-      if (!url || vfondoSrc !== src) return;
+      if (!url || vfondoSrc !== src) { sueltaVF(); return; }
       const v = vfondo = B.el('video', 'vfondo'); v.muted = true; v.loop = true; v.playsInline = true; v.style.opacity = '0'; v.src = url;
-      v.addEventListener('playing', () => { v.style.opacity = ''; }, { once: true });   // hasta que pinta su primer fotograma, se ve la lámina
-      $('fondo').appendChild(v); const p = v.play(); if (p && p.catch) p.catch(() => { });
+      v.addEventListener('playing', () => { v.style.opacity = ''; sueltaVF(); }, { once: true });   // hasta que pinta su primer fotograma, se ve la lámina
+      /* RELEVO: si el túnel del plano anterior (p9a) iba en este mismo vídeo, éste arranca en la misma fase en vez de reiniciarse */
+      const F = B.tunelFase;
+      if (F && F.v && F.v.isConnected && F.dur && performance.now() - F.ts < 4000) {
+        v.preload = 'auto';
+        v.addEventListener('loadedmetadata', () => { try { v.currentTime = ((F.v.currentTime || F.t) + .12) % (v.duration || F.dur); } catch (e) { } const pp = v.play(); if (pp && pp.catch) pp.catch(() => { }); }, { once: true });
+        $('fondo').appendChild(v); B.tunelFase = null;
+      } else { $('fondo').appendChild(v); const p = v.play(); if (p && p.catch) p.catch(() => { }); }
       B.vida.quita();   // la «vida» se pensó para la lámina: con el vídeo del dron sobra
     });
   }
@@ -279,7 +289,8 @@
     alPintar.push(fd => {
       M._congelado = false;
       const quita = () => { if (M._congelado) return; capa.classList.remove('on'); capa.style.transition = ''; capa.style.opacity = ''; B.$$('video', capa).forEach(v => { try { v.pause(); } catch (e) { } }); capa.innerHTML = ''; };
-      if (fd) { capa.style.transition = 'opacity ' + fd + 's ease'; capa.style.opacity = '0'; setTimeout(quita, fd * 1000 + 50); } else quita();
+      const va = () => { if (fd) { capa.style.transition = 'opacity ' + fd + 's ease'; capa.style.opacity = '0'; setTimeout(quita, fd * 1000 + 50); } else quita(); };
+      if (esperaVF) esperaVF.then(va); else va();   // si el plano siguiente trae vídeo de fondo, el túnel se retira (con fundido) cuando éste ya se ve: nunca pasa por negro
     });
   }
   /* fundido a blanco (Iago, 2-nov: antes del Paleolítico): sube muy despacio al final del plano y se va al empezar el siguiente */
@@ -292,7 +303,7 @@
     alPintar.length = 0; M._congelado = false; pendiente = false;   // el vídeo nuevo sustituye al congelado
     capa.style.transition = ''; capa.style.opacity = '';
     capa.classList.add('on'); caja(false);
-    B.capas.limpia(); B.vida.quita();
+    B.capas.limpia(p.fundeEntra); B.vida.quita();
     if (p.tunel && (!p.video || !B.hayVideo(p.video))) {   // transición propia mientras no llegue el vídeo de Runway
       B.arr(p.sfx).forEach(x => B.espera(x.t || 0, c).then(ok => ok && B.sfx(x.src, x.vol)));
       const dT = RAPIDO ? .5 : (p.dur || 5);
@@ -320,7 +331,12 @@
       carga.remove();
       if (!url) { quitaViejos(); capa.classList.remove('on'); return true; }
       const v = B.el('video'); v.playsInline = true; v.src = url; v.volume = p.vol == null ? 1 : p.vol; v.style.opacity = '0'; capa.appendChild(v);
-      v.addEventListener('playing', () => { v.style.opacity = ''; requestAnimationFrame(quitaViejos); programaBlanco(p, c, RAPIDO ? .5 : (v.duration || p.dur || 5));
+      v.addEventListener('playing', () => {
+        if (vfondo && p.fundeEntra) {   // viene de un vídeo de fondo (el túnel): fundido cruzado, y el de fondo se retira cuando ya no se ve
+          v.style.transition = 'opacity ' + p.fundeEntra + 's ease'; v.getBoundingClientRect(); v.style.opacity = '';
+          setTimeout(() => { v.style.transition = ''; fondoVideo(null); }, p.fundeEntra * 1000 + 120);
+        } else v.style.opacity = '';
+        requestAnimationFrame(quitaViejos); programaBlanco(p, c, RAPIDO ? .5 : (v.duration || p.dur || 5));
         /* los vídeos de Runway no traen sonido: los efectos y sucesos del plano van a su tiempo desde que empieza a verse */
         B.arr(p.sfx).forEach(x => B.espera(x.t || 0, c).then(ok => ok && B.sfx(x.src, x.vol)));
         B.arr(p.al).forEach(x => B.espera(x.t || 0, c).then(ok => ok && x.fn(c))); }, { once: true });   // hasta su primer fotograma, se ve lo de antes
@@ -339,7 +355,7 @@
     const sig = () => { if (c.muerto) return Promise.resolve(false); if (i >= ls.length) return Promise.resolve(true); const l = ls[i++]; return M.di(l, c).then(ok => ok ? sig() : false); };
     return sig();
   }
-  const TUNEL = 'vid/tunel.mp4';
+  const TUNEL = B.hayVideo('vid/tunel_bucle.mp4') ? 'vid/tunel_bucle.mp4' : 'vid/tunel.mp4';   // el bucle perfecto (fundido cruzado interno de 1 s) si está
   /* DESTELLO dentro del túnel (Iago, 2-nov: viaje de vuelta): ~3 s de un vídeo (o lámina) envuelto en la nebulosa del túnel,
      sin fecha ni rótulo; con su sonido (sfx) y sus sucesos (fn). d = { t, dur, video, desde (s del vídeo), img, sfx, vol, fn } */
   function destello(capa, d, c) {
@@ -352,10 +368,16 @@
     } else if (d.img) { const q = B.primero(d.img); if (q && !q.falta) { const im = B.el('img'); im.src = q.src; box.appendChild(im); } }
     box.appendChild(B.el('i', 'destello-neb'));
     capa.appendChild(box);
+    /* media frase como texto en pantalla (lejana, onírica) mientras suena el eco: fundido de entrada y de salida, abajo para no tapar caras */
+    let tx = null;
+    if (d.texto) {
+      tx = B.el('div', 'destello-txt'); tx.innerHTML = (d.quien ? '<small>' + B.esc(d.quien) + '</small>' : '') + '<span>' + B.esc(d.texto) + '</span>'; capa.appendChild(tx);
+      B.espera(RAPIDO ? .05 : .45, c).then(ok => ok && tx.isConnected && tx.classList.add('on'));
+    }
     requestAnimationFrame(() => requestAnimationFrame(() => box.classList.add('on')));
     if (d.sfx) B.sfx(d.sfx, d.vol == null ? 1 : d.vol);
     if (d.fn) d.fn(c);
-    const quita = () => { box.classList.remove('on'); setTimeout(() => { if (v) try { v.pause(); } catch (e) { } box.remove(); }, 900); };
+    const quita = () => { box.classList.remove('on'); if (tx) tx.classList.remove('on'); setTimeout(() => { if (v) try { v.pause(); } catch (e) { } box.remove(); if (tx) tx.remove(); }, 1100); };
     B.espera(Math.max(.2, dur - .7), c).then(quita);
   }
   /* TELETRANSPORTE reutilizable (Iago, 2-nov): el túnel (vid/tunel.mp4 de Runway; si no está, el túnel dibujado) con su sonido

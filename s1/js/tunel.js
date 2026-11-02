@@ -18,7 +18,7 @@
     let vid = null, fl = null;
     if (o.video) {
       cv.style.display = 'none';
-      vid = B.el('video', 'tunel-vid'); vid.muted = true; vid.loop = true; vid.playsInline = true; vid.src = o.video; capa.appendChild(vid);
+      vid = B.el('video', 'tunel-vid'); vid.muted = true; vid.loop = true; vid.playsInline = true; vid.src = o.video; capa.appendChild(vid);   // el vídeo es un bucle perfecto (vid/tunel_bucle.mp4, fundido cruzado interno)
       const pp = vid.play(); if (pp && pp.catch) pp.catch(() => { });
       fl = B.el('i', 'tunel-flash'); capa.appendChild(fl);
     }
@@ -37,9 +37,14 @@
         if (vid) {
           const e = k < .12 ? 0 : k > .86 ? 1 : (1 - Math.cos(Math.PI * (k - .12) / .74)) / 2;
           bAnio.textContent = fmt(deU(u(de) + (u(a) - u(de)) * e));
-          const ent = Math.min(1, t / .6), sal = k > .88 ? (k - .88) / .12 : 0;
+          const ent = Math.min(1, t / .6), sal = (k > .88 && !o.sigue) ? (k - .88) / .12 : 0;   // o.sigue: el túnel continúa en el plano siguiente (sin flash blanco al salir)
           fl.style.opacity = Math.max(.75 * (1 - ent), .85 * sal).toFixed(3);
-          if (k >= 1) { vivo = false; try { vid.pause(); } catch (x) { } B.espera(.15, c).then(ok => res(ok)); return; }
+          if (k >= 1) {
+            vivo = false;
+            if (o.sigue) B.tunelFase = { v: vid, t: vid.currentTime, ts: performance.now(), dur: vid.duration || 0 };   // el vídeo SIGUE sonando/rodando: el plano siguiente lo recoge en la misma fase
+            else try { vid.pause(); } catch (x) { }
+            B.espera(o.sigue ? 0 : .15, c).then(ok => res(ok)); return;
+          }
           return requestAnimationFrame(dibuja);
         }
         const vel = Math.sin(Math.PI * Math.min(1, k * 1.08)) * .9 + .25;   // acelera y frena

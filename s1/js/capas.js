@@ -40,7 +40,16 @@
   /* pjPedido: el personaje que pide la frase aunque ahora no se vea (porque la lámina ya lo lleva). Si la frase cambia a
      una lámina sin él (img / imgs de la línea), vuelve a salir con la última pose pedida. */
   let pjPedido = null;
-  const quitaVisual = () => { B.$$('.tr-pj', capa).forEach(e => e.remove()); pjEl = null; pjAct = null; capa.classList.remove('pj-izq', 'pj-der'); };
+  /* quitaVisual(fd, deja): con fd > 0 la pose se va con un FUNDIDO de fd s (la misma duración que el fondo que cambia); sin fd, de golpe.
+     deja: no tocar las poses que ya se están yendo con fundido (clase 'sale') */
+  const quitaVisual = (fd, deja) => {
+    B.$$('.tr-pj', capa).forEach(e => {
+      if (e.classList.contains('sale')) { if (!deja) e.remove(); return; }
+      if (fd > 0) { e.classList.add('sale'); e.style.transition = 'opacity ' + fd + 's ease'; e.getBoundingClientRect(); e.style.opacity = '0'; setTimeout(() => e.remove(), fd * 1000 + 80); }
+      else e.remove();
+    });
+    pjEl = null; pjAct = null; capa.classList.remove('pj-izq', 'pj-der');
+  };
   function ponPj(o) {
     asegura();
     if (o) {
@@ -48,7 +57,7 @@
       const n = Object.assign({}, pjPedido && pjPedido.q === q0 ? pjPedido : {}); Object.keys(o).forEach(k => { if (o[k] !== undefined) n[k] = o[k]; }); n.q = q0;
       pjPedido = q0 ? n : null; o = pjPedido ? Object.assign({}, pjPedido) : null;
     } else pjPedido = null;
-    if (o && C.oculta.indexOf(o.q) >= 0) { quitaVisual(); return; }
+    if (o && C.oculta.indexOf(o.q) >= 0) { quitaVisual(0, true); return; }
     if (!o) { quitaVisual(); return; }
     const q = o.q || (pjAct && pjAct.q); if (!q) return;
     const p = PJ(q) || {};
@@ -74,9 +83,9 @@
   }
   C.pj = ponPj;
   /* tras cambiar de lámina: esconde al personaje si la lámina ya lo lleva, o lo devuelve si no */
-  C.aplicaOculta = function () {
+  C.aplicaOculta = function (fd) {
     asegura();
-    if (pjAct && C.oculta.indexOf(pjAct.q) >= 0) { quitaVisual(); return; }
+    if (pjAct && C.oculta.indexOf(pjAct.q) >= 0) { quitaVisual(fd); return; }   // fd: si el fondo cambia con fundido, la pose se funde con él
     if (!pjAct && pjPedido && C.oculta.indexOf(pjPedido.q) < 0) ponPj(Object.assign({}, pjPedido));
   };
   C.pjActual = () => pjAct;
@@ -136,5 +145,5 @@
     Object.keys(B.PJ || {}).forEach(q => B.arr(B.PJ[q].poses).forEach(p => r.push(RUTA(q, p))));
     return r;
   };
-  C.limpia = function () { quitaClaves(); C.aviso(null); ponPj(null); };
+  C.limpia = function (fd) { quitaClaves(); C.aviso(null); if (fd > 0) { pjPedido = null; quitaVisual(fd); } else ponPj(null); };   // fd: la pose sale con fundido
 })(window.TR);

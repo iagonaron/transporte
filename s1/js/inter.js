@@ -123,7 +123,7 @@
       coro.gain.cancelScheduledValues(t); coro.gain.setValueAtTime(coro.gain.value, t); coro.gain.linearRampToValueAtTime(0, t + fd);
       Object.keys(voces).forEach(f => voces[f].o.stop(t + fd + .05)); setTimeout(() => { try { coro.disconnect(); } catch (e) { } }, (fd + .2) * 1000);
     }
-    c.alMorir.push(() => coroFuera(.4));
+    c.alMorir.push(() => coroFuera(.2));
     vozOn(base);
     const p = panel('i-calibrar');
     const izq = el('div', 'cal-maq'), der = el('div', 'cal-filas'); p.appendChild(izq); p.appendChild(der);
@@ -232,7 +232,7 @@
         const al = el('div', 'alarma', B.esc(cfg.alarma || 'Coordenada temporal: activada')); pant.appendChild(al); p.classList.add('rojo');
         if (cfg.sfxAlarma) B.sfx(cfg.sfxAlarma, .7); else V().ui('mal');
         M().barraTexto(cfg.textoFin || 'Calibración perfecta.');
-        M().esperaSigue(c).then(ok2 => { coroFuera(1.5); if (fin) fin(ok2); });
+        M().esperaSigue(c).then(ok2 => { coroFuera(.2); if (fin) fin(ok2); });   // (Iago 23:10) al pulsar Continuar, el acorde se corta ya: Amaro habla sin pitido
       });
     }
     return M().cartel(cfg.cartel, { botones: [bBase] }).then(() => new Promise(res => { fin = res; c.alMorir.push(() => res(false)); }));
@@ -417,11 +417,9 @@
       aP.pon(kP);
       return B.espera(dur + .3, c).then(() => { ocupado = false; if (cfg.fondo) M().cambia(cfg.fondo); });
     }
-    const bMisma = btn('', 'j-misma pulsa', () => { if (ocupado || p.classList.contains('hecho')) return; bMisma.classList.remove('pulsa'); probada = true; ops.classList.add('probada'); juntos(digs[0]); }, 'Que los dos tapen los mismos agujeros');
-    bMisma.innerHTML = '<b>▶ Con la misma digitación</b><small>los dos tapan los mismos agujeros</small>';
-    ops.appendChild(bMisma);
+    ops.classList.add('probada');   /* (Iago 22:51) sin franja aparte: «Misma digitación» es la opción de todos tapados */
     const prueba = el('div', 'j-prueba'); prueba.appendChild(el('span', 'j-tit', cfg.titOpciones || 'Prueba la pequeña empezando con…')); ops.appendChild(prueba);
-    const NOM = { 5: 'Todos tapados', 4: 'Destapando 1', 3: 'Destapando 2', 2: 'Destapando 3', 1: 'Destapando 4' };
+    const NOM = { 5: 'Misma digitación', 4: 'Destapando 1', 3: 'Destapando 2', 2: 'Destapando 3', 1: 'Destapando 4' };
     (cfg.opciones || [5, 4, 3, 2, 1]).forEach(k => {
       const o = btn('', 'j-op', b => {
         if (ocupado || p.classList.contains('hecho')) return;
@@ -495,7 +493,7 @@
         hecha = true; V().ui('ok'); B.$$('.sel', teclado).forEach(x => x.classList.add('bien'));
         M().barraTexto(q.bien);
         const t = B.ac().currentTime + .1; V().nota('oboe', 69, t, 1.6, .6); V().nota(q.timbre, T.midi(elegida) - q.semis, t, 1.6, .7);
-        B.espera(2.2, c).then(ok => { if (!ok) return; qi++; if (qi < Q.length) pregunta(); else { M().barraTexto(cfg.fin); if (cfg.fondo) M().fondo(cfg.fondo, {}); M().esperaSigue(c).then(ok2 => res0 && res0(ok2)); } });
+        B.espera(2.2, c).then(ok => { if (!ok) return; qi++; if (qi < Q.length) { pregunta(); V().nota('oboe', 69, B.ac().currentTime + .3, 2, .9); } else {   /* (Iago 22:56) el oboe vuelve a dar el La con cada instrumento */ M().barraTexto(cfg.fin); if (cfg.fondo) M().fondo(cfg.fondo, {}); M().esperaSigue(c).then(ok2 => res0 && res0(ok2)); } });
       } else { V().ui('mal'); M().barraTexto(q.mal); }
     }
     return M().cartel(cfg.cartel, { botones: [bLa, bComp] }).then(() => { pregunta(); V().nota('oboe', 69, B.ac().currentTime + .1, 2, .9); return new Promise(res => { res0 = res; c.alMorir.push(() => res(false)); }); });

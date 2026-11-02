@@ -53,7 +53,7 @@
     const l = MUE[tipo]; if (!l) return false;
     const cerca = cand => { let m = null, dd = 99; cand.forEach(x => { const d = Math.abs(x[1] - midi); if (B.buf[x[0]] && d < dd) { dd = d; m = x; } }); return [m, dd]; };
     let [mejor, d] = cerca(l.filter(x => !x[3]));   // primero las sostenidas
-    if (!mejor || (dur <= .45 || d > 5)) { const o = cerca(l); if (o[0] && (!mejor || o[1] < d)) mejor = o[0]; }   // notas cortas (o lejos): también las staccato
+    if (!mejor || dur <= .45) { const o = cerca(l); if (o[0] && (!mejor || o[1] < d)) mejor = o[0]; }   // (Iago 22:55) las staccato solo para notas cortas: las largas, siempre con una sostenida
     if (!mejor) return false;
     const C = B.ac(), s = C.createBufferSource(), g = C.createGain(), e = ENV[tipo] || [.03, .2];
     s.buffer = B.buf[mejor[0]]; s.playbackRate.value = Math.pow(2, (midi - mejor[1]) / 12 - (mejor[2] || 0) / 1200);   // con su corrección de afinación
