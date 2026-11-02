@@ -82,14 +82,18 @@
   C.pjActual = () => pjAct;
 
   /* ── palabras clave ── */
-  function ponClaves(it, c) {
+  function ponClaves(it, c, dur) {
     asegura();
     quitaClaves(true);
-    const box = B.el('div', 'tr-claves ' + (it.estilo || 'fila')); capa.appendChild(box); clavesEl = box;
+    /* (Iago, 2-nov) cada palabra clave dura ~2,5 s y se va con un fundido, para no tapar lo que pasa en la lámina;
+       pos: 'arriba' | 'izq' | 'der' (por defecto, centro alto) para no tapar caras ni pantallas */
+    const box = B.el('div', 'tr-claves ' + (it.estilo || 'fila') + (it.pos ? ' pos-' + it.pos : '')); capa.appendChild(box); clavesEl = box;
+    const dura = it.dura || 2.5;
     B.arr(it.claves).forEach((x, i) => {
       const ch = B.el('span', 'tr-clave'); ch.textContent = x; box.appendChild(ch);
-      const t = it.ts ? it.ts[i] : (it.t || 0) + i * (it.paso || .7);
+      const t = it.ens && dur ? it.ens[i] * dur : it.ts ? it.ts[i] : (it.t || 0) + i * (it.paso || .7);   // ens: fracciones de la frase (si aún no hay voz)
       B.espera(t, c).then(ok => { if (ok && box.isConnected) ch.classList.add('on'); });
+      B.espera(t + dura, c).then(ok => { if (ok && box.isConnected) ch.classList.remove('on'); });
     });
   }
   function quitaClaves() { if (clavesEl) { clavesEl.remove(); clavesEl = null; } }
@@ -125,7 +129,7 @@
       if (q && t > .4) B.espera(t - .4, c).then(ok => ok && decod(RUTA(q, o.pose)));   // descodificada 0,4 s antes: entra a su tiempo
       B.espera(t, c).then(ok => ok && ponPj(o));
     });
-    if (l.claves) ponClaves(l.claves, c);
+    if (l.claves) ponClaves(l.claves, c, dur);
   };
   C.recursos = function (sesion) {
     const r = [];

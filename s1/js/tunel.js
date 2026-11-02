@@ -14,8 +14,17 @@
     const dur = o.dur || 5, de = o.de == null ? 2100 : o.de, a = o.a == null ? -40000 : o.a;
     const col = o.color || [88, 184, 255];
     const cv = B.el('canvas', 'tunel'); cv.width = W; cv.height = H; capa.appendChild(cv);
+    /* con o.video (vid/tunel.mp4 de Runway): el vídeo de fondo en vez del dibujo, y un destello blanco suave al entrar y al salir */
+    let vid = null, fl = null;
+    if (o.video) {
+      cv.style.display = 'none';
+      vid = B.el('video', 'tunel-vid'); vid.muted = true; vid.loop = true; vid.playsInline = true; vid.src = o.video; capa.appendChild(vid);
+      const pp = vid.play(); if (pp && pp.catch) pp.catch(() => { });
+      fl = B.el('i', 'tunel-flash'); capa.appendChild(fl);
+    }
     const cont = B.el('div', 'tunel-anio'); cont.innerHTML = '<small>año</small><b></b>'; capa.appendChild(cont);
     const bAnio = B.$('b', cont);
+    if (o.contador === false) cont.style.display = 'none';
     const cx = cv.getContext('2d');
     const est = []; for (let i = 0; i < 140; i++) est.push({ an: Math.random() * 6.283, z: Math.random(), v: .4 + Math.random() * .8, h: Math.random() });
     const t0 = B.ahora();
@@ -25,6 +34,14 @@
       (function dibuja() {
         if (!vivo) return;
         const t = B.ahora() - t0, k = Math.min(1, t / dur);
+        if (vid) {
+          const e = k < .12 ? 0 : k > .86 ? 1 : (1 - Math.cos(Math.PI * (k - .12) / .74)) / 2;
+          bAnio.textContent = fmt(deU(u(de) + (u(a) - u(de)) * e));
+          const ent = Math.min(1, t / .6), sal = k > .88 ? (k - .88) / .12 : 0;
+          fl.style.opacity = Math.max(.75 * (1 - ent), .85 * sal).toFixed(3);
+          if (k >= 1) { vivo = false; try { vid.pause(); } catch (x) { } B.espera(.15, c).then(ok => res(ok)); return; }
+          return requestAnimationFrame(dibuja);
+        }
         const vel = Math.sin(Math.PI * Math.min(1, k * 1.08)) * .9 + .25;   // acelera y frena
         cx.fillStyle = 'rgba(2,4,12,.35)'; cx.fillRect(0, 0, W, H);
         const mx = W / 2 + Math.sin(t * 1.3) * 18, my = H / 2 + Math.cos(t * 1.1) * 10;

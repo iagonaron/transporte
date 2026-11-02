@@ -105,8 +105,7 @@
 
   /* ════════ b · CALIBRAR EL TRANSPORTADOR ════════ */
   I.calibrar = function (cfg, c) {
-    const base = cfg.base || 220, mult = cfg.multiplos || [2, 4, 8, 16], ini = cfg.inicio || [583, 1130, 2210, 2905];
-    const maxHz = base * (Math.max.apply(null, mult) + 1);
+    const base = cfg.base || 220, mult = cfg.multiplos || [2, 4, 8, 16];
     /* el acorde de octavas: la base suena desde que aparece el interactivo; cada octava colocada se queda sonando.
        Ganancia repartida y menor cuanto más aguda (1760/3520 no chillan), con fundido al entrar y al salir. */
     const AC = B.ac(), coro = AC.createGain(); coro.gain.setValueAtTime(0, AC.currentTime); coro.gain.linearRampToValueAtTime(1, AC.currentTime + 1.6); coro.connect(B.bus.inst);
@@ -138,28 +137,92 @@
     const pant = el('div', 'cal-pant'); pant.innerHTML = '<div>Frecuencia base · <b>' + base + ' Hz</b></div>'; izq.appendChild(pant);
     const bBase = btn('🔊 Base ' + base + ' Hz', '', () => { const o = V().seno(base, .12); setTimeout(() => o.parar(.3), 1100); });
     let hechos = mult.map(() => false), activa = false;
+    /* DESLIZADOR PROPIO (Iago, 2-nov: «no me funciona bien»): pointer events con captura (ratón y táctil, Chrome 94), touch-action:none.
+       Rango acotado y lineal por deslizador (ver RANGOS). Arrastrar desde cualquier punto de la pista (clic en la pista = salta ahí), y el tirador sigue al dedo sin
+       saltos; con Mayúsculas el arrastre se vuelve lento (≈0,3 Hz por píxel).
+       Teclado ←↓/→↑ ±1 Hz (±10 con Mayús), rueda ±1 Hz (±10 con Mayús), botones − y +. Encaja al llegar a ±1 Hz (→ exacto, sfx_anillo_encaja) y se queda sonando. */
+    /* (Iago, 2-nov, cambia lo anterior) cada deslizador cubre SOLO un rango acotado alrededor de su octava, lineal, y empieza abajo
+       del todo (en el mínimo), sin sonar hasta que lo tocas; encaja a ±1 Hz (±2 en el de 3000–4000) */
+    const RANGOS = cfg.rangos || [[400, 500], [800, 1000], [1600, 1900], [3000, 4000]], TOL = cfg.tol || [1, 1, 1, 2];
+    const lect = el('div', 'cal-lect'); p.appendChild(lect);   // lectura grande mientras se mueve
+    let lectT = null;
     const filas = mult.map((m, i) => {
-      const f = el('div', 'cal-fila'), lab = el('b', 'mx', '×' + m), menos = btn('−', 'cuad', () => mueve(-1), 'Bajar 1 Hz'), mas = btn('+', 'cuad', () => mueve(1), 'Subir 1 Hz');
-      const sl = el('input'); sl.type = 'range'; sl.min = base; sl.max = maxHz; sl.step = 1; sl.value = ini[i];
+      const obj = base * m, LO = RANGOS[i][0], HI = RANGOS[i][1], tol = TOL[i];
+      const aPos = hz => B.clamp((hz - LO) / (HI - LO), 0, 1), aHz = v => Math.round(LO + B.clamp(v, 0, 1) * (HI - LO));
+      const f = el('div', 'cal-fila'), lab = el('b', 'mx', '×' + m), menos = btn('−', 'cuad', () => paso(-1), 'Bajar 1 Hz'), mas = btn('+', 'cuad', () => paso(1), 'Subir 1 Hz');
+      const pista = el('div', 'cal-pista'); pista.tabIndex = 0; pista.setAttribute('role', 'slider'); pista.setAttribute('aria-label', 'Frecuencia ×' + m);
+      pista.setAttribute('aria-valuemin', LO); pista.setAttribute('aria-valuemax', HI);
+      const ext = el('span', 'cal-ext'); ext.innerHTML = '<b>' + LO + '</b><b>' + HI + '</b>'; pista.appendChild(ext);
+      const rel = el('i', 'cal-rel'), tir = el('i', 'cal-tir'); pista.appendChild(rel); pista.appendChild(tir);
       const hz = el('span', 'hz'), luz = el('i', 'luz');
-      f.appendChild(lab); f.appendChild(menos); f.appendChild(sl); f.appendChild(mas); f.appendChild(hz); f.appendChild(luz); der.appendChild(f);
-      let osc = null, tCorta = null;
-      const volMov = () => .15 * Math.pow(440 / Math.max(440, +sl.value), .5);   // el que se mueve, por encima, pero sin chillar arriba
-      const suena = () => { if (activa) return; if (!osc) osc = V().seno(+sl.value, volMov()); else osc.frec(+sl.value); clearTimeout(tCorta); tCorta = setTimeout(() => { if (osc) { osc.parar(.25); osc = null; } }, 420); };
-      const pinta = () => { hz.textContent = sl.value + ' Hz'; const ok = +sl.value === base * m; f.classList.toggle('ok', ok); anillos[i].classList.toggle('on', ok);
-        if (ok && !hechos[i]) { hechos[i] = true; V().ui('anillo'); vozOn(base * m); } if (!ok && hechos[i]) { hechos[i] = false; vozOff(base * m); } revisa(); };
-      function mueve(d) { if (activa) return; sl.value = B.clamp(+sl.value + d, base, maxHz); suena(); pinta(); }
-      sl.addEventListener('input', () => { suena(); pinta(); });
-      sl.addEventListener('keydown', ev => ev.stopPropagation());
+      f.appendChild(lab); f.appendChild(menos); f.appendChild(pista); f.appendChild(mas); f.appendChild(hz); f.appendChild(luz); der.appendChild(f);
+      let val = LO, pos = 0, osc = null, tCorta = null, tocado = false;
+      const volMov = () => .15 * Math.pow(440 / Math.max(440, val), .5);
+      function suena(sigue) {
+        if (activa) return;
+        if (!tocado) return;
+        if (!osc) osc = V().seno(val, volMov()); else osc.frec(val);
+        clearTimeout(tCorta); if (!sigue) tCorta = setTimeout(() => { if (osc) { osc.parar(.25); osc = null; } }, 520);
+      }
+      function pinta() {
+        tir.style.left = (pos * 100) + '%'; rel.style.width = (pos * 100) + '%';
+        hz.textContent = val + ' Hz'; pista.setAttribute('aria-valuenow', val);
+        const ok = val === obj; f.classList.toggle('ok', ok); anillos[i].classList.toggle('on', ok);
+        if (ok && !hechos[i]) { hechos[i] = true; B.sfx('sfx/sfx_anillo_encaja.mp3', .9); vozOn(obj); }
+        if (!ok && hechos[i]) { hechos[i] = false; vozOff(obj); }
+        revisa();
+      }
+      function muestra() { lect.textContent = val + ' Hz'; lect.classList.add('on'); const r = pista.getBoundingClientRect(), e = p.getBoundingClientRect(), k = B.$('#escena').getBoundingClientRect().width / 1920;
+        lect.style.left = ((r.left - e.left) / k + pista.offsetWidth * pos) + 'px'; lect.style.top = ((r.top - e.top) / k - 66) + 'px';
+        clearTimeout(lectT); lectT = setTimeout(() => lect.classList.remove('on'), 900); }
+      function pon(nuevo, desdePos) {   // nuevo valor en Hz (entero); desdePos: la posición la manda el arrastre
+        if (activa) return;
+        tocado = true;
+        nuevo = B.clamp(Math.round(nuevo), LO, HI);
+        if (Math.abs(nuevo - obj) <= tol) nuevo = obj;   // encaja solo a ±1 Hz (±2 en el agudo)
+        val = nuevo; pos = desdePos != null && nuevo !== obj ? desdePos : aPos(val);
+        pinta(); muestra();
+      }
+      function paso(d) { pon(val + d); suena(); }
+      /* arrastre */
+      let arr = null;
+      pista.addEventListener('pointerdown', ev => {
+        if (activa || (ev.pointerType === 'mouse' && ev.button !== 0)) return;
+        ev.preventDefault(); ev.stopPropagation(); pista.focus();
+        const r = pista.getBoundingClientRect(), x = (ev.clientX - r.left) / r.width, tr = tir.getBoundingClientRect();
+        if (ev.clientX < tr.left - 6 || ev.clientX > tr.right + 6) { pos = B.clamp(x, 0, 1); pon(aHz(pos), pos); }   // clic en la pista: el tirador va ahí
+        arr = { id: ev.pointerId, x: ev.clientX, p: pos, w: r.width, l: r.left }; arr.off = pos - x;   // el tirador se queda bajo el dedo, sin saltos
+        try { pista.setPointerCapture(ev.pointerId); } catch (e) { }
+        f.classList.add('mueve'); suena(true);
+      });
+      pista.addEventListener('pointermove', ev => {
+        if (!arr || ev.pointerId !== arr.id) return;
+        ev.preventDefault();
+        const dx = ev.clientX - arr.x, xr = (ev.clientX - arr.l) / arr.w; arr.x = ev.clientX;
+        if (ev.shiftKey) { arr.p = B.clamp(arr.p + dx / arr.w * Math.min(1, .3 / ((HI - LO) / arr.w)), 0, 1); arr.off = arr.p - xr; }   // con Mayúsculas, ≈0,3 Hz por píxel
+        else arr.p = B.clamp(xr + arr.off, 0, 1);
+        pon(aHz(arr.p), arr.p); suena(true);
+      });
+      const suelta = ev => { if (!arr || (ev && ev.pointerId !== arr.id)) return; try { pista.releasePointerCapture(arr.id); } catch (e) { } arr = null; f.classList.remove('mueve'); pos = aPos(val); pinta(); suena(); };
+      pista.addEventListener('pointerup', suelta); pista.addEventListener('pointercancel', suelta); pista.addEventListener('lostpointercapture', () => suelta());
+      pista.addEventListener('keydown', ev => {
+        const k = ev.key, d = ev.shiftKey ? 10 : 1;
+        if (k === 'ArrowRight' || k === 'ArrowUp') { ev.preventDefault(); ev.stopPropagation(); paso(d); }
+        else if (k === 'ArrowLeft' || k === 'ArrowDown') { ev.preventDefault(); ev.stopPropagation(); paso(-d); }
+        else if (k === 'PageUp' || k === 'PageDown') { ev.preventDefault(); ev.stopPropagation(); paso(k === 'PageUp' ? 100 : -100); }
+        else ev.stopPropagation();
+      });
+      pista.addEventListener('wheel', ev => { if (activa) return; ev.preventDefault(); paso((ev.deltaY < 0 || ev.deltaX > 0 ? 1 : -1) * (ev.shiftKey ? 10 : 1)); }, { passive: false });
       c.alMorir.push(() => { if (osc) osc.parar(.05); });
-      pinta();
-      return { f: f, sl: sl };
+      pinta(); hz.textContent = LO + ' Hz';
+      return { f: f, pista: pista, pon: pon };
     });
+    B._cal = filas;   // (solo para las pruebas automáticas)
     let fin = null;
     function revisa() {
       if (activa || !hechos.every(Boolean)) return;
       activa = true;
-      filas.forEach(x => { x.sl.disabled = true; });
+      filas.forEach(x => { x.f.classList.add('fija'); x.pista.tabIndex = -1; });
       svg.classList.add('gira'); p.classList.add('activa'); V().ui('enciende');
       B.arr(cfg.sfxActiva).forEach((x, k) => B.espera(k * .6, c).then(ok => ok && B.sfx(x, .8)));
       coro.gain.linearRampToValueAtTime(1.6, AC.currentTime + .8);   // el acorde completo crece al activarse
@@ -340,20 +403,26 @@
     const filas = el('div', 'fl-lista'); p.appendChild(filas);
     const mk = (f, quien) => { const fila = el('div', 'fl-fila'); fila.appendChild(el('b', 'fl-nom', quien)); const a = flauta(f, { tocable: false }); fila.appendChild(a.el); filas.appendChild(fila); return a; };
     const aG = mk(G, cfg.quienG || 'Él · grande'), aP = mk(P, cfg.quienP || 'Ella · pequeña');
+    /* (Iago, 2-nov) primero, destacado, «Con la misma digitación»; después, 5 posiciones de la pequeña para probar:
+       todos tapados y destapando 1, 2, 3 o 4 (cada una con su dibujito). Bien = suena igual o a la octava que la grande. */
     const ops = el('div', 'j-ops'); p.appendChild(ops);
-    ops.appendChild(el('span', 'j-tit', cfg.titOpciones || 'La flauta pequeña empieza con…'));
-    let ocupado = false, res0 = null;
+    let ocupado = false, res0 = null, probada = false;
     function juntos(kP) {
       if (ocupado) return Promise.resolve(); ocupado = true;
+      if (cfg.fondoToca) M().cambia(cfg.fondoToca);   // mientras suenan, el tallador tocando
       const t0 = B.ac().currentTime + .1, sube = SUBE[kP] - SUBE[digs[0]];
       const dur = aG.dibujo(digs, ritmo, t0, c, .7);
       /* la pequeña: el mismo dibujo, empezando con la digitación elegida */
       let t = 0; digs.forEach((k, i) => { V().nota('flauta', P.base + SUBE[digs[0]] + sube + (SUBE[k] - SUBE[digs[0]]), t0 + t * E8(), ritmo[i] * E8() * .95, .7); t += ritmo[i]; });
       aP.pon(kP);
-      return B.espera(dur + .3, c).then(() => { ocupado = false; });
+      return B.espera(dur + .3, c).then(() => { ocupado = false; if (cfg.fondo) M().cambia(cfg.fondo); });
     }
-    const bMisma = btn('▶ Con la misma digitación', 'prim', () => juntos(digs[0]));
-    (cfg.opciones || [5, 3, 2, 1]).forEach(k => {
+    const bMisma = btn('', 'j-misma pulsa', () => { if (ocupado || p.classList.contains('hecho')) return; bMisma.classList.remove('pulsa'); probada = true; ops.classList.add('probada'); juntos(digs[0]); }, 'Que los dos tapen los mismos agujeros');
+    bMisma.innerHTML = '<b>▶ Con la misma digitación</b><small>los dos tapan los mismos agujeros</small>';
+    ops.appendChild(bMisma);
+    const prueba = el('div', 'j-prueba'); prueba.appendChild(el('span', 'j-tit', cfg.titOpciones || 'Prueba la pequeña empezando con…')); ops.appendChild(prueba);
+    const NOM = { 5: 'Todos tapados', 4: 'Destapando 1', 3: 'Destapando 2', 2: 'Destapando 3', 1: 'Destapando 4' };
+    (cfg.opciones || [5, 4, 3, 2, 1]).forEach(k => {
       const o = btn('', 'j-op', b => {
         if (ocupado || p.classList.contains('hecho')) return;
         B.$$('.j-op', ops).forEach(x => x.classList.remove('sel')); b.classList.add('sel');
@@ -362,10 +431,10 @@
           if (bien) { V().ui('ok'); b.classList.add('bien'); p.classList.add('hecho'); M().barraTexto(cfg.bien); M().esperaSigue(c).then(ok => res0 && res0(ok)); }
           else { V().ui('mal'); b.classList.add('malo'); M().barraTexto(cfg.mal); }
         });
-      }, 'Digitación con ' + k + ' agujeros tapados');
-      o.appendChild(diagrama(k)); ops.appendChild(o);
+      }, NOM[k] || (k + ' tapados'));
+      o.appendChild(diagrama(k)); o.appendChild(el('small', '', NOM[k] || '')); prueba.appendChild(o);
     });
-    return M().cartel(cfg.cartel, { botones: [bMisma] }).then(() => new Promise(res => { res0 = res; c.alMorir.push(() => res(false)); }));
+    return M().cartel(cfg.cartel, { botones: [] }).then(() => new Promise(res => { res0 = res; c.alMorir.push(() => res(false)); }));
   };
 
   /* ════════ e · AFINAR CON EL OBOE ════════ */
@@ -381,13 +450,17 @@
     let qi = 0, elegida = null, res0 = null, hecha = false;
     const bLa = btn('🔊 La del oboe', 'prim', () => V().nota('oboe', 69, B.ac().currentTime + .05, 2, .9));
     const bComp = btn('Comprobar', '', () => comprueba());
-    /* teclado de dos octavas (Do4–Si5): cada tecla toca el instrumento con la nota escrita (suena transportada) */
+    /* (Iago, 2-nov) teclado de UNA octava, la real en la que está la nota correcta de cada instrumento (cambia con la pregunta);
+       teclas grandes, negras en grupos de 2 + 3; el nombre de la nota sale al pulsarla. Cada tecla toca el instrumento con la nota escrita. */
     const BL = [['c', 0], ['d', 2], ['e', 4], ['f', 5], ['g', 7], ['a', 9], ['b', 11]], NEG = { c: 'c#', d: 'd#', f: 'f#', g: 'g#', a: 'a#' };
-    [4, 5].forEach(o => BL.forEach(b => {
-      const k = el('button', 'tb'); k.type = 'button'; k.dataset.k = b[0] + '/' + o; k.innerHTML = '<small>' + T.NOMBRE[b[0]] + '</small>';
-      k.addEventListener('click', ev => { ev.stopPropagation(); elige(k.dataset.k); }); teclado.appendChild(k);
-      if (NEG[b[0]]) { const n = el('button', 'tn'); n.type = 'button'; n.dataset.k = NEG[b[0]] + '/' + o; n.title = T.nombre(n.dataset.k); n.addEventListener('click', ev => { ev.stopPropagation(); elige(n.dataset.k); }); k.appendChild(n); }
-    }));
+    function teclas(o) {
+      teclado.innerHTML = '';
+      BL.forEach(b => {
+        const k = el('button', 'tb'); k.type = 'button'; k.dataset.k = b[0] + '/' + o; k.innerHTML = '<small></small>';
+        k.addEventListener('click', ev => { ev.stopPropagation(); elige(k.dataset.k); }); teclado.appendChild(k);
+        if (NEG[b[0]]) { const n = el('button', 'tn'); n.type = 'button'; n.dataset.k = NEG[b[0]] + '/' + o; n.innerHTML = '<small></small>'; n.addEventListener('click', ev => { ev.stopPropagation(); elige(n.dataset.k); }); k.appendChild(n); }
+      });
+    }
     function pregunta() {
       const q = Q[qi]; elegida = null; hecha = false;
       inst.innerHTML = '';
@@ -396,7 +469,7 @@
       inst.appendChild(el('small', '', q.sub || ''));
       M().barraTexto(q.texto);
       if (q.fondo) M().fondo(q.fondo, { nombre: q.fondoNombre || 'Foto' }); else if (cfg.fondo) M().fondo(cfg.fondo, {});
-      B.$$('.tb,.tn', teclado).forEach(x => x.classList.remove('sel', 'bien'));
+      teclas(q.octava || Math.floor((69 + q.semis) / 12) - 1);   // la octava de la nota escrita correcta
       pinta(); lect.textContent = '';
     }
     function pinta() {
@@ -411,7 +484,7 @@
     function elige(k) {
       if (hecha) return;
       const q = Q[qi]; elegida = k;
-      B.$$('.tb,.tn', teclado).forEach(x => x.classList.toggle('sel', x.dataset.k === k));
+      B.$$('.tb,.tn', teclado).forEach(x => { const on = x.dataset.k === k; x.classList.toggle('sel', on); const sm = x.querySelector(':scope > small'); if (sm) sm.textContent = on ? T.nombre(k) : ''; });
       V().nota(q.timbre, T.midi(k) - q.semis, B.ac().currentTime + .03, 1.2, .85);
       pinta();
     }

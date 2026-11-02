@@ -145,7 +145,7 @@ window.TR = window.TR || {};
   };
   B.musica = function (m) {
     if (!AC) return;
-    if (m && Array.isArray(m.src)) { const q = B.primero(m.src, 'audio'); m = Object.assign({}, m, { src: q ? q.src : null }, q && q.vol != null ? { vol: q.vol } : {}); if (!m.src) m = null; }
+    if (m && Array.isArray(m.src)) { const q = B.primero(m.src, 'audio'); m = Object.assign({}, m, { src: q ? q.src : null }, q && q.vol != null ? { vol: q.vol } : {}, q && q.bucle != null ? { bucle: q.bucle } : {}); if (!m.src) m = null; }
     if (m && musAct && musAct.src === m.src) { if (m.vol != null && musAct.h) musAct.h.gan.gain.setTargetAtTime(m.vol, AC.currentTime, .9); return; }
     if (musAct && musAct.h) musAct.h.parar(m && m.corte ? .25 : 1.6);
     musAct = null;

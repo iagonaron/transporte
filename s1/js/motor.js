@@ -30,13 +30,29 @@
      src: 'img/t1/x.webp' o lista con sustitutos [{src, zoom, cx, cy, ajuste:'contain', luz, vida}] → el primero que exista.
      zoom/cx/cy: encuadre dentro de la lámina (cx, cy = punto que queda en el centro, fracciones); ajuste 'contain' = lámina
      vertical entera sobre una copia desenfocada; luz = brillo (p. ej. .6 para «de noche»). */
-  let fondoAct = null, fondoOpc = null;
+  /* CAMBIO LIMPIO (Iago, 2-nov): doble búfer. La lámina nueva se descodifica ANTES (img.decode) y se pone ENCIMA de la
+     vieja; la vieja se retira dos fotogramas después. Nunca se pasa por fondo vacío ni por negro. Lo que tiene que
+     esperar a que la lámina nueva esté pintada (quitar el vídeo de fondo, el último fotograma de un vídeo) va en alPintar. */
+  let fondoAct = null, fondoOpc = null, gen = 0, pendiente = false;
+  const alPintar = [];
+  const DEC = new Map();
+  function decod(url) {
+    if (DEC.has(url)) return DEC.get(url);
+    const pr = new Promise(res => { const im = new Image(); im.src = url; const ok = () => res(im);
+      (im.decode ? im.decode() : Promise.resolve()).then(ok, ok); setTimeout(ok, 2500); });
+    DEC.set(url, pr); if (DEC.size > 14) DEC.delete(DEC.keys().next().value);   // pocas a la vez: el aula tiene poca memoria
+    return pr;
+  }
+  M.predecod = function (src) { const q = src ? B.primero(src) : null; if (q && !q.falta) decod(B.img[q.src] || q.src); };
+  function trasPintar(fd) { pendiente = false; alPintar.splice(0).forEach(fn => { try { fn(fd || 0); } catch (e) { console.warn(e); } }); }
   M.fondo = function (src, o) {
     o = o || {};
     const f = $('fondo');
     const q = src ? B.primero(src) : null;
     const clave = q ? JSON.stringify(q) : null;
-    if (clave === fondoAct && !o.forzar) return fondoOpc;
+    if (clave === fondoAct && !o.forzar) { if (!pendiente) trasPintar(o.funde); return fondoOpc; }
+    /* fundido cruzado lento (Iago, 2-nov) cuando la lámina es la misma imagen con otro encuadre o con halos (o si el plano lo pide) */
+    const fd = o.funde != null ? o.funde : (q && fondoOpc && !q.falta && !fondoOpc.falta && q.src === fondoOpc.src ? 1.2 : 0);
     fondoAct = clave; fondoOpc = q;
     const nuevo = B.el('div', 'lam');
     if (!q) nuevo.classList.add('negra');
@@ -52,8 +68,20 @@
       if (q.luz != null) nuevo.style.filter = 'brightness(' + q.luz + ') saturate(' + (q.luz < 1 ? .85 : 1) + ')';
       if (q.mueve) nuevo.classList.add('mueve');
     } else { nuevo.classList.add('marca'); nuevo.innerHTML = '<div><b>' + B.esc(o.nombre || 'Lámina') + '</b><small>' + B.esc(q.src) + '</small>' + (o.desc ? '<span>' + B.esc(o.desc) + '</span>' : '') + '</div>'; }
-    f.appendChild(nuevo);
-    B.$$('.lam', f).forEach(e => { if (e !== nuevo) e.remove(); });
+    const mi = ++gen; pendiente = true;
+    const pinta = () => {
+      if (mi !== gen) return;   // ya se pidió otra
+      const fdLam = M._congelado ? 0 : fd;   // desde un vídeo congelado, lo que se funde es el vídeo (encima), no la lámina
+      if (fdLam) { nuevo.style.opacity = '0'; nuevo.style.transition = 'opacity ' + fdLam + 's ease'; }
+      if (vfondo && vfondo.parentNode === f) f.insertBefore(nuevo, vfondo); else f.appendChild(nuevo);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (mi !== gen) return;
+        if (fdLam) { nuevo.style.opacity = '1'; trasPintar(0); setTimeout(() => { if (mi === gen) B.$$('.lam', f).forEach(e => { if (e !== nuevo) e.remove(); }); }, fdLam * 1000 + 60); return; }
+        B.$$('.lam', f).forEach(e => { if (e !== nuevo) e.remove(); });
+        trasPintar(fd);
+      }));
+    };
+    if (q && !q.falta) decod(B.img[q.src] || q.src).then(pinta); else pinta();
     if (B.capas) { B.capas.oculta = (q && !q.falta && q.ocultaPj) || []; B.capas.aplicaOculta(); }
     return q;
   };
@@ -63,7 +91,7 @@
     const q = src ? B.primero(src) : null;
     if (!q || q.falta) return null;
     const ant = fondoAct, r = M.fondo(src, o || {});
-    if (fondoAct !== ant) { if (vfondo) fondoVideo(null); B.vida.pon((r && r.vida) || []); }   // el vídeo de fondo (si lo había) deja paso a la lámina nueva
+    if (fondoAct !== ant) { if (vfondo) fondoVideo(null); B.vida.pon((r && r.vida) || []); }   // fondoVideo(null) espera a que la lámina esté pintada   // el vídeo de fondo (si lo había) deja paso a la lámina nueva
     return r;
   };
   function programaImgs(lista, dur, c) {
@@ -75,12 +103,13 @@
   function fondoVideo(src) {
     if (src && src === vfondoSrc && vfondo) return;
     vfondoSrc = src && B.hayVideo(src) ? src : null;
-    if (vfondo) { try { vfondo.pause(); } catch (e) { } vfondo.remove(); vfondo = null; }
+    if (vfondo) { const v = vfondo; vfondo = null; const quita = () => { try { v.pause(); } catch (e) { } v.remove(); }; if (pendiente) alPintar.push(quita); else quita(); }
     if (!src || !B.hayVideo(src)) return;
     B.precargaVideo(src).then(url => {
       if (!url || vfondoSrc !== src) return;
-      vfondo = B.el('video', 'vfondo'); vfondo.muted = true; vfondo.loop = true; vfondo.playsInline = true; vfondo.src = url;
-      $('fondo').appendChild(vfondo); const p = vfondo.play(); if (p && p.catch) p.catch(() => { });
+      const v = vfondo = B.el('video', 'vfondo'); v.muted = true; v.loop = true; v.playsInline = true; v.style.opacity = '0'; v.src = url;
+      v.addEventListener('playing', () => { v.style.opacity = ''; }, { once: true });   // hasta que pinta su primer fotograma, se ve la lámina
+      $('fondo').appendChild(v); const p = v.play(); if (p && p.catch) p.catch(() => { });
       B.vida.quita();   // la «vida» se pensó para la lámina: con el vídeo del dron sobra
     });
   }
@@ -88,13 +117,15 @@
   /* ── montar un plano ── */
   function montaPlano(p) {
     $('escena').classList.toggle('con-inter', false);
-    const q = M.fondo(p.negro ? null : p.img, { nombre: p.nombre, desc: p.desc });
+    const q = M.fondo(p.negro ? null : p.img, { nombre: p.nombre, desc: p.desc, funde: p.funde });
     fondoVideo(p.fondoVid);
     if (p.amb !== undefined) B.ambiente(p.amb);
     if (p.mus === false) B.musica(null); else if (p.mus) B.musica(p.mus);
     if (vfondo && vfondoSrc) B.vida.quita(); else B.vida.pon((q && !q.falta && q.vida) || p.vida || []);
     B.capas.plano(p);
     $('efecto').className = p.efecto ? 'ef-' + p.efecto : '';
+    $('fondo').className = p.fondoClase || '';   // p. ej. 'ensuena' (desenfoque y ondulación)
+    $('escena').classList.toggle('recuerdo', !!p.recuerdo);   // tinte cálido y bordes suaves (el ensayo es un recuerdo de Noa)
     B.arr(p.sfx).forEach(x => B.espera(x.t || 0, ctl).then(ok => ok && B.sfx(x.src, x.vol)));
     /* reacciones y sucesos del plano (sin frase): poses [{t, q, pose}] y al [{t, fn}] */
     if (p.poses) B.capas.linea({ poses: p.poses, mantenClaves: true }, p.auto || 4, ctl);
@@ -146,6 +177,8 @@
     if (l.vida !== undefined) B.vida.pon(l.vida);
     B.capas.linea(l, dur, c);
     B.arr(l.sfx).forEach(x => B.espera(x.t != null ? x.t : (x.en || 0) * dur, c).then(ok => ok && B.sfx(x.src, x.vol)));
+    /* sucesos de la frase: {t | en | tras (s después de acabar la voz), fn} */
+    B.arr(l.al).forEach(x => B.espera(x.tras != null ? dur - (l.espera || 0) + x.tras : x.t != null ? x.t : (x.en || 0) * dur, c).then(ok => ok && x.fn(c)));
     let h = null;
     const t0 = B.ahora();
     if (hayVoz && !RAPIDO) { B.agacha(true); h = B.suena(vozSrc, { bus: l.filtro ? B.filtroVoz(l.filtro, B.buf[vozSrc].duration) : B.bus.voz, grupo: 'voz', vol: l.vol }); }
@@ -232,16 +265,42 @@
   M.finInter = function () { M.barra(null); $('cartel').classList.remove('on'); $('inter').innerHTML = ''; $('inter').className = ''; $('escena').classList.remove('con-inter'); };
 
   /* ══════════ VÍDEO ══════════ con «Cargando… %»; si falta, un marcador que dura lo previsto */
+  /* al acabar un vídeo o un túnel no se quita la capa: se queda el último fotograma hasta que la lámina siguiente está pintada */
+  function congela(capa) {
+    M._congelado = true;
+    alPintar.push(fd => {
+      M._congelado = false;
+      const quita = () => { if (M._congelado) return; capa.classList.remove('on'); capa.style.transition = ''; capa.style.opacity = ''; B.$$('video', capa).forEach(v => { try { v.pause(); } catch (e) { } }); capa.innerHTML = ''; };
+      if (fd) { capa.style.transition = 'opacity ' + fd + 's ease'; capa.style.opacity = '0'; setTimeout(quita, fd * 1000 + 50); } else quita();
+    });
+  }
+  /* fundido a blanco (Iago, 2-nov: antes del Paleolítico): sube muy despacio al final del plano y se va al empezar el siguiente */
+  function blanco(on, seg) { const b = $('blanco'); if (!b) return; b.style.transition = 'opacity ' + (seg || 1.5) + 's ' + (on ? 'ease-in' : 'ease-out'); b.classList.toggle('on', !!on); M._blanco = !!on; }
+  function programaBlanco(p, c, dur) { if (!p.blanco) return; B.espera(Math.max(0, dur - p.blanco), c).then(ok => { if (!ok) return; blanco(true, p.blanco); if (p.sfxBlanco) B.sfx(p.sfxBlanco, .8); }); }
+  M.descongela = function () { if (M._congelado) trasPintar(); };
   function video(p, c) {
     const capa = $('video');
-    capa.innerHTML = ''; capa.classList.add('on'); caja(false);
+    const viejos = Array.from(capa.children), quitaViejos = () => viejos.forEach(e => { if (e.tagName === 'VIDEO') try { e.pause(); } catch (x) { } e.remove(); });
+    alPintar.length = 0; M._congelado = false; pendiente = false;   // el vídeo nuevo sustituye al congelado
+    capa.style.transition = ''; capa.style.opacity = '';
+    capa.classList.add('on'); caja(false);
     B.capas.limpia(); B.vida.quita();
     if (p.tunel && (!p.video || !B.hayVideo(p.video))) {   // transición propia mientras no llegue el vídeo de Runway
       B.arr(p.sfx).forEach(x => B.espera(x.t || 0, c).then(ok => ok && B.sfx(x.src, x.vol)));
-      return B.tunel(capa, Object.assign({ dur: RAPIDO ? .5 : (p.dur || 5) }, p.tunel), c).then(ok => { capa.classList.remove('on'); capa.innerHTML = ''; return ok; });
+      const dT = RAPIDO ? .5 : (p.dur || 5);
+      programaBlanco(p, c, dT);
+      /* vid/tunel.mp4 (Runway, sin texto) sirve para TODOS los saltos: un trozo en los cortos, entero en el largo; encima, el contador */
+      const vt = B.hayVideo(TUNEL) ? B.precargaVideo(TUNEL) : Promise.resolve(null);
+      return vt.then(url => {
+        if (c && c.muerto) return false;
+        const pr = B.tunel(capa, Object.assign({ dur: dT, video: url || null }, p.tunel), c);
+        B.arr(p.destellos).forEach(d => B.espera(RAPIDO ? .1 : (d.t || 0), c).then(ok => ok && destello(capa, d, c)));
+        requestAnimationFrame(() => requestAnimationFrame(quitaViejos));
+        return pr.then(ok => { congela(capa); return ok; });
+      });
     }
     if (!B.hayVideo(p.video)) {
-      capa.innerHTML = '<div class="vmarca"><b>' + B.esc(p.nombre || 'Vídeo') + '</b><small>' + B.esc(p.video) + '</small><span>' + B.esc(p.desc || '') + '</span><i></i></div>';
+      quitaViejos(); capa.innerHTML = '<div class="vmarca"><b>' + B.esc(p.nombre || 'Vídeo') + '</b><small>' + B.esc(p.video) + '</small><span>' + B.esc(p.desc || '') + '</span><i></i></div>';
       const barra = B.$('.vmarca i', capa), dur = RAPIDO ? .5 : (p.dur || 5), t0 = B.ahora();
       const iv = setInterval(() => { barra.style.width = Math.min(100, (B.ahora() - t0) / dur * 100) + '%'; }, 100);
       B.arr(p.sfx).forEach(x => B.espera(x.t || 0, c).then(ok => ok && B.sfx(x.src, x.vol)));
@@ -251,10 +310,14 @@
     return B.precargaVideo(p.video, f => { carga.textContent = 'Cargando… ' + Math.round(f * 100) + ' %'; }).then(url => {
       if (c && c.muerto) return false;
       carga.remove();
-      if (!url) { capa.classList.remove('on'); return true; }
-      const v = B.el('video'); v.playsInline = true; v.src = url; v.volume = p.vol == null ? 1 : p.vol; capa.appendChild(v);
+      if (!url) { quitaViejos(); capa.classList.remove('on'); return true; }
+      const v = B.el('video'); v.playsInline = true; v.src = url; v.volume = p.vol == null ? 1 : p.vol; v.style.opacity = '0'; capa.appendChild(v);
+      v.addEventListener('playing', () => { v.style.opacity = ''; requestAnimationFrame(quitaViejos); programaBlanco(p, c, RAPIDO ? .5 : (v.duration || p.dur || 5));
+        /* los vídeos de Runway no traen sonido: los efectos y sucesos del plano van a su tiempo desde que empieza a verse */
+        B.arr(p.sfx).forEach(x => B.espera(x.t || 0, c).then(ok => ok && B.sfx(x.src, x.vol)));
+        B.arr(p.al).forEach(x => B.espera(x.t || 0, c).then(ok => ok && x.fn(c))); }, { once: true });   // hasta su primer fotograma, se ve lo de antes
       return new Promise(res => {
-        const fin = ok => { v.onended = null; try { v.pause(); } catch (e) { } capa.classList.remove('on'); capa.innerHTML = ''; res(ok); };
+        const fin = ok => { v.onended = null; try { v.pause(); } catch (e) { } if (ok) congela(capa); else { capa.classList.remove('on'); capa.innerHTML = ''; } res(ok); };
         v.onended = () => fin(true); v.onerror = () => fin(true);
         if (c) c.alMorir.push(() => fin(false));
         const pr = v.play(); if (pr && pr.catch) pr.catch(() => fin(true));
@@ -268,8 +331,43 @@
     const sig = () => { if (c.muerto) return Promise.resolve(false); if (i >= ls.length) return Promise.resolve(true); const l = ls[i++]; return M.di(l, c).then(ok => ok ? sig() : false); };
     return sig();
   }
+  const TUNEL = 'vid/tunel.mp4';
+  /* DESTELLO dentro del túnel (Iago, 2-nov: viaje de vuelta): ~3 s de un vídeo (o lámina) envuelto en la nebulosa del túnel,
+     sin fecha ni rótulo; con su sonido (sfx) y sus sucesos (fn). d = { t, dur, video, desde (s del vídeo), img, sfx, vol, fn } */
+  function destello(capa, d, c) {
+    const dur = RAPIDO ? .4 : (d.dur || 3), box = B.el('div', 'destello'); let v = null;
+    if (d.video && B.hayVideo(d.video)) {
+      v = B.el('video'); v.muted = true; v.playsInline = true; v.preload = 'auto';
+      B.precargaVideo(d.video).then(url => { if (!url || !box.isConnected) return; v.src = url;
+        v.addEventListener('loadedmetadata', () => { try { v.currentTime = d.desde || 0; } catch (e) { } const pp = v.play(); if (pp && pp.catch) pp.catch(() => { }); }, { once: true }); });
+      box.appendChild(v);
+    } else if (d.img) { const q = B.primero(d.img); if (q && !q.falta) { const im = B.el('img'); im.src = q.src; box.appendChild(im); } }
+    box.appendChild(B.el('i', 'destello-neb'));
+    capa.appendChild(box);
+    requestAnimationFrame(() => requestAnimationFrame(() => box.classList.add('on')));
+    if (d.sfx) B.sfx(d.sfx, d.vol == null ? 1 : d.vol);
+    if (d.fn) d.fn(c);
+    const quita = () => { box.classList.remove('on'); setTimeout(() => { if (v) try { v.pause(); } catch (e) { } box.remove(); }, 900); };
+    B.espera(Math.max(.2, dur - .7), c).then(quita);
+  }
+  /* TELETRANSPORTE reutilizable (Iago, 2-nov): el túnel (vid/tunel.mp4 de Runway; si no está, el túnel dibujado) con su sonido
+     (salto + flash) y fundido a blanco al final. o = { dur (s, 3–4 por defecto), desde, hasta (años: si se dan, sale el contador), alFinal } */
+  M.teletransporte = function (o) {
+    o = o || {};
+    const capa = $('video'), dur = o.dur || 3.6, c = B.control();
+    alPintar.length = 0; M._congelado = false; capa.style.transition = ''; capa.style.opacity = '';
+    capa.innerHTML = ''; capa.classList.add('on'); caja(false); B.capas.limpia(); B.vida.quita(); $('cartel').classList.remove('on');
+    B.musica(null); B.ambiente([]);
+    B.sfx('sfx/sfx_salto_tiempo.mp3', .8);
+    const fl = B.existe('sfx/sfx_flash_blanco.mp3') ? 'sfx/sfx_flash_blanco.mp3' : 'sfx/sfx_flash_blanco_sint.mp3';
+    B.espera(Math.max(0, dur - 1.7), c).then(ok => { if (!ok) return; B.sfx(fl, .8); blanco(true, 1.6); });
+    const vt = B.hayVideo(TUNEL) ? B.precargaVideo(TUNEL) : Promise.resolve(null);
+    return vt.then(url => B.tunel(capa, { dur: dur, de: o.desde == null ? 2100 : o.desde, a: o.hasta == null ? 2100 : o.hasta, video: url || null, contador: o.desde != null }, c))
+      .then(() => B.espera(.2, c)).then(() => { if (o.alFinal) o.alFinal(); return true; });
+  };
   function plano(p, c) {
     M.plano = p.id; document.body.setAttribute('data-plano', p.id);
+    if (M._blanco) setTimeout(() => blanco(false, 1.6), 250);   // del blanco a lo siguiente
     const vidOk = p.video && B.hayVideo(p.video);
     if (vidOk || p.tunel || (p.video && !p.img)) {   // plano de vídeo (o túnel); si falta el vídeo y hay img, se monta como lámina fija: el sonido va dentro del vídeo (la música del plano anterior se apaga si mus:false)
       if (p.mus === false) B.musica(null); else if (p.mus) B.musica(p.mus);
@@ -279,6 +377,7 @@
     }
     montaPlano(p);
     const ls = B.arr(p.lineas);
+    B.arr(p.imgs).concat(ls.concat(B.arr(p.despues)).reduce((a, l) => a.concat(l.img ? [{ img: l.img }] : [], B.arr(l.imgs)), [])).forEach(x => M.predecod(x.img));
     let paso = ls.length ? (p.antes ? (caja(false), B.espera(RAPIDO ? .1 : p.antes, c).then(ok => ok ? (caja(true), lineas(ls, c)) : false)) : (caja(true), lineas(ls, c)))
       : (caja(false), B.espera(RAPIDO ? .3 : (p.auto || 0), c));
     if (p.inter) paso = paso.then(ok => {
@@ -318,7 +417,7 @@
   function salta(i, k) {
     if (ctl) ctl.matar();
     M.terminado = false; M.finInter(); caja(false); B.capas.limpia(); B.vida.quita();
-    const cv = $('video'); cv.classList.remove('on'); cv.innerHTML = ''; $('cartel').classList.remove('on'); $('cartel').innerHTML = '';
+    const cv = $('video'); cv.classList.remove('on'); cv.innerHTML = ''; cv.style.opacity = ''; alPintar.length = 0; M._congelado = false; blanco(false, .1); $('cartel').classList.remove('on'); $('cartel').innerHTML = '';
     if (window.TR.viento) B.viento.parar();
     const p = (S.escenas[i] || {}).planos ? S.escenas[i].planos[k || 0] : null;
     const so = sonidoEn(i, k || 0);
@@ -352,8 +451,9 @@
     const capa = $('cartel'); capa.innerHTML = '';
     const box = B.el('div', 'cart fin');
     box.innerHTML = '<p class="sup">' + B.esc(S.titulo) + '</p><h2>' + B.esc(S.subtitulo || '') + '</h2>';
-    const b = B.el('button', 'prim', 'Cerrar sesión'); b.type = 'button';
-    b.addEventListener('click', () => { location.href = (window.MOD_VOLVER || '../prueba.html') + location.hash; });
+    const b = B.el('button', 'prim', 'Transportarnos al menú principal'); b.type = 'button';
+    b.addEventListener('click', () => { b.disabled = true; capa.classList.remove('on'); capa.innerHTML = '';
+      M.teletransporte({ dur: 3.6, alFinal: () => { const v = window.MOD_VOLVER || '../prueba.html'; location.href = v + (v.indexOf('?') < 0 ? '?' : '&') + 'tp=1' + location.hash; } }); });
     const r = B.el('button', '', '↺ Repetir'); r.type = 'button'; r.addEventListener('click', () => { capa.classList.remove('on'); salta(0, 0); });
     const f = B.el('div', 'fila'); f.appendChild(r); f.appendChild(b); box.appendChild(f);
     capa.appendChild(box); capa.classList.add('on');
@@ -372,7 +472,7 @@
     }));
     return r.concat(B.capas.recursos(S), B.arr(S.recursos));
   }
-  function videos() { const v = []; S.escenas.forEach(e => e.planos.forEach(p => { if (p.video && B.hayVideo(p.video)) v.push(p.video); if (p.fondoVid && B.hayVideo(p.fondoVid)) v.push(p.fondoVid); })); return v; }
+  function videos() { const v = []; if (B.hayVideo(TUNEL) && S.escenas.some(e => e.planos.some(p => p.tunel))) v.push(TUNEL); S.escenas.forEach(e => e.planos.forEach(p => { if (p.video && B.hayVideo(p.video)) v.push(p.video); if (p.fondoVid && B.hayVideo(p.fondoVid)) v.push(p.fondoVid); B.arr(p.destellos).forEach(d => { if (d.video && B.hayVideo(d.video)) v.push(d.video); }); })); return v; }
 
   /* ══════════ ARRANQUE ══════════ */
   B.sesion = function (d) { S = d; };
