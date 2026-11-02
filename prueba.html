@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="s1/img/t1/icono.webp" type="image/webp">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="https://ge.lmathome.es/piel/latido.js?v=1"></script>
+<title>Transporte · Unidad 9</title>
+<link rel="stylesheet" href="s1/css/tr.css?v=1">
+<style>
+/* Portal de la U9 · Transporte (versión en prueba, solo Protester). Cada sesión es una página propia (s1/, s2/…). Estilo del menú de Modulación. */
+html,body{height:auto;min-height:100%;overflow:auto}
+body{background:#03060e;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.fondo{position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(3,6,14,.45), rgba(3,6,14,.85)), url(s1/img/t1/coruna2100.webp) center/cover}
+main{max-width:1100px;margin:0 auto;padding-block:6vh 40px;display:flex;flex-direction:column;gap:22px}
+.sup{font:600 13px var(--f-ui);letter-spacing:.32em;text-transform:uppercase;color:var(--azul2)}
+h1{margin:0;font:500 clamp(46px,8vw,96px)/1 var(--f-ui);letter-spacing:.02em}
+p.lead{margin:0;color:var(--tenue);font-size:clamp(16px,1.8vw,19px);max-width:56ch;line-height:1.5}
+.sesiones{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+a.ses{display:flex;flex-direction:column;text-decoration:none;color:inherit;background:var(--cristal);border:2px solid var(--borde);border-radius:12px;overflow:hidden}
+a.ses .im{width:100%;aspect-ratio:16/9;background:#0b1426 center/cover;display:flex;align-items:center;justify-content:center;font:500 56px var(--f-ui);color:var(--tenue)}
+a.ses span.t{display:flex;flex-direction:column;gap:4px;padding:12px 16px 14px}
+a.ses em{font:600 12px var(--f-ui);font-style:normal;letter-spacing:.2em;text-transform:uppercase;color:var(--azul2)}
+a.ses b{font:500 clamp(22px,2.4vw,28px)/1.1 var(--f-ui)}
+a.ses small{color:var(--tenue);font-size:14px;line-height:1.4}
+a.ses:hover, a.ses:focus-visible{border-color:#fff;outline:none}
+.ses.prox{opacity:.45;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="fondo" aria-hidden="true"></div>
+<main>
+  <span class="sup">Unidad 9 · 2.º GP</span>
+  <h1>Transporte</h1>
+  <p class="lead">A Coruña, 2100. Una máquina que viaja como el sonido, en ondas.</p>
+  <div class="sesiones">
+    <a class="ses" data-ir="s1/"><span class="im" style="background-image:url(s1/img/t1/aula2100.webp)"></span><span class="t"><em>Transporte 1</em><b>El mismo dibujo, a otra altura</b><small>El tema de Noa, el Transportador y tres flautas de hace cuarenta mil años.</small></span></a>
+    <a class="ses prox" aria-disabled="true"><span class="im">?</span><span class="t"><em>Transporte 2</em><b>?</b><small>Próximamente.</small></span></a>
+    <a class="ses prox" aria-disabled="true"><span class="im">?</span><span class="t"><em>Transporte 3</em><b>?</b><small>Próximamente.</small></span></a>
+    <a class="ses prox" aria-disabled="true"><span class="im">?</span><span class="t"><em>Transporte 4</em><b>?</b><small>Próximamente.</small></span></a>
+  </div>
+</main>
+<script>
+/* los enlaces llevan la cuenta (#c=…) a cada sesión */
+[].forEach.call(document.querySelectorAll('a.ses[data-ir]'), function(a){ a.href = a.getAttribute('data-ir') + location.hash; });
+</script>
+</body>
+</html>
