@@ -43,6 +43,20 @@ a.nodo.off{pointer-events:none}
 a.nodo.off .t,a.nodo.off .hz{color:#5b6d93}
 .sello{position:absolute;right:96px;top:96px;text-align:right;font:500 18px/1.6 'Plex';color:var(--tenue)}
 .sello b{display:block;font:600 22px 'Saira SC';color:var(--tinta)}
+/* ambiente sonoro: botón cuadrado discreto (solo icono; el texto aparece al pasar el ratón) */
+#amb{position:absolute;right:96px;top:84px;z-index:5;width:56px;height:56px;padding:0;border:0;background:rgba(6,12,29,.55);color:var(--cian);cursor:pointer;
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);transition:background .2s,color .2s}
+#amb svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+#amb .marco{fill:none;stroke:currentColor;stroke-width:2;opacity:.55;transition:opacity .2s}
+#amb .x{display:none}
+#amb.mudo{color:var(--tenue)}
+#amb.mudo .ondas{display:none}
+#amb.mudo .x{display:inline}
+#amb:hover,#amb:focus-visible{background:rgba(99,230,255,.16);color:var(--ambar);outline:none}
+#amb:hover .marco,#amb:focus-visible .marco{opacity:1}
+#ambtip{position:absolute;right:166px;top:93px;z-index:5;white-space:nowrap;font:500 18px/1 'Plex';letter-spacing:.04em;color:var(--tinta);
+  background:rgba(6,12,29,.8);padding:10px 14px;opacity:0;pointer-events:none;transition:opacity .2s}
+#amb:hover + #ambtip,#amb:focus-visible + #ambtip{opacity:1}
 </style>
 </head>
 <body>
@@ -55,6 +69,12 @@ a.nodo.off .t,a.nodo.off .hz{color:#5b6d93}
   <a class="nodo off" aria-disabled="true" style="left:780px"><span class="hz">440 Hz</span><span class="t">?</span><span class="d">Transporte 2</span></a>
   <a class="nodo off" aria-disabled="true" style="left:1140px"><span class="hz">880 Hz</span><span class="t">?</span><span class="d">Transporte 3</span></a>
   <a class="nodo off" aria-disabled="true" style="left:1500px"><span class="hz">1760 Hz</span><span class="t">?</span><span class="d">Transporte 4</span></a>
+  <button id="amb" type="button" aria-label="Silenciar el ambiente" aria-pressed="false" data-estado="espera">
+    <svg viewBox="0 0 56 56" aria-hidden="true"><polygon class="marco" points="10,1 55,1 55,46 46,55 1,55 1,10"/>
+      <path d="M15 24h6l8-7v22l-8-7h-6z" fill="currentColor"/>
+      <g class="ondas" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M34 22.5a8.5 8.5 0 0 1 0 11"/><path d="M38 18.5a14 14 0 0 1 0 19"/></g>
+      <g class="x" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M34 23l9 10M43 23l-9 10"/></g></svg>
+  </button><span id="ambtip">Silenciar ambiente</span>
 </div>
 <div id="destello" aria-hidden="true" style="position:fixed;inset:0;z-index:99;background:#fff;opacity:0;pointer-events:none;transition:opacity 1.4s ease-out"></div>
 <script>
@@ -67,6 +87,83 @@ a.nodo.off .t,a.nodo.off .hz{color:#5b6d93}
 /* el escenario 1920×1080 se escala para caber entero */
 function encaja(){ var e=document.getElementById('esc'), k=Math.min(innerWidth/1920, innerHeight/1080); e.style.transform='translate(-50%,-50%) scale('+k.toFixed(4)+')'; }
 encaja(); addEventListener('resize', encaja);
+
+/* ambiente sonoro: mar de noche (principal) + ciudad de 2100 (más bajo), en bucle sin cortes (Web Audio).
+   Suena desde el primer clic/tecla/toque (o ya, si el navegador lo permite); se recuerda el silencio; se va con fundido al entrar en una sesión. */
+(function(){
+  var NIVEL = 0.7, ENTRADA = 0.8, SALIDA = 0.8, LS = 'transporte_ambiente';
+  var AC = window.AudioContext || window.webkitAudioContext;
+  var btn = document.getElementById('amb'), tip = document.getElementById('ambtip');
+  var silencio = false;
+  try { silencio = localStorage.getItem(LS) === 'off'; } catch (e) {}
+  var ctx = null, master = null, capas = 0, entro = false, saliendo = false;
+
+  function pinta(){
+    btn.className = silencio ? 'mudo' : '';
+    btn.setAttribute('aria-pressed', silencio ? 'true' : 'false');
+    btn.setAttribute('aria-label', silencio ? 'Activar el ambiente' : 'Silenciar el ambiente');
+    tip.textContent = silencio ? 'Activar ambiente' : 'Silenciar ambiente';
+    btn.setAttribute('data-estado', silencio ? 'silencio' : (ctx && ctx.state === 'running' ? 'sonando' : 'espera'));
+  }
+  function rampa(a, tau){ if (!master) return; var t = ctx.currentTime; master.gain.cancelScheduledValues(t); master.gain.setValueAtTime(master.gain.value, t); master.gain.setTargetAtTime(a, t, tau); }
+  /* fundido de entrada (~2,5 s): constante de tiempo 0,8 s */
+  function entra(){ if (!ctx || ctx.state !== 'running' || silencio || saliendo) return; entro = true; rampa(NIVEL, ENTRADA); pinta(); }
+  function capa(url, nivel){
+    fetch(url).then(function(r){ return r.arrayBuffer(); }).then(function(b){
+      return new Promise(function(ok, ko){ ctx.decodeAudioData(b, ok, ko); });
+    }).then(function(buf){
+      var s = ctx.createBufferSource(), g = ctx.createGain();
+      s.buffer = buf; s.loop = true; g.gain.value = 0; s.connect(g); g.connect(master); s.start(0);
+      g.gain.setTargetAtTime(nivel, ctx.currentTime, 0.2); capas++;
+    }).catch(function(){});
+  }
+  function monta(){
+    if (ctx || !AC) return;
+    try { ctx = new AC(); } catch (e) { ctx = null; return; }
+    master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+    ctx.onstatechange = function(){ if (ctx.state === 'running') entra(); pinta(); };
+    capa('s1/sfx/menu_mar.mp3', 0.8);
+    capa('s1/sfx/menu_ciudad.mp3', 0.34);
+    if (ctx.state === 'running') entra();
+    else { try { ctx.resume().catch(function(){}); } catch (e) {} }
+  }
+  function gesto(ev){
+    if (silencio || (ev && btn.contains(ev.target))) return;
+    monta();
+    if (ctx && ctx.state !== 'running') { try { ctx.resume().then(entra, function(){}); } catch (e) {} } else entra();
+  }
+  ['pointerdown', 'keydown', 'touchstart', 'click'].forEach(function(n){ document.addEventListener(n, gesto, true); });
+
+  btn.addEventListener('click', function(){
+    silencio = !silencio;
+    try { localStorage.setItem(LS, silencio ? 'off' : 'on'); } catch (e) {}
+    monta();
+    if (silencio) rampa(0, 0.15);
+    else if (ctx) { if (ctx.state !== 'running') { try { ctx.resume().then(entra, function(){}); } catch (e) {} } else entra(); }
+    pinta();
+  });
+
+  /* al entrar en una sesión: el ambiente se va con fundido (~0,8 s) y se navega sin pasar de 1 s */
+  document.addEventListener('click', function(ev){
+    var a = ev.target.closest ? ev.target.closest('a.nodo[href]') : null;
+    if (!a || ev.defaultPrevented || ev.button || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+    if (!ctx || ctx.state !== 'running' || silencio || !master) return;
+    ev.preventDefault(); saliendo = true;
+    var t = ctx.currentTime; master.gain.cancelScheduledValues(t); master.gain.setValueAtTime(master.gain.value, t); master.gain.linearRampToValueAtTime(0, t + SALIDA);
+    var url = a.href; setTimeout(function(){ location.href = url; }, SALIDA * 1000);
+  });
+  /* volver con «atrás» (página en caché): el ambiente vuelve con fundido */
+  addEventListener('pageshow', function(ev){ if (ev.persisted) { saliendo = false; entra(); } });
+  /* pestaña oculta: en pausa; al volver, continúa */
+  document.addEventListener('visibilitychange', function(){
+    if (!ctx) return;
+    if (document.hidden) { try { ctx.suspend(); } catch (e) {} }
+    else if (!silencio && !saliendo) { try { ctx.resume(); } catch (e) {} }
+  });
+
+  pinta();
+  if (!silencio) monta(); /* si el navegador deja sonar sin gesto, ya suena (también al volver del teletransporte, ?tp=1) */
+})();
 </script>
 </body>
 </html>
