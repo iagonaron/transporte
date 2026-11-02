@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<!-- controles.js (Modulación) va PRIMERO: la pausa general envuelve el reloj, los temporizadores y el AudioContext -->
+<script src="js/controles.js?v=4"></script>
+<link rel="icon" href="img/t1/icono.webp" type="image/webp">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Transporte 1 · El mismo dibujo, a otra altura</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="css/tr.css?v=2">
+<script>window.MOD_VOLVER = '../prueba.html'; window.MOD_BASE = '';</script>
+</head>
+<body>
+<div class="app">
+  <div id="escena">
+    <div id="fondo"></div>
+    <canvas id="vida" aria-hidden="true"></canvas>
+    <div id="efecto" aria-hidden="true"></div>
+    <div id="capas"></div>
+    <div id="inter"></div>
+    <div id="video"></div>
+    <div id="dialogo" aria-live="polite"><span id="dQuien"></span><p id="dTexto"></p><div class="nav"><button id="bCont" class="prim" type="button" disabled>Continuar ▶</button></div></div>
+    <div id="barra"></div>
+    <div id="cartel"></div>
+    <div class="cab">
+      <div class="marca"><b id="marcaTit">Transporte 1</b><small id="marcaSub"></small></div>
+      <div id="puntos" aria-hidden="true"></div>
+      <div class="fila"></div>
+    </div>
+    <div id="inicio" role="button" tabindex="0" aria-label="Pulsa para empezar la sesión">
+      <span class="sup" id="iSup"></span><h1 id="iTit">Transporte 1</h1><span class="sub" id="iSub"></span>
+      <span class="start">▶ Pulsa para empezar</span><span class="estado" id="iEstado">Cargando…</span><span class="pista">clic o cualquier tecla</span>
+    </div>
+  </div>
+</div>
+<script src="data/recursos.js"></script>
+<script src="js/nucleo.js?v=2"></script>
+<script src="js/sonido.js?v=2"></script>
+<script src="js/vexflow.js"></script>
+<script src="js/viento.js?v=2"></script>
+<script src="js/pauta.js?v=2"></script>
+<script src="js/vida.js?v=2"></script>
+<script src="js/tunel.js?v=2"></script>
+<script src="js/capas.js?v=2"></script>
+<script src="js/motor.js?v=2"></script>
+<script src="js/inter.js?v=2"></script>
+<script src="data/t1.js?v=2"></script>
+<script>document.getElementById('escena').classList.add('en-marcha');</script>
+</body>
+</html>
