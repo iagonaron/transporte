@@ -169,7 +169,11 @@
     const hayVoz = !!(vozSrc && B.buf[vozSrc]);
     const txt = l.texto || '';
     const durTxt = Math.max(1.6, txt.length * .062);
-    const dur = RAPIDO ? .3 : (hayVoz ? B.buf[vozSrc].duration : durTxt) + (l.espera || 0);
+    /* (Iago 22:28) «Continuar» se enciende ~1 s antes de que acabe la voz; si se pulsa entonces, la voz anterior
+       acaba sola (no se corta) y la siguiente arranca justo cuando termina (retraso ≤ 1 s, el texto e imagen ya cambian) */
+    const retraso = (hayVoz && !RAPIDO) ? Math.max(0, (M._vozHasta || 0) - B.ahora()) : 0;
+    const dur = RAPIDO ? .3 : retraso + (hayVoz ? B.buf[vozSrc].duration : durTxt) + (l.espera || 0);
+    const antesFin = (RAPIDO || !hayVoz) ? 0 : Math.min(1, B.buf[vozSrc].duration * .25) + (l.espera || 0);
     if (l.img) M.cambia(l.img);
     programaImgs(l.imgs, dur, c);
     if (l.mus !== undefined) { if (l.mus === false) B.musicaCorta(); else B.musica(l.mus); }
@@ -180,16 +184,18 @@
     /* sucesos de la frase: {t | en | tras (s después de acabar la voz), fn} */
     B.arr(l.al).forEach(x => B.espera(x.tras != null ? dur - (l.espera || 0) + x.tras : x.t != null ? x.t : (x.en || 0) * dur, c).then(ok => ok && x.fn(c)));
     let h = null;
-    const t0 = B.ahora();
-    if (hayVoz && !RAPIDO) { B.agacha(true); h = B.suena(vozSrc, { bus: l.filtro ? B.filtroVoz(l.filtro, B.buf[vozSrc].duration) : B.bus.voz, grupo: 'voz', vol: l.vol }); }
+    const t0 = B.ahora() + retraso;
+    if (hayVoz && !RAPIDO) { B.agacha(true); M._vozHasta = t0 + B.buf[vozSrc].duration;
+      const arranca = () => { h = B.suena(vozSrc, { bus: l.filtro ? B.filtroVoz(l.filtro, B.buf[vozSrc].duration) : B.bus.voz, grupo: 'voz', vol: l.vol }); };
+      if (retraso > .02) B.espera(retraso, c).then(ok => ok && arranca()); else arranca(); }
     return new Promise(res => {
       let n = 0, escrito = false, vozFin = !hayVoz, listo = false, ultBlip = 0, auto = null, hecho = false;
       pintaTexto(txt, 0);
-      const vel = RAPIDO ? .001 : hayVoz ? Math.max(.012, (B.buf[vozSrc].duration * .9) / Math.max(1, txt.length)) : .032;
+      const vel = RAPIDO ? .001 : hayVoz ? Math.max(.012, ((B.buf[vozSrc].duration - antesFin + (l.espera || 0)) * .9) / Math.max(1, txt.length)) : .032;
       const iv = setInterval(() => {
         if (c && c.muerto) return fin(false);
         if (escrito) return;
-        const meta = Math.min(txt.length, Math.floor((B.ahora() - t0) / vel) + 1);
+        const meta = Math.min(txt.length, Math.max(0, Math.floor((B.ahora() - t0) / vel) + 1));
         if (meta > n) {
           n = meta; pintaTexto(txt, n);
           const ini = txt.slice(0, n).search(/\S+$/), enPal = ini < 0 ? -1 : n - 1 - ini, ms = performance.now();
@@ -197,7 +203,8 @@
         }
         if (n >= txt.length) { escrito = true; pintaTexto(txt, txt.length); prueba(); }
       }, 30);
-      B.espera(dur, c).then(ok => { if (!ok) return fin(false); vozFin = true; if (hayVoz) B.agacha(false); prueba(); });
+      B.espera(Math.max(.3, dur - antesFin), c).then(ok => { if (!ok) return fin(false); vozFin = true; prueba(); });
+      if (hayVoz && !RAPIDO) B.espera(dur, c).then(ok => ok && !hecho && B.agacha(false));
       function prueba() {
         if (listo || !escrito || !vozFin) return;
         listo = true; bC.disabled = false; bC.classList.add('late'); d.classList.add('lista');
@@ -211,8 +218,9 @@
         if (hecho) return; hecho = true;
         clearInterval(iv); clearTimeout(auto); esperaSigue = null; d.classList.remove('lista');
         bC.classList.remove('late'); bC.disabled = true;
-        if (!ok && h) h.parar(.1);
-        if (hayVoz) B.agacha(false);
+        if (!ok && h) { h.parar(.1); M._vozHasta = 0; }
+        if (hayVoz && !ok) B.agacha(false);
+        if (hayVoz && ok) { const q = Math.max(0, (M._vozHasta || 0) - B.ahora()); setTimeout(() => { if (!esperaSigue || M._vozHasta <= B.ahora() + .05) B.agacha(false); }, q * 1000); }
         res(ok);
       }
       esperaSigue = toca;

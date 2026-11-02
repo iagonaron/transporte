@@ -143,7 +143,7 @@
        Teclado ←↓/→↑ ±1 Hz (±10 con Mayús), rueda ±1 Hz (±10 con Mayús), botones − y +. Encaja al llegar a ±1 Hz (→ exacto, sfx_anillo_encaja) y se queda sonando. */
     /* (Iago, 2-nov, cambia lo anterior) cada deslizador cubre SOLO un rango acotado alrededor de su octava, lineal, y empieza abajo
        del todo (en el mínimo), sin sonar hasta que lo tocas; encaja a ±1 Hz (±2 en el de 3000–4000) */
-    const RANGOS = cfg.rangos || [[400, 500], [800, 1000], [1600, 1900], [3000, 4000]], TOL = cfg.tol || [1, 1, 1, 2];
+    const RANGOS = cfg.rangos || [[400, 500], [760, 920], [1700, 2000], [3000, 4000]], TOL = cfg.tol || [1, 1, 1, 2];
     const lect = el('div', 'cal-lect'); p.appendChild(lect);   // lectura grande mientras se mueve
     let lectT = null;
     const filas = mult.map((m, i) => {
