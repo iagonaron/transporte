@@ -341,7 +341,7 @@
         { id: 'p6a', funde: 1.2, nombre: 'La llegada · −40 000', img: IMG.llegada, amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento], mus: MUS.paleo, pj: null, antes: 1.2,
           lineas: [
             { id: 't1_019', quien: 'NOA', texto: 'Demasiado antiguo… creo que he calculado mal el tiempo.', claves: { claves: ['−40 000 años'], ts: [0], pos: 'izq' }, espera: .8 },
-            { id: 't1_019b', quien: 'NARRADOR', img: IMG.llegadaCerca, imgs: [{ en: .56, img: IMG.llegada }], texto: 'Al parecer, el Transportador no solo la ha desplazado treinta metros: la ha llevado cuarenta mil años atrás. Esa playa bien podría ser la que hay junto a la Torre de Hércules, justo ahí fuera… mucho antes de que existiera la Torre.' },
+            { id: 't1_019b', quien: 'NARRADOR', img: IMG.llegadaCerca, texto: 'Al parecer, el Transportador no solo la ha desplazado treinta metros: la ha llevado cuarenta mil años atrás.' },   /* (Iago 22:45) sobra lo de la playa */
             { id: 't1_019c', quien: 'NARRADOR', img: IMG.paleoLejos, imgs: [{ en: .45, img: IMG.paleoPadreHija }], texto: 'Junto al fuego hay un padre y su hija. Hace cuarenta mil años, las personas ya eran como nosotros: el mismo cuerpo, la misma voz… y las mismas ganas de hacer música.' },
             { id: 't1_019d', quien: 'NARRADOR', img: O(IMG.paleoTalla, IMG.tallador), imgs: [{ en: .5, img: IMG.paleoAcerca }], texto: 'Él talla flautas con las cañas del río. Noa se acerca despacio, sin hacer ruido, para escucharlas.',
               sfx: [{ src: SF('sfx_tallar_cana'), en: .03, vol: .6 }, { src: B.existe(SF('sfx_pasos_hierba')) ? SF('sfx_pasos_hierba') : SF('sfx_pasos_juncos_sint'), en: .5, vol: .75 }] }
