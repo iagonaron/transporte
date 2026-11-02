@@ -107,6 +107,7 @@
       { tipo: 'anillos', zona: [.72, .0, .28, .55], n: 2, color: '#58c8ff' }, { tipo: 'polvo', zona: [0, 0, 1, 1], n: 14, color: '#ffe8c0' }],
     prueba: [{ tipo: 'anillos', zona: [.27, .02, .47, .7], n: 3 }, { tipo: 'onda', zona: [.745, .3, .1, .07] }, { tipo: 'onda', zona: [.885, .475, .1, .06], color: '#7fffd0', tam: 1.5 },
       { tipo: 'polvo', zona: [.2, 0, .6, .9], n: 18, color: '#cfe8ff' }],
+    llegadaFin: [{ tipo: 'reflejos', zona: [0, .45, .45, .15], n: 14, color: '#ffd9a0' }, { tipo: 'chispas', zona: [.4, .15, .2, .6], n: 6, color: '#cfeeff' }],
     llegada: [{ tipo: 'anillos', zona: [.27, .55, .5, .3], n: 2, color: '#9fe4ff' }, { tipo: 'chispas', zona: [.3, .1, .45, .75], n: 22, color: '#cfeeff' }, { tipo: 'reflejos', zona: [0, .4, .45, .2], n: 14, color: '#ffd9a0' }]
   };
   /* ocultaPj: personajes que YA salen en la lámina → no se les pone la pose encima (Iago/C4: nunca el mismo personaje dos veces).
@@ -126,7 +127,7 @@
       vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 3 }, { tipo: 'polvo', zona: [0, 0, 1, 1], n: 18, color: '#cfe8ff' }] },
     pruebaAmaro: { src: 'img/t1/prueba.webp', zoom: 1.25, cx: .4, cy: .4, ocultaPj: ['NOA'],
       vida: [{ tipo: 'anillos', zona: [.34, .025, .59, .875], n: 3 }, { tipo: 'onda', zona: [.93, .375, .07, .09] }, { tipo: 'polvo', zona: [.2, 0, .7, 1], n: 18, color: '#cfe8ff' }] },
-    llegada: { src: 'img/t1/llegada.webp', vida: VIDA.llegada, ocultaPj: ['NOA'] },
+    llegada: { src: 'img/t1/llegada_fin.webp', vida: VIDA.llegadaFin, ocultaPj: ['NOA'] },   /* (Iago 22:32) = último fotograma de llegada.mp4 */
     modulo: { src: 'img/t1/lab_modulo.webp', ocultaPj: ['NOA'], vida: [{ tipo: 'chispas', zona: [.17, .3, .25, .4], n: 14, color: '#7fd4ff' }, { tipo: 'respira', zona: [.12, .25, .35, .5], color: '#58c8ff', vel: 2 },
       { tipo: 'polvo', zona: [.4, 0, .6, 1], n: 12, color: '#ffe2b8' }] },
     tallador: [{ src: 'img/t1/tallador.webp', vida: VIDA.paleoCerca }, { src: 'img/t1/paleolitico.webp', zoom: 1.6, cx: .68, cy: .5, vida: VIDA.paleoCerca, ocultaPj: ['TALLADOR', 'NINA'] }],
@@ -184,7 +185,7 @@
       { src: 'img/t1/prueba.webp', zoom: 1.25, cx: .4, cy: .4, luz: .75, ocultaPj: ['NOA'], vida: [{ tipo: 'respira', zona: [0, 0, 1, 1], color: '#ff3b3b', vel: 3 }] }],
     pruebaNoa: { src: N('prueba_noa_traviesa'), ocultaPj: ['NOA'], vida: [{ tipo: 'respira', zona: [.0, .55, .7, .4], color: '#58c8ff', vel: 1.6 }, { tipo: 'leds', p: [[.815, .555], [.815, .58]], color: '#ff4a3a', f: 3 },
       { tipo: 'polvo', zona: [.1, .1, .8, .8], n: 16, color: '#cfe8ff' }] },
-    llegadaCerca: { src: 'img/t1/llegada.webp', zoom: 1.3, cx: .5, cy: .4, ocultaPj: ['NOA'], vida: [{ tipo: 'reflejos', zona: [0, .5, 1, .3], n: 16, color: '#ffd9a0' }] },
+    llegadaCerca: { src: 'img/t1/llegada_fin.webp', zoom: 1.3, cx: .5, cy: .42, ocultaPj: ['NOA'], vida: [{ tipo: 'reflejos', zona: [0, .5, 1, .3], n: 16, color: '#ffd9a0' }] },
     paleoLejos: [{ src: N('paleo_lejos'), ocultaPj: ['NOA'], vida: [{ tipo: 'chispas', zona: [.55, .45, .1, .15], n: 10, color: '#ffb35a' }, { tipo: 'reflejos', zona: [0, .6, 1, .25], n: 16, color: '#ffd9a0' }] },
       { src: 'img/t1/paleolitico.webp', vida: VIDA.paleo }],
     paleoPadreHija: { src: N('paleo_padre_hija'), ocultaPj: ['TALLADOR', 'NINA'], vida: VIDA.paleoCerca },
@@ -269,10 +270,10 @@
             cartel: 'Mira las dos partituras: arriba, el <b>saxo alto</b> en Do♯ menor (4♯); abajo, el <b>piano</b> en Mi menor (1♯), con sus dos manos. Pulsa <b>▶ Las dos</b> y escucha.',
             pregunta: '¿Por qué dos partituras distintas suenan igual? Guárdate la pregunta.' } },
         /* (Iago, 2-nov) primero vibra la pulsera sobre el aula (~1,2 s) y solo después se ve a Amaro llamando desde el laboratorio */
-        { id: 'p1d', nombre: 'Aula · mensaje del laboratorio', img: IMG.aula, amb: [AMB.aula], vida: VIDA.aula, pj: null, antes: 1.2,
+        { id: 'p1d', nombre: 'Aula · mensaje del laboratorio', img: O(IMG.aulaPulsera, IMG.aula), amb: [AMB.aula], vida: VIDA.aula, pj: null, antes: 1.2,
           sfx: [{ src: SF('sfx_pulsera_vibra'), t: 0 }], aviso: { de: 'Laboratorio · Amaro', txt: 'Llamada entrante', tipo: 'lab' },
           lineas: [
-            { id: 't1_005', quien: 'AMARO', nombre: 'Laboratorio · Amaro', filtro: 'telefono', mus: false, img: O(IMG.amaroLlamada, IMG.labLlamada), pj: { q: 'AMARO', pose: 'explica', lado: 'der' },
+            { id: 't1_005', quien: 'AMARO', nombre: 'Laboratorio · Amaro', filtro: 'telefono', mus: false, pj: { q: 'AMARO', pose: 'explica', lado: 'der', marco: 'llamada' },   /* (Iago 22:26) cuadrito de llamada de móvil, como la madre */
               aviso: { de: 'Laboratorio · Amaro', txt: 'Hoy es el día. Te esperamos en la Torre.', tipo: 'lab' }, texto: 'Noa. Hoy es el día. Te esperamos en la Torre.' }
           ] },
         { id: 'p1d2', nombre: 'Aula · a Noa se le enciende la mirada', img: O(IMG.aulaNoaLlamada, IMG.aulaPulsera, IMG.aula), amb: [AMB.aula], pj: null, auto: 1.6 },
@@ -312,7 +313,7 @@
       { id: 'e4', titulo: 'La prueba', planos: [
         { id: 'p4a', nombre: 'El Transportador', img: IMG.pruebaAmaro, desc: 'Noa dentro de la máquina; Amaro en la consola', amb: [AMB.lab], mus: MUS.tension,
           lineas: [{ id: 't1_015', quien: 'AMARO', imgs: [{ en: .5, img: IMG.pruebaConsola }], pj: { q: 'AMARO', pose: 'tableta' }, poses: [{ en: .45, pose: 'explica' }], texto: 'Frecuencia base: doscientos veinte hercios. Coloca sus octavas: por dos, por cuatro, por ocho y por dieciséis.' }],
-          inter: { tipo: 'calibrar', base: 220, multiplos: [2, 4, 8, 16], rangos: [[400, 500], [800, 1000], [1600, 1900], [3000, 4000]], tol: [1, 1, 1, 2],
+          inter: { tipo: 'calibrar', base: 220, multiplos: [2, 4, 8, 16], rangos: [[400, 500], [760, 920], [1700, 2000], [3000, 4000]]   /* (Iago 22:30) cada octava en su sitio del deslizador: 40 %, 75 %, 20 %, 52 % */, tol: [1, 1, 1, 2],
             cartel: 'Calibra el Transportador: la base es <b>220 Hz</b>. Arrastra cada deslizador hasta su octava <b>exacta</b> (×2, ×4, ×8, ×16). Afina con − y + (o con las flechas) de 1 en 1 Hz.',
             destino: 'Destino: exterior de la Torre · 30 m', alarma: 'Coordenada temporal: activada', textoFin: 'Calibración perfecta. Pero… ¿qué es esa línea roja?',
             sfxActiva: [SF('sfx_maquina_arranca'), SF('sfx_anillos_giran')], sfxAlarma: SF('sfx_alarma') },
