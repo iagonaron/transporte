@@ -211,6 +211,9 @@
     trompaCerca: { src: 'img/t1/viaje_trompa_s18.webp', zoom: 1.3, cx: .5, cy: .45 }, clarineteCerca: { src: 'img/t1/viaje_clarinete_s19.webp', zoom: 1.3, cx: .5, cy: .45 },
     resInstr: { src: N('res_instrumentos'), vida: [{ tipo: 'polvo', zona: [0, 0, 1, 1], n: 18, color: '#ffe2b8' }, { tipo: 'respira', zona: [.1, .2, .8, .5], color: '#58b8ff' }] },
     resTaller: { src: N('res_taller'), vida: POLVO() },
+    resOrq1: { src: N('res_orquesta1') }, resOrq2: { src: N('res_orquesta2') }, resOrq3: { src: N('res_orquesta3') },
+    paleoPadreDa: { src: N('paleo_padre_da'), ocultaPj: ['TALLADOR', 'NINA'], vida: VIDA.paleoCerca },
+    paleoNinaToca: { src: N('paleo_nina_toca'), ocultaPj: ['TALLADOR', 'NINA'], vida: VIDA.paleoCerca },
     resFlautas: { src: N('res_flautas'), vida: [{ tipo: 'polvo', zona: [0, 0, 1, 1], n: 16, color: '#ffe2b8' }] },
     cierreLab: { src: 'img/t1/laboratorio.webp', zoom: 2, cx: .55, cy: .4, luz: .5, vida: [{ tipo: 'apaga', zona: [.2, .05, .6, .9], dur: 9 }, { tipo: 'polvo', zona: [0, 0, 1, 1], n: 12, color: '#cfe8ff' }] },   // mientras no llegue cierre_noa_foto: la máquina, de noche, apagándose
     cierreNoa: { src: N('cierre_noa_foto'), ocultaPj: ['NOA'], vida: [{ tipo: 'apaga', zona: [0, 0, .4, .5], dur: 9, color: '#58c8ff' }, { tipo: 'respira', zona: [.86, .06, .06, .08], color: '#ffd9a0', vel: 1.4 },
@@ -351,21 +354,16 @@
           poses: [{ t: 1.6, q: 'TALLADOR', pose: 'toca' }, { t: 5.2, q: 'NOA', pose: 'sorpresa' }],
           al: [{ t: 1.8, fn: () => flautaDibujo(FL.grande.base, 2) }] }
       ] },
-      /* 7 · Tres flautas */
-      { id: 'e7', titulo: 'Tres flautas', planos: [
-        { id: 'p7', nombre: 'Las tres flautas', img: O(IMG.paleoPadreFlauta, IMG.tallador), pj: null, amb: [AMB.paleoBajo, AMB.fuegoBajo, AMB.grillos], mus: MUS.paleoBajo,
-          inter: { tipo: 'flautas', flautas: [FL.grande, FL.mediana, FL.pequena], digitaciones: DIBUJO, ritmo: RITMO,
-            cartel: 'Tapa los mismos agujeros en las tres flautas y escucha. Pulsa <b>▶ Dibujo</b> en cada una: los dedos hacen lo mismo… ¿y el sonido?',
-            reto: 'Reto: escucha A, B y C y ponlas en orden, <b>de la más grave a la más aguda</b>.',
-            bien: '¡Exacto! El mismo dibujo, a otra altura.', mal: 'Todavía no. Escúchalas otra vez y vuelve a ordenarlas.' } }
-      ] },
+      /* (Iago 22:47) fuera el interactivo de ordenar tres flautas: solo la del padre y la de la hija («para no liar») */
       /* 8 · Tocar juntos */
       { id: 'e8', titulo: 'Tocar juntos', planos: [
-        { id: 'p8a', nombre: 'El tallador y la niña', img: IMG.tallador, mus: MUS.paleo, amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento], pj: { q: 'NINA', pose: 'senala' }, auto: 2.6,
-          poses: [{ t: 1.5, q: 'TALLADOR', pose: 'sonrie' }] },
+        /* (Iago 22:46) el padre le da la flautita a la hija y ella toca lo mismo, más agudo */
+        { id: 'p8a', nombre: 'El padre le da la flauta pequeña', img: O(IMG.paleoPadreDa, IMG.tallador), mus: MUS.paleo, amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento], pj: null, auto: 3.2 },
+        { id: 'p8a2', nombre: 'La niña toca', img: O(IMG.paleoNinaToca, IMG.tallador), mus: MUS.paleoBajo, amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento], pj: null, auto: 4.4,
+          al: [{ t: .4, fn: () => flautaDibujo(FL.grande.base + 12, 1) }] },   // lo mismo que el padre, una octava más aguda
         { id: 'p8', nombre: 'El tallador y la niña', mus: MUS.paleoBajo, img: IMG.tallador, desc: 'El tallador con la flauta grande y una niña con la pequeña', pj: null, amb: [AMB.paleoBajo, AMB.fuegoBajo, AMB.grillos],
           inter: { tipo: 'juntos', fondoToca: IMG.paleoPadreFlauta, fondo: IMG.tallador, opciones: [5, 4, 3, 2, 1], flautas: [FL.grande, FL.pequena], quienG: 'Él · grande', quienP: 'Ella · pequeña', digitaciones: DIBUJO, ritmo: RITMO,
-            cartel: 'Él toca la grande y ella la pequeña. Pulsa primero <b>▶ Con la misma digitación</b>: los dos tapan los mismos agujeros. Después prueba las otras posiciones de la pequeña y <b>elige con cuál tiene que empezar</b> para que suene igual que la grande.',
+            cartel: 'Él toca la grande y ella la pequeña. Prueba primero con la <b>misma digitación</b> (los dos tapan todos los agujeros) y escucha. Después prueba las otras posiciones de la pequeña y <b>elige con cuál tiene que empezar</b> para que suene igual que la grande, pero más aguda.',
             titOpciones: 'Prueba la pequeña empezando con…', bien: '¡Ahora suenan igual! (la pequeña, una octava más aguda)', mal: 'Todavía no suenan igual. Prueba otra digitación.' } },
         { id: 'p8b', nombre: 'El tallador y la niña', mus: MUS.paleo, img: IMG.tallador, amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento], pj: { q: 'NINA', pose: 'feliz' }, antes: 1.6,
           lineas: [
@@ -377,18 +375,18 @@
          con dos DESTELLOS breves (~3 s) y SIN FECHA (ni rótulos ni contador): el trompista y el clarinetista envueltos en la nebulosa,
          cada uno con media frase lejana (eco, filtro, bajito) y el sonido de su instrumento (sampler) */
       { id: 'e9', titulo: 'Viaje de vuelta', planos: [
-        { id: 'p9a', nombre: 'Túnel · viaje de vuelta', tunel: { de: -40000, a: 2100, contador: false }, dur: 9.8, mus: MUS.viaje, amb: [],
+        { id: 'p9a', nombre: 'Túnel · viaje de vuelta', tunel: { de: -40000, a: 2100, contador: false, sigue: true }, dur: 9.8, mus: MUS.viaje, amb: [],
           sfx: [{ src: SF('sfx_salto_tiempo'), t: 0 }, { src: SF('sfx_destello'), t: 1.3, vol: .5 }, { src: SF('sfx_destello'), t: 5.3, vol: .5 }],
           destellos: [
-            { t: 1.4, dur: 3.2, video: 'vid/viaje_trompa.mp4', desde: 2.5, img: IMG.trompa, sfx: SF('sfx_eco_trompista'), vol: .9,
+            { t: 1.4, dur: 3.2, video: 'vid/viaje_trompa.mp4', desde: 2.5, img: IMG.trompa, quien: 'Trompista', texto: 'Cambio el tono: pongo este tubo, más largo…', sfx: SF('sfx_eco_trompista'), vol: .9,
               fn: () => frase('trompa', [51, 55, 58, 63], .9, .36, .5) },   // «Cambio el tono: pongo este tubo, más largo…» · Do–Mi–Sol–Do escrito, suena Mi♭
-            { t: 5.4, dur: 3.2, video: 'vid/viaje_clarinete.mp4', desde: 2.5, img: IMG.clarinete, sfx: SF('sfx_eco_clarinetista'), vol: .9,
+            { t: 5.4, dur: 3.2, video: 'vid/viaje_clarinete.mp4', desde: 2.5, img: IMG.clarinete, quien: 'Clarinetista', texto: 'Cojo el clarinete en la, un poco más largo…', sfx: SF('sfx_eco_clarinetista'), vol: .9,
               fn: () => frase('clarinete', [69, 71, 73, 74], .9, .32, .5) }   // «Cojo el clarinete en la, un poco más largo…» · Do–Re–Mi–Fa escrito, suena La–Si–Do♯–Re
           ] },
-        { id: 'p9e', nombre: 'Túnel · Noa', negro: true, fondoVid: 'vid/tunel.mp4', amb: [], vida: [{ tipo: 'anillos', zona: [.3, .15, .4, .7], n: 3, color: '#58b8ff' }, { tipo: 'polvo', zona: [0, 0, 1, 1], n: 20, color: '#9fdcff' }],
+        { id: 'p9e', nombre: 'Túnel · Noa', negro: true, funde: .9, fondoVid: 'vid/tunel_bucle.mp4', amb: [], vida: [{ tipo: 'anillos', zona: [.3, .15, .4, .7], n: 3, color: '#58b8ff' }, { tipo: 'polvo', zona: [0, 0, 1, 1], n: 20, color: '#9fdcff' }],
           lineas: [{ id: 't1_022', quien: 'NOA', pj: { q: 'NOA', pose: 'pensativa' }, texto: 'No es un error. Es una forma de hacer que el mismo dibujo encaje.' }] },
         /* la llegada a 2100 NO es anticlimática: destello, llegada fuerte, la música del viaje culmina y se va; luego, el ambiente del laboratorio */
-        { id: 'p9f', nombre: 'Vuelta al laboratorio', video: 'vid/vuelta.mp4', tunel: { de: -40000, a: 2100, contador: false }, dur: 5, blanco: 1.1, amb: [],
+        { id: 'p9f', nombre: 'Vuelta al laboratorio', video: 'vid/vuelta.mp4', fundeEntra: .8, tunel: { de: -40000, a: 2100, contador: false }, dur: 5, blanco: 1.1, amb: [],
           sfx: [{ src: SF('sfx_salto_tiempo'), t: 0, vol: .7 }, { src: SF('sfx_destello'), t: 3.6, vol: 1 }, { src: SF('sfx_llegada'), t: 3.9, vol: 1.3 }, { src: SF('sfx_impacto'), t: 3.9, vol: .7 }, { src: SFo('sfx_maquina_apaga'), t: 4.4, vol: .6 }],
           al: [{ t: 1.2, fn: () => B.musica({ src: 'mus/mus_viaje.mp3', vol: .9 }) }, { t: 4.2, fn: () => B.musica(null) }] }
       ] },
@@ -427,13 +425,16 @@
           lineas: [
             { id: 't1_res1', quien: 'NARRADOR', img: IMG.aulaNoaPapel, imgs: [{ en: .5, img: IMG.resInstr }], texto: 'Repasemos. Hay instrumentos que no suenan lo que leen: son los instrumentos transpositores. El saxo alto, el clarinete, la trompa…',
               claves: { claves: ['Instrumentos transpositores'], ens: [.25], pos: 'arriba' } },
+            /* (Iago 23:01) todos los transpositores de la orquesta; trombón y tuba, no */
+            { id: 't1_res1b', quien: 'NARRADOR', img: IMG.resOrq1, imgs: [{ en: .26, img: IMG.trompa }, { en: .47, img: IMG.resOrq2 }, { en: .84, img: IMG.resOrq3 }], texto: 'En la orquesta hay más instrumentos transpositores: el clarinete, la trompa, la trompeta en si bemol y el corno inglés, en fa. Otros solo cambian de octava: el flautín suena una octava más agudo de lo escrito, y el contrabajo y el contrafagot, una más grave. El trombón y la tuba, en cambio, se escriben tal como suenan.' },
             { id: 't1_res2', quien: 'NARRADOR', img: O(IMG.resTaller, IMG.paleoTalla), imgs: [{ en: .36, img: IMG.resFlautas }, { en: .7, img: IMG.paleoPadreFlauta }], texto: 'Antes no había fábricas: cada artesano hacía sus instrumentos a mano, y cada uno salía de un tamaño distinto. Una flauta más larga suena más grave; una más corta, más aguda. Con la misma digitación, cada una daba el mismo dibujo… a otra altura.' },
             { id: 't1_res3', quien: 'NARRADOR', img: IMG.trompa, imgs: [{ en: .3, img: IMG.clarinete }, { en: .6, img: IMG.aulaNoaPapel }], texto: 'Por eso cada instrumento se escribe según su tamaño: la trompa cambiaba de tubo, el clarinetista elegía entre el clarinete en si bemol y el clarinete en la, y el saxo alto lee una sexta mayor más aguda de lo que suena. Así todos pueden leer con las mismas posiciones.',
               claves: { claves: ['Trompa: cambia de tubo', 'Clarinete en Si♭ o en La', 'Saxo alto: lee una 6.ª M más aguda'], ens: [.12, .38, .64], pos: 'arriba' } }
           ] },
         { id: 'p11c', nombre: 'Dos formas', img: IMG.defDosFormas, amb: [AMB.labBajo], pj: null,
           lineas: [
-            { id: 't1_027', quien: 'NARRADOR', img: IMG.defDosFormas, texto: 'Hay dos formas de hacerlo: escribiéndolo de nuevo, o en tu cabeza mientras tocas.', claves: { claves: ['Escrito', 'Mental'], ts: [2.4, 4] } }
+            { id: 't1_027', quien: 'NARRADOR', img: IMG.orquesta, imgs: [{ en: .3, img: IMG.aula }, { en: .6, img: IMG.defDosFormas }], texto: 'Por eso, para tocar juntos, estos instrumentos necesitan transportar. Y no solo ellos: también hace falta, por ejemplo, cuando una canción queda demasiado aguda o demasiado grave para quien la canta. Hay dos formas de hacer el transporte: escribiéndolo de nuevo, que se llama transporte escrito, o en tu cabeza mientras tocas, que se llama transporte mental.',
+              claves: { claves: ['Transporte escrito', 'Transporte mental'], ts: [15.1, 18.4] } }   /* (Iago 23:04) retoma por qué hace falta transportar */
           ] }
       ] },
       /* 12 · Cierre */
