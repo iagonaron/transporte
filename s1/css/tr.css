@@ -51,6 +51,7 @@ button{font-family:var(--f-ui)}
 #escena.con-inter .tr-pj{opacity:0}
 .tr-claves{position:absolute;left:24%;right:24%;top:30%;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:16px}
 .tr-claves.lista{flex-direction:column}
+.tr-claves.tal .tr-clave{text-transform:none!important;letter-spacing:.02em}
 .tr-clave{font:600 52px/1.1 'DM Sans',var(--f-ui);text-transform:uppercase;letter-spacing:.06em;color:#fff;padding:14px 26px;border-radius:10px;background:rgba(6,12,26,.72);border:2px solid var(--borde);opacity:0}
 .tr-clave{transition:opacity .7s ease}.tr-clave.on{opacity:1;transition:opacity .25s ease}
 .tr-claves.pos-arriba{top:8.5%}.tr-claves.pos-izq{left:4%;right:auto;top:26%;flex-direction:column;align-items:flex-start}.tr-claves.pos-der{right:4%;left:auto;top:26%;flex-direction:column;align-items:flex-end}
