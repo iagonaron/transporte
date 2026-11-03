@@ -54,7 +54,12 @@ a.nodo.off .t,a.nodo.off .hz{color:#5b6d93}
 #amb.mudo .x{display:inline}
 #amb:hover,#amb:focus-visible{background:rgba(99,230,255,.16);color:var(--ambar);outline:none}
 #amb:hover .marco,#amb:focus-visible .marco{opacity:1}
-#ambtip{position:absolute;right:166px;top:93px;z-index:5;white-space:nowrap;font:500 18px/1 'Plex';letter-spacing:.04em;color:var(--tinta);
+#pc{position:absolute;right:166px;top:84px;z-index:5;width:56px;height:56px;padding:0;border:0;background:rgba(6,12,29,.55);color:var(--cian);cursor:pointer}
+#pc svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}#pc .marco{fill:none;stroke:currentColor;stroke-width:2;opacity:.55}
+#pc:hover,#pc:focus-visible{background:rgba(99,230,255,.16);color:var(--ambar);outline:none}#pc .sal{display:none}#pc.on .ent{display:none}#pc.on .sal{display:inline}
+#pctip{position:absolute;right:166px;top:152px;z-index:5;white-space:nowrap;font:500 18px/1 'Plex';letter-spacing:.04em;color:var(--tinta);opacity:0;transition:opacity .2s;pointer-events:none}
+#pc:hover + #pctip,#pc:focus-visible + #pctip{opacity:1}
+#ambtip{position:absolute;right:96px;top:152px;z-index:5;white-space:nowrap;font:500 18px/1 'Plex';letter-spacing:.04em;color:var(--tinta);
   background:rgba(6,12,29,.8);padding:10px 14px;opacity:0;pointer-events:none;transition:opacity .2s}
 #amb:hover + #ambtip,#amb:focus-visible + #ambtip{opacity:1}
 </style>
@@ -63,12 +68,17 @@ a.nodo.off .t,a.nodo.off .hz{color:#5b6d93}
 <div id="esc">
   <div class="fondo" aria-hidden="true"><video muted autoplay loop playsinline poster="s1/img/t1/coruna2100.webp" src="s1/vid/portada_coruna2100.mp4"></video></div>
   <div class="top"><span class="sup">Unidad 9 · 2.º GP</span><h1>Transporte</h1><p class="lead">Una máquina escondida bajo la Torre que viaja como el sonido: <b>en ondas</b>. Cada salto, a una frecuencia más alta.</p></div>
-  <svg class="onda" viewBox="0 0 1920 1080" aria-hidden="true"><path d="M0 915.0 L10 909.6 L20 903.9 L30 898.1 L40 892.2 L50 886.1 L60 880.0 L70 873.9 L80 867.8 L90 861.9 L100 856.1 L110 850.4 L120 845.0 L130 839.8 L140 835.0 L150 830.5 L160 826.4 L170 822.7 L180 819.4 L190 816.6 L200 814.2 L210 812.4 L220 811.1 L230 810.3 L240 810.0 L250 810.3 L260 811.1 L270 812.4 L280 814.2 L290 816.6 L300 819.4 L310 822.7 L320 826.4 L330 830.5 L340 835.0 L350 839.8 L360 845.0 L370 850.4 L380 856.1 L390 861.9 L400 867.8 L410 873.9 L420 880.0 L430 886.1 L440 892.2 L450 898.1 L460 903.9 L470 909.6 L480 915.0 L490 920.2 L500 925.0 L510 929.5 L520 933.6 L530 937.3 L540 940.6 L550 943.4 L560 945.8 L570 947.6 L580 948.9 L590 949.7 L600 950.0 L610 949.7 L620 948.9 L630 947.6 L640 945.8 L650 943.4 L660 940.6 L670 937.3 L680 933.6 L690 929.5 L700 925.0 L710 920.2 L720 915.0 L730 909.6 L740 903.9 L750 898.1 L760 892.2 L770 886.1 L780 880.0 L790 873.9 L800 867.8 L810 861.9 L820 856.1 L830 850.4 L840 845.0 L850 839.8 L860 835.0 L870 830.5 L880 826.4 L890 822.7 L900 819.4 L910 816.6 L920 814.2 L930 812.4 L940 811.1 L950 810.3 L960 810.0 L970 810.3 L980 811.1 L990 812.4 L1000 814.2 L1010 816.6 L1020 819.4 L1030 822.7 L1040 826.4 L1050 830.5 L1060 835.0 L1070 839.8 L1080 845.0 L1090 850.4 L1100 856.1 L1110 861.9 L1120 867.8 L1130 873.9 L1140 880.0 L1150 886.1 L1160 892.2 L1170 898.1 L1180 903.9 L1190 909.6 L1200 915.0 L1210 920.2 L1220 925.0 L1230 929.5 L1240 933.6 L1250 937.3 L1260 940.6 L1270 943.4 L1280 945.8 L1290 947.6 L1300 948.9 L1310 949.7 L1320 950.0 L1330 949.7 L1340 948.9 L1350 947.6 L1360 945.8 L1370 943.4 L1380 940.6 L1390 937.3 L1400 933.6 L1410 929.5 L1420 925.0 L1430 920.2 L1440 915.0 L1450 909.6 L1460 903.9 L1470 898.1 L1480 892.2 L1490 886.1 L1500 880.0 L1510 873.9 L1520 867.8 L1530 861.9 L1540 856.1 L1550 850.4 L1560 845.0 L1570 839.8 L1580 835.0 L1590 830.5 L1600 826.4 L1610 822.7 L1620 819.4 L1630 816.6 L1640 814.2 L1650 812.4 L1660 811.1 L1670 810.3 L1680 810.0 L1690 810.3 L1700 811.1 L1710 812.4 L1720 814.2 L1730 816.6 L1740 819.4 L1750 822.7 L1760 826.4 L1770 830.5 L1780 835.0 L1790 839.8 L1800 845.0 L1810 850.4 L1820 856.1 L1830 861.9 L1840 867.8 L1850 873.9 L1860 880.0 L1870 886.1 L1880 892.2 L1890 898.1 L1900 903.9 L1910 909.6 L1920 915.0" fill="none" stroke="#63e6ff" stroke-width="3" opacity=".9"/><path d="M0 849.7 L10 853.2 L20 857.5 L30 862.5 L40 868.0 L50 873.9 L60 880.0 L70 886.1 L80 892.0 L90 897.5 L100 902.5 L110 906.8 L120 910.3 L130 912.9 L140 914.5 L150 915.0 L160 914.5 L170 912.9 L180 910.3 L190 906.8 L200 902.5 L210 897.5 L220 892.0 L230 886.1 L240 880.0 L250 873.9 L260 868.0 L270 862.5 L280 857.5 L290 853.2 L300 849.7 L310 847.1 L320 845.5 L330 845.0 L340 845.5 L350 847.1 L360 849.7 L370 853.2 L380 857.5 L390 862.5 L400 868.0 L410 873.9 L420 880.0 L430 886.1 L440 892.0 L450 897.5 L460 902.5 L470 906.8 L480 910.3 L490 912.9 L500 914.5 L510 915.0 L520 914.5 L530 912.9 L540 910.3 L550 906.8 L560 902.5 L570 897.5 L580 892.0 L590 886.1 L600 880.0 L610 873.9 L620 868.0 L630 862.5 L640 857.5 L650 853.2 L660 849.7 L670 847.1 L680 845.5 L690 845.0 L700 845.5 L710 847.1 L720 849.7 L730 853.2 L740 857.5 L750 862.5 L760 868.0 L770 873.9 L780 880.0 L790 886.1 L800 892.0 L810 897.5 L820 902.5 L830 906.8 L840 910.3 L850 912.9 L860 914.5 L870 915.0 L880 914.5 L890 912.9 L900 910.3 L910 906.8 L920 902.5 L930 897.5 L940 892.0 L950 886.1 L960 880.0 L970 873.9 L980 868.0 L990 862.5 L1000 857.5 L1010 853.2 L1020 849.7 L1030 847.1 L1040 845.5 L1050 845.0 L1060 845.5 L1070 847.1 L1080 849.7 L1090 853.2 L1100 857.5 L1110 862.5 L1120 868.0 L1130 873.9 L1140 880.0 L1150 886.1 L1160 892.0 L1170 897.5 L1180 902.5 L1190 906.8 L1200 910.3 L1210 912.9 L1220 914.5 L1230 915.0 L1240 914.5 L1250 912.9 L1260 910.3 L1270 906.8 L1280 902.5 L1290 897.5 L1300 892.0 L1310 886.1 L1320 880.0 L1330 873.9 L1340 868.0 L1350 862.5 L1360 857.5 L1370 853.2 L1380 849.7 L1390 847.1 L1400 845.5 L1410 845.0 L1420 845.5 L1430 847.1 L1440 849.7 L1450 853.2 L1460 857.5 L1470 862.5 L1480 868.0 L1490 873.9 L1500 880.0 L1510 886.1 L1520 892.0 L1530 897.5 L1540 902.5 L1550 906.8 L1560 910.3 L1570 912.9 L1580 914.5 L1590 915.0 L1600 914.5 L1610 912.9 L1620 910.3 L1630 906.8 L1640 902.5 L1650 897.5 L1660 892.0 L1670 886.1 L1680 880.0 L1690 873.9 L1700 868.0 L1710 862.5 L1720 857.5 L1730 853.2 L1740 849.7 L1750 847.1 L1760 845.5 L1770 845.0 L1780 845.5 L1790 847.1 L1800 849.7 L1810 853.2 L1820 857.5 L1830 862.5 L1840 868.0 L1850 873.9 L1860 880.0 L1870 886.1 L1880 892.0 L1890 897.5 L1900 902.5 L1910 906.8 L1920 910.3" fill="none" stroke="#63e6ff" stroke-width="1.5" opacity=".35"/></svg>
+  <svg class="onda" viewBox="0 0 1920 1080" aria-hidden="true"><path id="ondaA" d="" fill="none" stroke="#63e6ff" stroke-width="3" opacity=".9"/><path id="ondaB" d="" fill="none" stroke="#63e6ff" stroke-width="1.5" opacity=".35"/></svg>
   <span class="anillo on" style="left:420px;top:880px"></span><span class="anillo on" style="left:780px;top:880px"></span><span class="anillo off" style="left:1140px;top:880px"></span><span class="anillo off" style="left:1500px;top:880px"></span>
   <a class="nodo" data-ir="s1/" style="left:420px"><span class="hz">220 Hz</span><span class="t">El mismo dibujo, a otra altura</span><span class="d">Transporte 1</span></a>
   <a class="nodo" data-ir="s2/" style="left:780px"><span class="hz">440 Hz</span><span class="t">La misma canción, más grave</span><span class="d">Transporte 2</span></a>
   <a class="nodo off" aria-disabled="true" style="left:1140px"><span class="hz">880 Hz</span><span class="t">?</span><span class="d">Transporte 3</span></a>
   <a class="nodo off" aria-disabled="true" style="left:1500px"><span class="hz">1760 Hz</span><span class="t">?</span><span class="d">Transporte 4</span></a>
+  <button id="pc" type="button" aria-label="Pantalla completa">
+    <svg viewBox="0 0 56 56" aria-hidden="true"><polygon class="marco" points="10,1 55,1 55,46 46,55 1,55 1,10"/>
+      <g class="ent" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M17 24v-7h7M32 17h7v7M39 32v7h-7M24 39h-7v-7"/></g>
+      <g class="sal" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M24 17v7h-7M39 24h-7v-7M32 39v-7h7M17 32h7v7"/></g></svg>
+  </button><span id="pctip">Pantalla completa</span>
   <button id="amb" type="button" aria-label="Silenciar el ambiente" aria-pressed="false" data-estado="espera">
     <svg viewBox="0 0 56 56" aria-hidden="true"><polygon class="marco" points="10,1 55,1 55,46 46,55 1,55 1,10"/>
       <path d="M15 24h6l8-7v22l-8-7h-6z" fill="currentColor"/>
@@ -163,6 +173,38 @@ encaja(); addEventListener('resize', encaja);
 
   pinta();
   if (!silencio) monta(); /* si el navegador deja sonar sin gesto, ya suena (también al volver del teletransporte, ?tp=1) */
+})();
+</script>
+<script>
+/* (Iago 3-nov) las dos ondas de la portada animadas: la principal es una onda estacionaria cuyos nodos son las sesiones (220·440·880·1760 Hz);
+   la secundaria, semitransparente, viaja por detrás. Sin movimiento si el sistema pide reducirlo. */
+(function(){
+  var A = document.getElementById('ondaA'), Bo = document.getElementById('ondaB'); if (!A || !Bo) return;
+  var quieto = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function d(f){ var s = 'M'; for (var x = 0; x <= 1920; x += 10) s += (x ? ' L' : '') + x + ' ' + f(x).toFixed(1); return s; }
+  function pinta(t){
+    var a = Math.cos(t * 2 * Math.PI / 5.2);                       // la principal «respira» (periodo 5,2 s), quieta en los nodos
+    A.setAttribute('d', d(function(x){ return 880 + 70 * a * Math.cos(2 * Math.PI * (x - 600) / 720); }));
+    var fase = t * 55, am = 35 * (0.85 + 0.15 * Math.sin(t * 2 * Math.PI / 7));   // la secundaria viaja hacia la derecha
+    Bo.setAttribute('d', d(function(x){ return 880 + am * Math.cos(2 * Math.PI * (x - 150 - fase) / 360); }));
+  }
+  if (quieto) { pinta(0); return; }
+  var t0 = null;
+  function paso(ms){ if (t0 === null) t0 = ms; pinta((ms - t0) / 1000); requestAnimationFrame(paso); }
+  pinta(0); requestAnimationFrame(paso);
+})();
+</script>
+<script>
+/* (Iago 3-nov) botón de pantalla completa (también Safari/iPad con webkit) */
+(function(){
+  var b = document.getElementById('pc'), tip = document.getElementById('pctip'), de = document.documentElement; if (!b) return;
+  var pide = de.requestFullscreen || de.webkitRequestFullscreen, sale = document.exitFullscreen || document.webkitExitFullscreen;
+  if (!pide) { b.style.display = 'none'; return; }
+  function en(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function pinta(){ var o = en(); b.classList.toggle('on', o); b.setAttribute('aria-label', o ? 'Salir de pantalla completa' : 'Pantalla completa'); tip.textContent = o ? 'Salir de pantalla completa' : 'Pantalla completa'; }
+  b.addEventListener('click', function(ev){ ev.stopPropagation(); try { if (en()) sale.call(document); else pide.call(de); } catch (e) {} });
+  ['fullscreenchange', 'webkitfullscreenchange'].forEach(function(n){ document.addEventListener(n, pinta); });
+  pinta();
 })();
 </script>
 </body>
