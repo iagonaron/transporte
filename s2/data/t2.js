@@ -15,7 +15,7 @@
       mira: { neutra: 'izq', aburrida: 'izq', traviesa: 'izq', sorpresa: 'izq', pensativa: 'izq', emocion: 'izq' } },
     AMARO: { nombre: 'Dra. Amaro', color: '#c9b6ff', lado: 'der', alto: .84, dir: PJ1, _: 'explica', poses: ['explica', 'tableta', 'alarma', 'helada'],
       mira: { explica: 'izq', tableta: 'der', alarma: 'der', helada: 'der' } },
-    MADRE: { nombre: 'Mamá', color: '#ffc48a', lado: 'der', alto: .8, dir: PJ1, _: 'decepcion', poses: ['decepcion'] },
+    MADRE: { nombre: 'Mamá', color: '#ffc48a', lado: 'der', alto: .8, dir: PJ1, _: 'decepcion', poses: ['decepcion'], mira: { decepcion: 'der' } },   // (Iago 3-nov) caras hacia el centro: se voltea
     COPISTA: { nombre: 'Don Ramón', color: '#e9c48a', lado: 'der', poses: [] },
     MAESTRO: { nombre: 'Maestro de capilla', color: '#ffd9a0', lado: 'der', poses: [] }
   };
@@ -71,9 +71,9 @@
     madreSola: I2('casa_madre_sola', 'La madre sola a la mesa, mirando la lluvia; el plato de Noa intacto', { vida: LLUVIA([0, 0, .4, .8], 80).concat(POLVO()) }),
     plato: I2('casa_plato', 'DETALLE: el brazo de Lumi recoge el plato de Noa sin tocar', { vida: [{ tipo: 'apaga', zona: [.3, .1, .4, .4], dur: 4, color: '#ffcf8a' }].concat(POLVO()) }),
     /* laboratorio: con reserva de T1 (y la pose encima) mientras no lleguen las nuevas */
-    torre: O(I2('torre_amanecer', 'La Torre de Hércules al amanecer; Noa sube hacia la entrada', { vida: [{ tipo: 'faro', zona: [.5, .2, .4, 0] }].concat(POLVO('#cfe8ff')) }),
+    torre: O(I2('torre_amanecer', 'La Torre de Hércules esa misma noche, con lluvia; Noa sube deprisa hacia la entrada', { vida: [{ tipo: 'faro', zona: [.5, .2, .4, 0] }].concat(POLVO('#cfe8ff')) }),
       { src: T1('dron_torre'), vida: [{ tipo: 'faro', zona: [.36, .114, .42, 0] }, { tipo: 'drones', zona: [.45, .0, .55, .25], n: 3 }] }),
-    labEspera: O(I2('lab_amaro_espera', 'Laboratorio al amanecer: Amaro ya está, a la derecha, junto a la consola', { ocultaPj: ['AMARO'], vida: [{ tipo: 'anillos', zona: [.3, .05, .35, .6], n: 2 }].concat(POLVO('#cfe8ff')) }),
+    labEspera: O(I2('lab_amaro_espera', 'Laboratorio de noche: Amaro sigue allí, a la derecha, junto a la consola', { ocultaPj: ['AMARO'], vida: [{ tipo: 'anillos', zona: [.3, .05, .35, .6], n: 2 }].concat(POLVO('#cfe8ff')) }),
       { src: T1('laboratorio'), ocultaPj: ['NOA', 'AMARO'], vida: [{ tipo: 'anillos', zona: [.38, .05, .35, .62], n: 3 }].concat(POLVO('#cfe8ff')) }),
     labModulo: O(I2('lab_amaro_modulo', 'Amaro enseña el viejo módulo de Noa, mirando hacia ella', { ocultaPj: ['AMARO'], vida: [{ tipo: 'chispas', zona: [.4, .4, .2, .2], n: 8, color: '#7fd4ff' }].concat(POLVO('#cfe8ff')) }),
       { src: T1('lab_modulo'), vida: [{ tipo: 'respira', zona: [.12, .25, .35, .5], color: '#58c8ff', vel: 2 }].concat(POLVO()) }),
@@ -95,7 +95,7 @@
     archivo: I2('archivo_general', 'Archivo de la Capilla de Música: Don Ramón en su mesa bajo la ventana con lluvia; velas', { vida: LLUVIA([0, 0, .3, .5], 40).concat(VELA(.5, .4), POLVO('#ffe8c0')) }),
     pluma: I2('copista_pluma', 'DETALLE: la mano de Don Ramón copia con pluma y tinta en papel pautado', { vida: VELA(.8, .2).concat(POLVO('#ffe8c0')) }),
     maestro: I2('archivo_maestro', 'El maestro de capilla entra con prisa, partitura en alto', { vida: POLVO('#ffe8c0') }),
-    himno: I2('archivo_himno', 'DETALLE: el maestro deja el himno en la mesa y señala el pentagrama; un bajón apoyado en la pared', { vida: VELA(.2, .3).concat(POLVO('#ffe8c0')) }),
+    himno: I2('archivo_himno', 'DETALLE: el maestro deja el himno en la mesa y señala el pentagrama; un fagot barroco apoyado en la pared', { vida: VELA(.2, .3).concat(POLVO('#ffe8c0')) }),
     copista: I2('archivo_copista', 'Don Ramón resopla y señala el montón de partes por copiar', { vida: VELA(.7, .35).concat(POLVO('#ffe8c0')) }),
     noaAsoma: I2('archivo_noa_asoma', 'Noa se asoma por la puerta del claustro, mojada, mano a medio levantar', { ocultaPj: ['NOA'], vida: LLUVIA([.6, 0, .4, .8], 50).concat(POLVO('#ffe8c0')) }),
     copistaMira: I2('archivo_copista_mira', 'Don Ramón mira a Noa de arriba abajo por encima de los anteojos', { vida: POLVO('#ffe8c0') }),
@@ -103,7 +103,7 @@
     mesa: I2('archivo_mesa', 'Cenital SIN personas: la mesa del copista (papel pautado, pluma, tintero, vela); centro limpio', { vida: VELA(.85, .2).concat(POLVO('#ffe8c0')) }),
     copistaSorpresa: I2('archivo_copista_sorpresa', 'Don Ramón sostiene la hoja nueva a contraluz, admirado; Noa con media sonrisa', { ocultaPj: ['NOA'], vida: VELA(.2, .3).concat(POLVO('#ffe8c0')) }),
     noaLejos: I2('archivo_noa_lejos', 'Noa, primer plano, mira la ventana con lluvia: sonrisa melancólica', { ocultaPj: ['NOA'], vida: LLUVIA([.6, 0, .4, .7], 50) }),
-    ministriles: I2('ministriles', 'Galería del claustro: los tres ministriles tocan (chirimía, sacabuche, bajón); el maestro marca el compás', { vida: LLUVIA([0, 0, 1, .5], 80).concat(POLVO('#ffe8c0')) }),
+    ministriles: I2('ministriles', 'Galería del claustro: los tres ministriles tocan (chirimía, sacabuche, fagot barroco); el maestro marca el compás', { vida: LLUVIA([0, 0, 1, .5], 80).concat(POLVO('#ffe8c0')) }),
     bajon: I2('ministriles_bajon', 'El bajonista, rojo y apurado: se le quiebra la nota aguda', { vida: POLVO('#ffe8c0') }),
     tocan: I2('ministriles_tocan', 'Los tres tocan relajados el himno transportado; el maestro asiente', { vida: LLUVIA([0, 0, 1, .4], 60).concat(POLVO('#ffe8c0')) }),
     minNoa: I2('ministriles_noa', 'Noa escucha junto a una columna, satisfecha; los ministriles desenfocados', { ocultaPj: ['NOA'], vida: LLUVIA([0, 0, .4, .6], 50) }),
@@ -139,7 +139,13 @@
     bajon: [[55, 1], [59, 1], [62, 1], [60, .5], [59, .5], [57, 1], [54, 1], [55, 3]]
   };
   const NEGRA = .72;
+  /* (Iago 3-nov) en la escena 6 el himno suena GRABADO con muestras reales (chirimía/oboe, sacabuche/trombón antiguo, bajón/fagot; reverb de claustro):
+     s2/mus/himno_original.mp3 (con la quiebra del re4) y himno_fa.mp3; los hace audio/render_himno.py con estas mismas VOCES y NEGRA,
+     la 1.ª nota a 0,05 s del principio del fichero (así suena a la vez que antes: +0,1 s). Si falta el mp3, las notas sueltas de siempre. */
+  const HIMNO_MP3 = { orig: 'mus/himno_original.mp3', fa: 'mus/himno_fa.mp3' };
   function tocaHimno(semis, quiebra) {
+    const mp3 = quiebra && semis === 0 ? HIMNO_MP3.orig : !quiebra && semis === -2 ? HIMNO_MP3.fa : null;
+    if (mp3 && B.buf[mp3]) { const h = B.suena(mp3, { t: B.ac().currentTime + .05, bus: B.bus.sfx, vol: 1, grupo: 'sfx' }); if (V().suelta) V().suelta(h); return; }
     const t0 = B.ac().currentTime + .1, corta = quiebra ? 2.6 : 99;
     Object.keys(VOCES).forEach(ins => { let t = 0; VOCES[ins].forEach(([m, d], i) => {
       if (t >= corta) return;
@@ -158,7 +164,7 @@
       SF1('sfx_anillos_giran'), SF1('sfx_maquina_arranca'), SF1('sfx_anillo_encaja'), SF1('sfx_pulsera_vibra'), SF1('sfx_puerta_scifi'), SF1('sfx_estuche_cierra'),
       SFo('sfx_lumi'), SFo('sfx_plato'), SFo('sfx_silla'), SFo('sfx_puerta_casa'), SFo('sfx_campanas'), SFo('sfx_pluma'), SFo('sfx_papel'), SFo('sfx_pasos_piedra')]
       .concat(Object.keys(IMG).map(k => B.primero(IMG[k])).filter(q => q && !q.falta).map(q => q.src))
-      .concat(B.viento.SAX_RUTAS, B.viento.UI_RUTAS, B.viento.MUESTRAS_RUTAS || []),
+      .concat(B.viento.SAX_RUTAS, B.viento.UI_RUTAS, B.viento.MUESTRAS_RUTAS || [], [HIMNO_MP3.orig, HIMNO_MP3.fa]),
     escenas: [
       /* 0 · Arranque sin palabras: Coruña 2100 al anochecer → el edificio de la madre → la puerta se abre */
       { id: 'e0', titulo: 'Entrada', planos: [
@@ -177,7 +183,7 @@
             { id: 't2_004', quien: 'NOA', img: IMG.noaPlato, pj: { q: 'NOA', pose: 'aburrida' }, texto: 'Estoy aquí, ¿no?', espera: .6 },
             { id: 't2_005', quien: 'MADRE', img: IMG.madreFoto, pj: { q: 'MADRE', pose: 'decepcion' }, texto: 'Estás aquí… como estaba tu padre. Aquí, pero no.', espera: .5 },
             { id: 't2_006', quien: 'NOA', img: IMG.noaCrispada, pj: { q: 'NOA', pose: 'aburrida' }, texto: 'No empieces con papá.', espera: .6 },
-            { id: 't2_007', quien: 'MADRE', img: IMG.dos, pj: { q: 'MADRE', pose: 'decepcion' }, texto: 'Solo digo que no quiero que nos pase lo mismo que a nosotros.', espera: .4 },
+            { id: 't2_007', quien: 'MADRE', img: IMG.dos, pj: { q: 'MADRE', pose: 'decepcion' }, texto: 'Tu padre y yo dejamos de hablarnos poco a poco. No quiero que nos pase lo mismo a nosotras.', espera: .4 },
             { id: 't2_008', quien: 'NOA', img: IMG.noaLevanta, pj: { q: 'NOA', pose: 'aburrida' }, sfx: [{ src: SFo('sfx_silla'), t: 0, vol: .7 }, { src: SF1('sfx_estuche_cierra'), en: .6, vol: .6 }],
               texto: 'Me voy. Tengo mucho trabajo, mamá. Tengo cosas más importantes que esto.' }
           ] },
@@ -191,13 +197,13 @@
         { id: 'p2a', nombre: 'La Torre, de mañana', img: IMG.torre, amb: [AMB.mar, AMB.labBajo], mus: MUS.lab, pj: null, antes: .8,
           lineas: [
             { id: 't2_009', quien: 'NARRADOR', imgs: [{ en: .5, img: IMG.labEspera }], amb: [AMB.lab], sfx: [{ src: SF1('sfx_puerta_scifi'), en: .48, vol: .6 }],
-              texto: 'A la mañana siguiente, Noa llega a la Torre antes que nadie. Pero la doctora Amaro ha llegado aún antes.' },
+              texto: 'Noa no tenía que volver a la Torre hasta el día siguiente. Pero esa misma noche fue directa allí. Y no estaba sola: la doctora Amaro también seguía allí.' },
             { id: 't2_010', quien: 'AMARO', img: IMG.labModulo, imgs: [{ en: .55, img: IMG.labRegMod }], pj: { q: 'AMARO', pose: 'tableta' }, poses: [{ en: .6, pose: 'explica' }],
               texto: 'He revisado el registro línea por línea… y he encontrado esto. Un módulo que no aparece en ningún plano. ¿Lo pusiste tú?', claves: { claves: ['Un módulo que no está en los planos'], ens: [.58], pos: 'izq' } },
-            { id: 't2_011', quien: 'NOA', img: IMG.labNoa, pj: { q: 'NOA', pose: 'traviesa' }, texto: 'Sí. Pero no te voy a decir para qué.', espera: .4 },
-            { id: 't2_012', quien: 'AMARO', img: IMG.labDos, pj: { q: 'AMARO', pose: 'alarma' }, texto: 'Ayer viajaste cuarenta mil años atrás. ¿Sabes lo peligroso que es eso?', claves: { claves: ['−40 000 años'], ens: [.25], pos: 'arriba' } },
-            { id: 't2_013', quien: 'NOA', img: IMG.labNoa, pj: { q: 'NOA', pose: 'neutra' }, texto: 'Por eso hoy no iremos tan atrás. Solo un poco. Tú controlas la consola.' },
-            { id: 't2_014', quien: 'AMARO', img: IMG.labDos, pj: { q: 'AMARO', pose: 'tableta' }, texto: 'Unos siglos. Ni uno más.', espera: .5 }
+            { id: 't2_011', quien: 'NOA', img: IMG.labNoa, pj: { q: 'NOA', pose: 'traviesa' }, texto: '¿Eso? Ni idea. No lo había visto en mi vida.', espera: .6 },
+            { id: 't2_012', quien: 'AMARO', img: IMG.labDos, pj: { q: 'AMARO', pose: 'alarma' }, texto: 'Ya, claro. Ayer viajaste cuarenta mil años atrás. ¿Sabes lo peligroso que es eso?', claves: { claves: ['−40 000 años'], ens: [.35], pos: 'arriba' } },
+            { id: 't2_013', quien: 'NOA', img: IMG.labNoa, pj: { q: 'NOA', pose: 'neutra' }, texto: 'Por eso hoy no iremos tan atrás. Solo un poco. Mi padre no se habría rendido a la primera, ¿verdad?' },
+            { id: 't2_014', quien: 'AMARO', img: IMG.labDos, pj: { q: 'AMARO', pose: 'tableta' }, texto: 'Tu padre… Está bien. Unos siglos. Ni uno más.', espera: .5 }
           ] },
         /* mientras Amaro se gira a la consola, Noa abre a escondidas el cuaderno de su padre y teclea el destino en su pulsera */
         { id: 'p2b', nombre: 'El cuaderno del padre', img: O(IMG.labCuaderno, IMG.cuaderno), amb: [AMB.lab], pj: null, antes: 2.4, sfx: [{ src: SFo('sfx_papel'), t: .6, vol: .7 }],
@@ -207,6 +213,17 @@
               laminas: [{ en: .62, lamina: null }], sfx: [{ src: SF1('sfx_ui_clic'), en: .66 }, { src: SF1('sfx_ui_clic'), en: .72 }, { src: SF1('sfx_destello'), en: .82, vol: .6 }],
               texto: 'Lo que Amaro no ve es que Noa ya ha elegido el destino. Lo ha sacado del cuaderno de su padre.' }
           ] },
+        /* (Iago 3-nov) antes del salto, otra vez lo de las frecuencias, pero con DECIBELIOS: cuatro señales, un sonómetro en cada una
+           (js/decibelios.js · css/decibelios.css). Al activarse suenan los anillos; el arranque de la máquina lo pone p2c */
+        { id: 'p2cal', nombre: 'Calibrar la intensidad', img: { src: T1('prueba_consola'), vida: [{ tipo: 'traza', zona: [.40, .48, .33, .07], periodo: .16 }, { tipo: 'parpadeo', zona: [.38, .33, .36, .25], color: '#9fe4ff' }] },
+          amb: [AMB.lab], ambInter: [AMB.labBajo], mus: MUS.lab,
+          lineas: [{ id: 't2_015b', quien: 'AMARO', pj: { q: 'AMARO', pose: 'tableta' }, texto: 'Esta vez calibramos la intensidad. Cada señal, en su nivel exacto. Ni un decibelio de más.' }],
+          inter: { tipo: 'decibelios',
+            escala: [40, 100], canales: [{ hz: 220, obj: 62, pos: .46 }, { hz: 440, obj: 76, pos: .78 }, { hz: 880, obj: 52, pos: .34 }, { hz: 1760, obj: 88, pos: .62 }],   /* (Iago 09:56) misma escala 40–100; el objetivo en otro sitio del dial y del deslizador */
+            cartel: 'Calibra la intensidad: sube cada señal hasta que su sonómetro quede justo en el centro de la zona marcada.',
+            cartelCorto: 'Sube cada señal hasta que la aguja quede <b>en el centro de la zona ámbar</b>. Afina con − y + (o con las flechas; con Mayús, de 10 en 10).',
+            textoFin: 'Intensidad calibrada: cada señal, en su nivel exacto.', destino: 'Intensidad calibrada · Destino: Santiago, hacia 1730',
+            sfxActiva: [SF1('sfx_anillos_giran')] } },
         { id: 'p2c', nombre: 'El Transportador se activa', img: IMG.maquina, amb: [AMB.lab], mus: MUS.tension, pj: null, auto: 3.4,
           sfx: [{ src: SF1('sfx_maquina_arranca'), t: .1 }, { src: SF1('sfx_anillos_giran'), t: 1.2 }] }
       ] },
@@ -227,9 +244,9 @@
         { id: 'p4a', nombre: 'Archivo de la Capilla de Música', img: IMG.archivo, amb: [AMB.archivo, AMB.organoBajo], mus: MUS.santiagoBajo, pj: null, antes: .8,
           lineas: [
             { id: 't2_018', quien: 'NARRADOR', imgs: [{ en: .5, img: IMG.pluma }], sfx: [{ src: SFo('sfx_pluma'), en: .5, vol: .7 }],
-              texto: 'En el archivo de la Capilla de Música trabaja un copista. Para esto no hay imprentas: cada parte se copia a mano, nota a nota.', claves: { claves: ['Copia a mano'], ens: [.62], pos: 'arriba' } },
+              texto: 'En el archivo de la Capilla de Música trabaja un copista. Ya existe la imprenta, pero la música de la catedral no se imprime: el maestro la compone para sus músicos, y cada parte se copia a mano, nota a nota.', claves: { claves: ['Copia a mano'], ens: [.62], pos: 'arriba' } },
             { id: 't2_019', quien: 'MAESTRO', img: IMG.maestro, imgs: [{ en: .5, img: IMG.himno }], sfx: [{ src: SFo('sfx_pasos_piedra'), t: 0, vol: .7 }, { src: SFo('sfx_papel'), en: .5, vol: .7 }],
-              texto: '¡Don Ramón! Los ministriles tocan este himno mañana en la procesión, y está demasiado agudo para el bajón. Cópielo un tono más grave.', claves: { claves: ['Un tono más grave'], ens: [.86], pos: 'arriba' } },
+              texto: '¡Don Ramón! Los ministriles tocan este himno mañana en la procesión, y está demasiado agudo para el fagot. Cópielo un tono más grave.', claves: { claves: ['Un tono más grave'], ens: [.86], pos: 'arriba' } },
             { id: 't2_020', quien: 'COPISTA', img: IMG.copista, texto: '¿Un tono más grave? ¿Todo? Nota por nota… no acabaré antes de vísperas.' },
             { id: 't2_021', quien: 'NOA', img: IMG.noaAsoma, texto: 'Puedo ayudarle. Sé hacerlo.', espera: .4 },
             { id: 't2_022', quien: 'COPISTA', img: IMG.copistaMira, texto: '¿Tú? …Está bien. Pero sin borrones.', espera: .4 },
@@ -241,15 +258,17 @@
       /* 5 · Interactivo 1: el transporte escrito, guiado (mecánica de Teoría PRO) */
       { id: 'e5', titulo: 'Copiar un tono más grave', planos: [
         { id: 'p5', nombre: 'La mesa del copista', img: IMG.mesa, amb: [AMB.archivo], ambInter: [{ src: SFl('amb_archivo'), vol: .16 }], mus: MUS.santiagoBajo, pj: null, auto: .6,
-          inter: { tipo: 'escrito', modo: 'guiado', melodia: HIMNO,
-            cartel: 'Ayuda a Don Ramón: el himno está en <b>Sol mayor</b> y hay que copiarlo <b>una 2.ª mayor más grave</b>. Primero elige con las ruedas la <b>tonalidad nueva</b> y su <b>armadura</b>. Después coloca cada nota en el pentagrama de abajo (la nota de arriba que toca se ilumina en ámbar). Cuando acabes, pulsa <b>Corregir</b>.',
+          inter: { tipo: 'escrito', modo: 'guiado', melodia: HIMNO, alterar: false,   /* (Iago 3-nov) en T2 sin alteraciones accidentales: fuera ♭ ♮ ♯ */
+            cartel: 'Ayuda a Don Ramón: el himno está en <b>Sol mayor</b> y hay que copiarlo <b>una 2.ª mayor más grave</b>. Primero elige con las ruedas la <b>tonalidad nueva</b> y su <b>armadura</b>. Después coloca cada nota en el pentagrama de abajo (la nota de arriba que toca se ilumina en rojo). Cuando acabes, pulsa <b>Corregir</b>.',
             cartelCorto: 'Tonalidad nueva y armadura con las ruedas; luego cada nota, <b>una 2.ª mayor más abajo</b>. Pulsa <b>▶ Original</b> para oír el himno.',
             pistas: { ton: 'La tónica también baja una 2.ª mayor: de sol, un tono más abajo.', arm: 'Noa ya lo ha dicho: fa mayor lleva un bemol en la armadura (si♭).',
               notas: 'Cada nota baja un grado: si estaba en una línea, va al espacio de justo debajo (y al revés). Las rojas no están en su sitio.' },
-            bien: '¡Ni un borrón! <b>Fa mayor</b>, un bemol, y cada nota una 2.ª mayor más abajo.' },
+            bien: '¡Ni un borrón! <b>Fa mayor</b>, un bemol, y cada nota una 2.ª mayor más abajo.', sigueAlAcertar: 1.6, piel: 'epoca' },
           despues: [
-            { id: 't2_024', quien: 'COPISTA', img: IMG.copistaSorpresa, sfx: [{ src: SFo('sfx_papel'), t: 0, vol: .6 }], texto: 'Ni un borrón. ¿Dónde aprendiste a escribir música tan deprisa?', amb: [AMB.archivo] },
-            { id: 't2_025', quien: 'NOA', img: IMG.noaLejos, pj: { q: 'NOA', pose: 'pensativa' }, texto: 'En un sitio muy lejos de aquí.', espera: 1 }
+            /* (Iago 3-nov) al acertar suena enseguida Don Ramón (sigueAlAcertar), sin esperar a «Continuar» */
+            { id: 't2_024', quien: 'COPISTA', img: IMG.copistaSorpresa, sfx: [{ src: SFo('sfx_papel'), t: 0, vol: .6 }], texto: 'Muy bien, muchacha. Nada mal. ¿Dónde aprendiste a hacer esto?', amb: [AMB.archivo] },
+            { id: 't2_025b', quien: 'COPISTA', img: IMG.copistaMira, texto: 'Y, por cierto, ¿qué son esos artilugios que llevas en el cuello y en la mano? Y esa ropa… es de lo más gallarda.', espera: .3 },
+            { id: 't2_025', quien: 'NOA', img: IMG.noaLejos, pj: { q: 'NOA', pose: 'traviesa' }, texto: 'Uf… es una historia muy larga. Creo que mejor no se lo cuento.', espera: 1 }
           ] }
       ] },
       /* 6 · Los ministriles lo tocan: el original (al bajón se le quiebra el re agudo) y el transportado */
@@ -260,20 +279,22 @@
           al: [{ t: .6, fn: () => tocaHimno(-2, false) }] },
         { id: 'p6c', nombre: 'Las diferencias · Sol M → Fa M', img: IMG.minNoa, amb: [AMB.lluviaBaja, AMB.organoBajo], mus: MUS.santiagoBajo, pj: null,
           lineas: [
-            { id: 't2_026', quien: 'NARRADOR', imgs: [{ en: .2, img: IMG.mesaLuz }], laminas: [{ en: .2, lamina: ARM('Las diferencias · Sol M → Fa M', ['Fa♯ → Fa', 'Si → Si♭'], [4.2, 7.4, 10.8]) }],
-              texto: 'Es el mismo himno, a otra altura. Pero al pasar de sol mayor a fa mayor, dos notas cambian: el fa, que era sostenido, ahora es natural; y el si, que era natural, ahora es bemol. Son las diferencias: dos, hacia abajo.', espera: 1 }
+            /* (Iago 3-nov) diferencias simplificadas: cuántas y hacia dónde (sin listar las notas) */
+            { id: 't2_026', quien: 'NARRADOR', imgs: [{ en: .2, img: IMG.mesaLuz }, { en: .62, img: IMG.pluma }],
+              laminas: [{ en: .2, lamina: Object.assign(ARM('Sol M (1♯) → Fa M (1♭) · 2 diferencias ↓', ['2 diferencias ↓'], [4]), { total: null }) }],
+              texto: 'Es el mismo himno, a otra altura. Al pasar de sol mayor a fa mayor, la armadura cambia en dos alteraciones, hacia abajo: un sostenido menos y un bemol más. Son las diferencias: dos, hacia abajo.', espera: 1 }
           ] }
       ] },
-      /* 7 · Interactivo 2: las diferencias (trCorregir de Teoría PRO) */
+      /* 7 · Interactivo 2: las diferencias (trCorregir de Teoría PRO), simplificado (Iago 3-nov): solo cuántas y hacia dónde */
       { id: 'e7', titulo: 'Las diferencias', planos: [
         { id: 'p7', nombre: 'Las diferencias', img: IMG.mesa, amb: [AMB.archivo], mus: MUS.santiagoBajo, pj: null, auto: .3,
-          inter: { tipo: 'diferencias',
-            cartel: 'Ahora tú: cuenta las <b>diferencias</b>. Mira las dos armaduras y elige <b>cuántas</b> notas cambian, si cambian <b>hacia arriba</b> (hacia los sostenidos) o <b>hacia abajo</b> (hacia los bemoles) y <b>cuáles</b> son. Después, <b>Corregir</b>.',
-            cartelCorto: 'Cuántas notas cambian, hacia dónde y cuáles. Después, <b>Corregir</b>.',
-            fin: 'Las diferencias: las notas que cambian de alteración al pasar de una armadura a la otra.',
+          inter: { tipo: 'diferencias', piel: 'epoca', notas: false,
+            cartel: 'Ahora tú: cuenta las <b>diferencias</b>. Mira las dos armaduras y elige <b>cuántas</b> alteraciones cambian y si van <b>hacia arriba</b> (más sostenidos o menos bemoles) o <b>hacia abajo</b> (más bemoles o menos sostenidos). Después, <b>Corregir</b>.',
+            cartelCorto: 'Cuántas diferencias y hacia dónde. Después, <b>Corregir</b>.',
+            fin: 'Las diferencias: cuántas alteraciones cambian de una armadura a la otra, y hacia dónde.',
             items: [
-              { de: { ton: 'Re Mayor', f: 2 }, a: { ton: 'Mi Mayor', f: 4 }, transp: '2.ª M ↑', bien: '¡Exacto! De 2♯ a 4♯: sol y re se suben (sol♯, re♯).', explica: 'De 2♯ a 4♯ se añaden dos sostenidos: sol♯ y re♯. Son <b>2 diferencias hacia arriba</b>.' },
-              { de: { ton: 'Fa Mayor', f: -1 }, a: { ton: 'Mi♭ Mayor', f: -3 }, transp: '2.ª M ↓', bien: '¡Exacto! De 1♭ a 3♭: mi y la se bajan (mi♭, la♭).', explica: 'De 1♭ a 3♭ se añaden dos bemoles: mi♭ y la♭. Son <b>2 diferencias hacia abajo</b>.' }
+              { de: { ton: 'Re Mayor', f: 2 }, a: { ton: 'Mi Mayor', f: 4 }, transp: '2.ª M ↑', bien: '¡Exacto! De 2♯ a 4♯: dos diferencias hacia arriba (dos sostenidos más).', explica: 'De 2♯ a 4♯ hay dos sostenidos más: son <b>2 diferencias hacia arriba</b>.' },
+              { de: { ton: 'Fa Mayor', f: -1 }, a: { ton: 'Mi♭ Mayor', f: -3 }, transp: '2.ª M ↓', bien: '¡Exacto! De 1♭ a 3♭: dos diferencias hacia abajo (dos bemoles más).', explica: 'De 1♭ a 3♭ hay dos bemoles más: son <b>2 diferencias hacia abajo</b>.' }
             ] } }
       ] },
       /* 8 · Vuelta: Amaro sospecha; Noa borra la segunda coordenada */
@@ -285,9 +306,9 @@
           sfx: [{ src: SF1('sfx_salto_tiempo'), t: 0, vol: .6 }, { src: SF1('sfx_destello'), t: 3.6, vol: .9 }, { src: SF1('sfx_llegada'), t: 3.9, vol: 1.1 }, { src: SF1('sfx_impacto'), t: 3.9, vol: .5 }, { src: SF1o('sfx_maquina_apaga'), t: 4.4, vol: .6 }] },
         { id: 'p8d', nombre: 'Laboratorio · ¿casualidad?', img: IMG.amaroSospecha, amb: [AMB.lab], pj: null, antes: 1,
           lineas: [
-            { id: 't2_028', quien: 'AMARO', pj: { q: 'AMARO', pose: 'helada' }, texto: 'Unos siglos, dije… y has ido a parar justo a Santiago. ¿Casualidad?' },
+            { id: 't2_028', quien: 'AMARO', pj: { q: 'AMARO', pose: 'helada' }, texto: 'Qué curioso… Solo programé que viajaras unos siglos atrás, y has aparecido en Santiago. No logro entenderlo.' },
             { id: 't2_029', quien: 'NOA', img: IMG.noaSonrisa, pj: { q: 'NOA', pose: 'traviesa' }, texto: 'Será que a la máquina le gustan las campanas.', espera: .4 },
-            { id: 't2_030', quien: 'AMARO', img: IMG.amaroFirme, pj: { q: 'AMARO', pose: 'explica' }, texto: 'El módulo es tuyo, de acuerdo. Pero desde hoy, el destino lo elijo yo.' },
+            { id: 't2_030', quien: 'AMARO', img: IMG.amaroFirme, pj: { q: 'AMARO', pose: 'explica' }, texto: 'El módulo es tu herencia, de acuerdo. Pero recuerda que aquí los parámetros y el destino los elijo yo.' },
             /* en la pantalla del registro parpadea una SEGUNDA coordenada; mientras Amaro se gira, Noa la borra */
             { id: 't2_031', quien: 'NOA', img: IMG.registro, imgs: [{ t: 1.9, img: IMG.dedo }], lamina: REG({ fila: 1, t: 2.8 }), pj: null,
               sfx: [{ src: SF1('sfx_ui_clic'), t: 2.7, vol: .9 }], texto: 'Claro.', espera: 4.2 }
@@ -300,9 +321,9 @@
             { id: 't2_032', quien: 'NARRADOR', lamina: ARM('1 · La tonalidad nueva y su armadura'),
               laminas: [{ en: .52, lamina: { tipo: 'melodias', titulo: '2 · Cada nota, el mismo intervalo', ex: B.escrito.fijo(HIMNO), paso: .62, t0: .3 } }],
               texto: 'Transportar por escrito es copiar la obra de nuevo en otra tonalidad. Primero decides la tonalidad nueva y su armadura. Después mueves cada nota el mismo intervalo.', espera: .6 },
-            { id: 't2_033', quien: 'NARRADOR', img: IMG.tocan, lamina: null, imgs: [{ en: .4, img: IMG.pluma }],
-              texto: 'Su ventaja: cuando ya está escrito, solo tienes que tocarlo. Sus desventajas: lleva tiempo, y la partitura original ya no te sirve para esa versión.',
-              claves: { claves: ['Ventaja: solo tocarlo', 'Lleva tiempo', 'El original ya no sirve'], ens: [.1, .5, .72], pos: 'arriba' } },
+            { id: 't2_033', quien: 'NARRADOR', img: IMG.pluma, lamina: null, imgs: [{ en: .6, img: IMG.tocan }],
+              texto: 'Sus desventajas: lleva tiempo, y la partitura original ya no te sirve para esa versión. Su ventaja: cuando ya está escrito, solo tienes que tocarlo.',
+              claves: { claves: ['Lleva tiempo', 'El original ya no sirve', 'Ventaja: solo tocarlo'], ens: [.14, .33, .66], pos: 'arriba' } },
             { id: 't2_034', quien: 'NARRADOR', img: IMG.nocheNoa, texto: '¿Y si no hubiera tiempo para copiarla? Entonces habría que transportar en la cabeza, mientras se toca. Pero eso… será otro viaje.',
               claves: { claves: ['Transporte mental'], ens: [.55], pos: 'arriba' }, espera: 1.2 }
           ] }
@@ -310,8 +331,8 @@
       /* 10 · Ejercicio final (generador TR_ESC, 3 melodías de dificultad creciente, con nota) y cierre */
       { id: 'e10', titulo: 'Ejercicio final', planos: [
         { id: 'p10', nombre: 'Ejercicio final', img: IMG.mesaLuz, amb: [AMB.labBajo], mus: MUS.resumen, pj: null, auto: .4,
-          inter: { tipo: 'escrito', modo: 'final', niveles: [1, 2, 3],
-            cartel: 'Ejercicio final: <b>tres melodías</b>, cada una un poco más difícil. En cada una, elige la <b>tonalidad nueva</b> y su <b>armadura</b>, coloca todas las notas transportadas y pulsa <b>Corregir</b> (una sola vez). Al final verás tu nota.',
+          inter: { tipo: 'escrito', modo: 'final', niveles: [1, 2, 3], alterar: false, opcional: true,   /* (Iago 3-nov) opcional: practicar o volver al menú */
+            cartel: 'Si quieres, practica con el ejercicio final: <b>tres melodías</b>, cada una un poco más difícil. En cada una, elige la <b>tonalidad nueva</b> y su <b>armadura</b>, coloca todas las notas transportadas y pulsa <b>Corregir</b> (una sola vez). Al final verás tu nota.',
             cartelCorto: 'Tonalidad nueva + armadura + cada nota transportada. Después, <b>Corregir</b>.' } },
         { id: 'p10b', nombre: 'Cierre · el cuaderno', img: IMG.cierre, amb: [AMB.labBajo], mus: MUS.cierre, pj: null, auto: 9,
           imgs: [{ t: 4.6, img: IMG.cuadernoOtra }], sfx: [{ src: SFo('sfx_papel'), t: 4.2, vol: .6 }] }
