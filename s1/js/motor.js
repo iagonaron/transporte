@@ -74,6 +74,7 @@
       const fdLam = M._congelado ? 0 : fd;   // desde un vídeo congelado, lo que se funde es el vídeo (encima), no la lámina
       if (fdLam) { nuevo.style.opacity = '0'; nuevo.style.transition = 'opacity ' + fdLam + 's ease'; }
       if (vfondo && vfondo.parentNode === f) f.insertBefore(nuevo, vfondo); else f.appendChild(nuevo);
+      if (o.anima && nuevo.animate) nuevo.animate(o.anima.k, o.anima.o);   // p. ej. el recuerdo entra desenfocado y cálido y se enfoca
       requestAnimationFrame(() => requestAnimationFrame(() => {
         if (mi !== gen) return;
         if (fdLam) { nuevo.style.opacity = '1'; trasPintar(0); setTimeout(() => { if (mi === gen) B.$$('.lam', f).forEach(e => { if (e !== nuevo) e.remove(); }); }, fdLam * 1000 + 60); return; }
@@ -124,10 +125,19 @@
     });
   }
 
+  /* ENSOÑACIÓN (Iago 3-nov): p.ensueno = 'entra' → la lámina que se ve ondula, se desenfoca, brilla y se entibia a la vez que suena el arpa
+     (dura lo que el plano; se queda así); 'sale' → la lámina nueva (el recuerdo) entra con ese mismo estado y se enfoca mientras funde,
+     encima de la anterior, que sigue desenfocada: sin cortes. Web Animations (Chrome 94); mismas listas de filtros en todos los pasos. */
+  const ENS = [[0, 0, 1, 1, 0, 1, 0], [.22, 1.6, 1.05, 1.06, .1, 1.012, .5], [.48, 4.2, 1.12, 1.02, .2, 1.026, -.6], [.74, 7, 1.2, .94, .3, 1.04, .7], [1, 10, 1.28, .88, .36, 1.05, -.35]];
+  const ensPaso = x => ({ offset: x[0], filter: 'blur(' + x[1] + 'px) brightness(' + x[2] + ') saturate(' + x[3] + ') sepia(' + x[4] + ')', transform: 'scale(' + x[5] + ') skewX(' + x[6] + 'deg)' });
+  const ENS_ENTRA = ENS.map(ensPaso), ENS_SALE = [[0, 10, 1.28, .88, .36, 1.05, -.35], [.45, 3.6, 1.1, .97, .18, 1.022, .4], [1, 0, 1, 1, 0, 1, 0]].map(ensPaso);
   /* ── montar un plano ── */
   function montaPlano(p) {
     $('escena').classList.toggle('con-inter', false);
-    const q = M.fondo(p.negro ? null : p.img, { nombre: p.nombre, desc: p.desc, funde: p.funde });
+    const ensDur = (RAPIDO ? .3 : (p.ensuenoDur || p.auto || 3.5)) * 1000;
+    const anima = p.ensueno === 'sale' ? { k: ENS_SALE, o: { duration: ensDur, easing: 'ease-out', fill: 'none' } } : p.ensueno === 'entra' ? { k: ENS_ENTRA, o: { duration: ensDur, easing: 'linear', fill: 'forwards' } } : null;
+    const q = M.fondo(p.negro ? null : p.img, { nombre: p.nombre, desc: p.desc, funde: p.funde, anima: anima });
+    if (p.ensueno === 'entra') B.$$('#fondo .lam').forEach(e => { if (e.animate) e.animate(anima.k, anima.o); });   // misma lámina que antes: se anima la que ya se ve
     fondoVideo(p.fondoVid);
     if (p.amb !== undefined) B.ambiente(p.amb);
     if (p.mus === false) B.musica(null); else if (p.mus) B.musica(p.mus);
@@ -196,7 +206,8 @@
     let h = null;
     const t0 = B.ahora() + retraso;
     if (hayVoz && !RAPIDO) { B.agacha(true); M._vozHasta = t0 + B.buf[vozSrc].duration;
-      const arranca = () => { h = B.suena(vozSrc, { bus: l.filtro ? B.filtroVoz(l.filtro, B.buf[vozSrc].duration) : B.bus.voz, grupo: 'voz', vol: l.vol }); };
+      const fil = l.filtro || (l.estilo === 'interior' ? 'interior' : null);   // (Iago 3-nov) las frases 'interior' suenan como voz de la conciencia
+      const arranca = () => { h = B.suena(vozSrc, { bus: fil ? B.filtroVoz(fil, B.buf[vozSrc].duration) : B.bus.voz, grupo: 'voz', vol: l.vol }); };
       if (retraso > .02) B.espera(retraso, c).then(ok => ok && arranca()); else arranca(); }
     return new Promise(res => {
       let n = 0, escrito = false, vozFin = !hayVoz, listo = false, ultBlip = 0, auto = null, hecho = false;
@@ -296,6 +307,18 @@
   /* fundido a blanco (Iago, 2-nov: antes del Paleolítico): sube muy despacio al final del plano y se va al empezar el siguiente */
   function blanco(on, seg) { const b = $('blanco'); if (!b) return; b.style.transition = 'opacity ' + (seg || 1.5) + 's ' + (on ? 'ease-in' : 'ease-out'); b.classList.toggle('on', !!on); M._blanco = !!on; }
   function programaBlanco(p, c, dur) { if (!p.blanco) return; B.espera(Math.max(0, dur - p.blanco), c).then(ok => { if (!ok) return; blanco(true, p.blanco); if (p.sfxBlanco) B.sfx(p.sfxBlanco, .8); }); }
+  /* (Iago 3-nov) blanco pleno sostenido al acabar el vídeo: p.blancoPleno = { dur (s), precarga (vídeo del plano siguiente),
+     sfx:[{src,t,vol}], mus (con fade: entra despacio), musT, amb (muy bajos), ambT }. Lo de después sigue sin corte en el plano siguiente. */
+  function sostieneBlanco(o, c) {
+    if (RAPIDO) return B.espera(.3, c);
+    if (o.precarga && B.hayVideo(o.precarga)) B.precargaVideo(o.precarga);
+    B.arr(o.sfx).forEach(x => B.espera(x.t || 0, c).then(ok => ok && B.sfx(x.src, x.vol)));
+    if (o.mus) B.espera(o.musT || 0, c).then(ok => ok && B.musica(o.mus));
+    if (o.amb) B.espera(o.ambT || 0, c).then(ok => ok && B.ambiente(o.amb));
+    return B.espera(o.dur || 3, c);
+  }
+  /* p.blancoSale = { fd (s), sfx, vol }: el blanco no se va al empezar el plano, sino sobre el primer fotograma de su vídeo, con su efecto */
+  function sueltaBlanco(p) { if (!M._blanco || !p.blancoSale) return; const o = p.blancoSale; blanco(false, RAPIDO ? .2 : (o.fd || 1.6)); if (o.sfx && !RAPIDO) B.sfx(o.sfx, o.vol); }
   M.descongela = function () { if (M._congelado) trasPintar(); };
   function video(p, c) {
     const capa = $('video');
@@ -336,7 +359,7 @@
           v.style.transition = 'opacity ' + p.fundeEntra + 's ease'; v.getBoundingClientRect(); v.style.opacity = '';
           setTimeout(() => { v.style.transition = ''; fondoVideo(null); }, p.fundeEntra * 1000 + 120);
         } else v.style.opacity = '';
-        requestAnimationFrame(quitaViejos); programaBlanco(p, c, RAPIDO ? .5 : (v.duration || p.dur || 5));
+        requestAnimationFrame(quitaViejos); sueltaBlanco(p); programaBlanco(p, c, RAPIDO ? .5 : (v.duration || p.dur || 5));
         /* los vídeos de Runway no traen sonido: los efectos y sucesos del plano van a su tiempo desde que empieza a verse */
         B.arr(p.sfx).forEach(x => B.espera(x.t || 0, c).then(ok => ok && B.sfx(x.src, x.vol)));
         B.arr(p.al).forEach(x => B.espera(x.t || 0, c).then(ok => ok && x.fn(c))); }, { once: true });   // hasta su primer fotograma, se ve lo de antes
@@ -397,13 +420,14 @@
   };
   function plano(p, c) {
     M.plano = p.id; document.body.setAttribute('data-plano', p.id);
-    if (M._blanco) setTimeout(() => blanco(false, 1.6), 250);   // del blanco a lo siguiente
+    if (M._blanco && !p.blancoSale) setTimeout(() => blanco(false, 1.6), 250);   // del blanco a lo siguiente
+    else if (M._blanco) setTimeout(() => { if (M.plano === p.id) sueltaBlanco(p); }, 6000);   // red de seguridad: si su vídeo no llega a verse
     const vidOk = p.video && B.hayVideo(p.video);
     if (vidOk || p.tunel || (p.video && !p.img)) {   // plano de vídeo (o túnel); si falta el vídeo y hay img, se monta como lámina fija: el sonido va dentro del vídeo (la música del plano anterior se apaga si mus:false)
       if (p.mus === false) B.musica(null); else if (p.mus) B.musica(p.mus);
       if (p.amb !== undefined) B.ambiente(p.amb);
       $('marcaSub').textContent = (S.escenas[escIdx] || {}).titulo || '';
-      return video(p, c);
+      return p.blancoPleno ? video(p, c).then(ok => ok ? sostieneBlanco(p.blancoPleno, c) : false) : video(p, c);
     }
     montaPlano(p);
     const ls = B.arr(p.lineas);

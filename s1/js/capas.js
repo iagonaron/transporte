@@ -98,6 +98,8 @@
        pos: 'arriba' | 'izq' | 'der' (por defecto, centro alto) para no tapar caras ni pantallas */
     const box = B.el('div', 'tr-claves ' + (it.estilo || 'fila') + (it.pos ? ' pos-' + it.pos : '')); capa.appendChild(box); clavesEl = box;
     const dura = it.dura || 2.5;
+    /* (Iago 3-nov) tonalidades menores («Mi m → Si m»): sin mayúsculas, para que la «m» de menor se lea como tal */
+    if (B.arr(it.claves).some(x => /(^|[\s♯♭])m(\b|$)/.test(String(x)))) box.classList.add('tal');
     B.arr(it.claves).forEach((x, i) => {
       const ch = B.el('span', 'tr-clave'); ch.textContent = x; box.appendChild(ch);
       const t = it.ens && dur ? it.ens[i] * dur : it.ts ? it.ts[i] : (it.t || 0) + i * (it.paso || .7);   // ens: fracciones de la frase (si aún no hay voz)

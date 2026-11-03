@@ -123,6 +123,14 @@
       coro.gain.cancelScheduledValues(t); coro.gain.setValueAtTime(coro.gain.value, t); coro.gain.linearRampToValueAtTime(0, t + fd);
       Object.keys(voces).forEach(f => voces[f].o.stop(t + fd + .05)); setTimeout(() => { try { coro.disconnect(); } catch (e) { } }, (fd + .2) * 1000);
     }
+    /* (Iago 3-nov) tras «Continuar», la máquina se queda como un fondo sutil: −20 dB, sin las octavas de más de 880 Hz,
+       y se va con fundido al empezar el plano siguiente (p4b) */
+    function coroFondo() {
+      if (!coroVivo) return; const t = AC.currentTime;
+      coro.gain.cancelScheduledValues(t); coro.gain.setValueAtTime(coro.gain.value, t); coro.gain.linearRampToValueAtTime(coro.gain.value * .1, t + .6);
+      Object.keys(voces).forEach(f => { if (+f > 880) { const v = voces[f]; delete voces[f]; v.g.gain.cancelScheduledValues(t); v.g.gain.setValueAtTime(v.g.gain.value, t); v.g.gain.linearRampToValueAtTime(0, t + .4); v.o.stop(t + .45); } });
+      const pl0 = M().plano, iv = setInterval(() => { if (!coroVivo) { clearInterval(iv); return; } if (M().plano !== pl0) { clearInterval(iv); coroFuera(2.5); } }, 200);
+    }
     c.alMorir.push(() => coroFuera(.2));
     vozOn(base);
     const p = panel('i-calibrar');
@@ -215,14 +223,17 @@
       pista.addEventListener('wheel', ev => { if (activa) return; ev.preventDefault(); paso((ev.deltaY < 0 || ev.deltaX > 0 ? 1 : -1) * (ev.shiftKey ? 10 : 1)); }, { passive: false });
       c.alMorir.push(() => { if (osc) osc.parar(.05); });
       pinta(); hz.textContent = LO + ' Hz';
-      return { f: f, pista: pista, pon: pon };
+      /* (3-nov) el fallo del pitido: si la última octava se encajaba ARRASTRANDO, su oscilador de arrastre se quedaba colgado
+         (suena() ya no hacía nada con la máquina activa) y seguía sonando hasta el salto. Al activarse, se calla siempre. */
+      const calla = () => { clearTimeout(tCorta); if (osc) { osc.parar(.25); osc = null; } };
+      return { f: f, pista: pista, pon: pon, calla: calla };
     });
     B._cal = filas;   // (solo para las pruebas automáticas)
     let fin = null;
     function revisa() {
       if (activa || !hechos.every(Boolean)) return;
       activa = true;
-      filas.forEach(x => { x.f.classList.add('fija'); x.pista.tabIndex = -1; });
+      filas.forEach(x => { x.f.classList.add('fija'); x.pista.tabIndex = -1; x.calla(); });
       svg.classList.add('gira'); p.classList.add('activa'); V().ui('enciende');
       B.arr(cfg.sfxActiva).forEach((x, k) => B.espera(k * .6, c).then(ok => ok && B.sfx(x, .8)));
       coro.gain.linearRampToValueAtTime(1.6, AC.currentTime + .8);   // el acorde completo crece al activarse
@@ -232,7 +243,7 @@
         const al = el('div', 'alarma', B.esc(cfg.alarma || 'Coordenada temporal: activada')); pant.appendChild(al); p.classList.add('rojo');
         if (cfg.sfxAlarma) B.sfx(cfg.sfxAlarma, .7); else V().ui('mal');
         M().barraTexto(cfg.textoFin || 'Calibración perfecta.');
-        M().esperaSigue(c).then(ok2 => { coroFuera(.2); if (fin) fin(ok2); });   // (Iago 23:10) al pulsar Continuar, el acorde se corta ya: Amaro habla sin pitido
+        M().esperaSigue(c).then(ok2 => { if (ok2) coroFondo(); else coroFuera(.2); if (fin) fin(ok2); });   // (Iago 3-nov) al pulsar Continuar, el acorde baja a un fondo sutil (≤880 Hz) y se va en p4b
       });
     }
     return M().cartel(cfg.cartel, { botones: [bBase] }).then(() => new Promise(res => { fin = res; c.alMorir.push(() => res(false)); }));
