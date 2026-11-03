@@ -62,7 +62,8 @@
     sfx_alarma: [-16.6, -17], sfx_anillo_encaja: [-26.4, -22], sfx_anillos_giran: [-16.3, -19], sfx_destello: [-17.4, -20], sfx_estuche_cierra: [-19.7, -18],
     sfx_llave_saxo: [-18, -18], sfx_llegada: [-13, -18], sfx_maquina_arranca: [-10.2, -18], sfx_notificacion: [-16.7, -21], sfx_pasos_rapidos: [-23.8, -19],
     sfx_puerta_scifi: [-9.9, -19], sfx_pulsera_vibra: [-4.3, -20], sfx_radio_interferencia: [-12.7, -22], sfx_salto_tiempo: [-15.3, -17], sfx_tallar_cana: [-14.7, -19],
-    sfx_ui_clic: [-17.9, -28], sfx_ui_error: [-16.3, -24], sfx_ui_ok: [-22.1, -24]
+    sfx_ui_clic: [-17.9, -28], sfx_ui_error: [-16.3, -24], sfx_ui_ok: [-22.1, -24],
+    sfx_arpa_sube: [-16.4, -23], sfx_arpa_baja: [-16.8, -23]   /* (3-nov) arpas de Splice: suaves, por debajo de la voz */
   };
   /* paisaje sonoro (Splice, s1/sfx/): ambientes en bucle con fundido entre planos y golpes en su momento */
   const SF = n => 'sfx/' + n + '.mp3';
@@ -232,6 +233,11 @@
   const motivo = (mel, acorde) => { const T = B.teoria, e8 = B.TEMA.corchea, t0 = B.ac().currentTime + .05; let t = 0;
     acorde.forEach(k => V().piano(T.midi(k), t0, 6 * e8, .16));
     mel.forEach((k, i) => { const d = [1, 1, 1, 3][i] * e8; V().nota('saxo', T.midi(k), t0 + t, d * .96, .45); t += d; }); };
+  /* (Iago 3-nov) ensoñación: el arpa empieza A LA VEZ que la pose pensativa y la ondulación; al entrar la voz del recuerdo, se retira */
+  const ARPA_SUBE = B.existe(SF('sfx_arpa_sube')) ? SF('sfx_arpa_sube') : SF('sfx_arpa_sube_sint'), ARPA_BAJA = B.existe(SF('sfx_arpa_baja')) ? SF('sfx_arpa_baja') : SF('sfx_arpa_baja_sint');
+  let arpaH = null;
+  const arpaEntra = () => { arpaH = B.sfx(ARPA_SUBE, .8); };
+  const arpaSale = () => { if (arpaH) { arpaH.parar(1.6); arpaH = null; } };
   const frase = (tipo, notas, t, d, vel) => { const t0 = B.ac().currentTime + (t || 0); notas.forEach((m, i) => V().nota(tipo, m, t0 + i * d, d * (i === notas.length - 1 ? 2.2 : .95), vel || .75)); };
 
   B.sesion({
@@ -239,7 +245,7 @@
     recursos: [FL.grande.img, FL.mediana.img, FL.pequena.img, 'img/t1/inst_saxo.webp', 'img/t1/inst_clarinete.webp', 'img/t1/inst_trompa.webp',
       SF('sfx_pulsera_vibra'), SF('sfx_notificacion'), SF('sfx_llave_saxo'), SF('sfx_estuche_cierra'), SF('sfx_pasos_rapidos'), SF('sfx_puerta_scifi'), SF('sfx_maquina_arranca'),
       SF('sfx_anillos_giran'), SF('sfx_alarma'), SF('sfx_salto_tiempo'), SF('sfx_llegada'), SF('sfx_radio_interferencia'), SF('sfx_tallar_cana'),
-      SFo('sfx_zumbido_sube'), SFo('sfx_chispazo'), SFo('sfx_humo'), SFo('sfx_impacto'), SFo('sfx_flash_blanco'), SFo('sfx_maquina_apaga'), SF('sfx_anillo_encaja'), SF('sfx_destello'), SF('sfx_eco_trompista'), SF('sfx_eco_clarinetista'), SF('sfx_pasos_hierba')].concat(Object.keys(IMG).map(k => B.primero(IMG[k])).filter(q => q && !q.falta).map(q => q.src))
+      SFo('sfx_zumbido_sube'), SFo('sfx_chispazo'), SFo('sfx_humo'), SFo('sfx_impacto'), SFo('sfx_flash_blanco'), SFo('sfx_maquina_apaga'), SF('sfx_anillo_encaja'), SF('sfx_destello'), SF('sfx_eco_trompista'), SF('sfx_eco_clarinetista'), SF('sfx_pasos_hierba'), SF('sfx_blanco_brillo'), SF('sfx_flash_sale'), ARPA_SUBE, ARPA_BAJA].concat(Object.keys(IMG).map(k => B.primero(IMG[k])).filter(q => q && !q.falta).map(q => q.src))
       .concat(B.viento.SAX_RUTAS, B.viento.UI_RUTAS, B.viento.MUESTRAS_RUTAS || []),
     escenas: [
       /* 0 · Entrada sin palabras (brief 3, C): la ciudad → el pasillo del conservatorio → las manos de Noa; su saxo se acerca */
@@ -336,12 +342,19 @@
       ] },
       /* 5 · El salto: vídeo de Runway; mientras, túnel propio con el contador */
       { id: 'e5', titulo: 'El salto', planos: [
-        { id: 'p5', blanco: 2.8, sfxBlanco: SFo('sfx_flash_blanco'), nombre: 'El salto', video: 'vid/salto.mp4', tunel: { de: 2100, a: -40000 }, dur: 7, mus: MUS.tensionBaja, amb: [], desc: 'Runway 1080p: el anillo se dispara, túnel, contador 2100 → −40 000',
+        /* (Iago 3-nov) el blanco dura más: al acabar el vídeo se sostiene 3,2 s (blanco pleno ≈3,5 s) con un brillo etéreo;
+           mientras, entra despacio la música del Paleolítico y los ambientes de la playa muy bajos (siguen sin corte en p6a0) */
+        { id: 'p5', blanco: 2.8, sfxBlanco: SFo('sfx_flash_blanco'),
+          blancoPleno: { dur: 3.2, precarga: 'vid/llegada.mp4', sfx: [{ src: SF('sfx_blanco_brillo'), t: 0, vol: .8 }],
+            mus: Object.assign({}, MUS.paleo, { fade: 3.6 }), musT: .2,
+            amb: [Object.assign({}, AMB.paleoBajo, { fade: 2.5 }), Object.assign({}, AMB.fuegoBajo, { fade: 2.5 }), Object.assign({}, AMB.grillos, { vol: .08, fade: 2.5 }), Object.assign({}, AMB.viento, { vol: .08, fade: 2.5 })], ambT: .5 },
+          nombre: 'El salto', video: 'vid/salto.mp4', tunel: { de: 2100, a: -40000 }, dur: 7, mus: MUS.tensionBaja, amb: [], desc: 'Runway 1080p: el anillo se dispara, túnel, contador 2100 → −40 000',
           sfx: [{ src: SF('sfx_salto_tiempo'), t: 0 }] }
       ] },
       /* 6 · Paleolítico */
       { id: 'e6', titulo: 'Paleolítico', planos: [
-        { id: 'p6a0', nombre: 'La llegada', video: 'vid/llegada.mp4', img: IMG.llegada, desc: 'Noa aparece junto al río, entre anillos de luz; se recoge el moño (v2, 5,0 s)', amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento], mus: MUS.paleo, pj: null, auto: 5, dur: 5,
+        { id: 'p6a0', blancoSale: { fd: 1.8, sfx: SF('sfx_flash_sale'), vol: .8 },   // (Iago 3-nov) el blanco se disuelve sobre el primer fotograma, con su efecto
+          nombre: 'La llegada', video: 'vid/llegada.mp4', img: IMG.llegada, desc: 'Noa aparece junto al río, entre anillos de luz; se recoge el moño (v2, 5,0 s)', amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento], mus: MUS.paleo, pj: null, auto: 5, dur: 5,
           sfx: [{ src: SF('sfx_llegada'), t: 0 }] },
         { id: 'p6a', funde: 1.2, nombre: 'La llegada · −40 000', img: IMG.llegada, amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento], mus: MUS.paleo, pj: null, antes: 1.2,
           lineas: [
@@ -396,10 +409,12 @@
       { id: 'e10', titulo: 'Afinar con el oboe', planos: [
         { id: 'p10a', nombre: 'Laboratorio · el registro', img: IMG.labCentro, amb: [AMB.lab],
           lineas: [{ id: 't1_023', quien: 'AMARO', imgs: [{ en: .45, img: IMG.labRegistro }], pj: { q: 'AMARO', pose: 'tableta' }, poses: [{ en: .18, pose: 'helada' }], texto: 'Esto no puede ser. Se suponía que solo viajaba en el espacio… Según el registro, has estado en el mismo sitio, pero hace cuarenta mil años. Y en el viaje de vuelta, el registro se vuelve loco: destellos de otras épocas que no consigo fechar.', claves: { claves: ['−40 000 años', 'Destellos sin fecha'], ens: [.4, .72], pos: 'arriba' } }] },
-        { id: 'p10a2', nombre: 'Laboratorio · Noa calla', img: IMG.labCentro, amb: [AMB.lab], pj: { q: 'NOA', pose: 'neutra' }, auto: 2.4 },
-        { id: 'p10s', nombre: 'Noa se queda pensando', img: IMG.labCentro, amb: [AMB.labBajo], mus: false, pj: { q: 'NOA', pose: 'pensativa' }, auto: 4.2, fondoClase: 'ensuena',
-          sfx: [{ src: B.existe(SF('sfx_arpa_sube')) ? SF('sfx_arpa_sube') : SF('sfx_arpa_sube_sint'), t: .4, vol: .85 }] },
-        { id: 'p10b', recuerdo: true, funde: 2, nombre: 'Ensayo de orquesta · 2100 (recuerdo)', img: IMG.orquesta, desc: 'Esa tarde, en el conservatorio: el oboe da el La', mus: false, amb: [AMB.orquesta], ambInter: [AMB.orquestaBajo], pj: { q: 'NOA', pose: 'pensativa' }, vida: VIDA.orquesta, antes: 2,
+        { id: 'p10a2', nombre: 'Laboratorio · Noa calla', img: IMG.labCentro, amb: [AMB.lab], pj: { q: 'NOA', pose: 'neutra' }, auto: 1.2,   // (Iago 3-nov) menos espera antes del gesto de pensar (era 2,4)
+          al: [{ t: 0, fn: () => { B.capas.decod(B.capas.ruta('NOA', 'pensativa')); B.motor.predecod(IMG.orquesta); } }] },   // la pose y el recuerdo ya descodificados: entran sin retraso
+        /* (Iago 3-nov) pose pensativa, arpa, ondulación/desenfoque y tinte cálido, todo a la vez desde el primer instante */
+        { id: 'p10s', nombre: 'Noa se queda pensando', img: IMG.labCentro, amb: [AMB.labBajo], mus: false, pj: { q: 'NOA', pose: 'pensativa' }, auto: 3.6, ensueno: 'entra', recuerdo: true,
+          al: [{ t: 0, fn: arpaEntra }] },
+        { id: 'p10b', recuerdo: true, funde: 2.4, ensueno: 'sale', ensuenoDur: 3.4, al: [{ t: .4, fn: arpaSale }], nombre: 'Ensayo de orquesta · 2100 (recuerdo)', img: IMG.orquesta, desc: 'Esa tarde, en el conservatorio: el oboe da el La', mus: false, amb: [AMB.orquesta], ambInter: [AMB.orquestaBajo], pj: { q: 'NOA', pose: 'pensativa' }, vida: VIDA.orquesta, antes: .5,   // (Iago 3-nov) la frase empieza MIENTRAS aparece la orquesta (era antes: 2)
           lineas: [{ id: 't1_024', quien: 'NOA', imgs: [{ en: .45, img: IMG.orquestaNoa }], estilo: 'interior', nombre: 'Noa (piensa)', texto: 'Mi saxo no se equivoca de nombre. Es como la flauta pequeña: con la misma digitación suena a otra altura. Por eso mi papel lleva otra armadura.' }],
           inter: { tipo: 'oboe', fondo: IMG.orquesta,
             cartel: 'El oboe da el <b>La</b>. Elige en el teclado la nota <b>escrita</b> que tiene que tocar cada instrumento para que suene La. Escucha y pulsa <b>Comprobar</b>.',
@@ -415,7 +430,7 @@
       ] },
       /* 11 · Definición */
       { id: 'e11', titulo: 'Transportar', planos: [
-        { id: 'p11', funde: 1.6, sfx: [{ src: B.existe(SF('sfx_arpa_baja')) ? SF('sfx_arpa_baja') : SF('sfx_arpa_baja_sint'), t: 0, vol: .8 }], nombre: 'Definición', img: IMG.definicion, desc: 'Fondo sobrio (pentagrama de luz)', mus: false, amb: [AMB.labBajo], pj: null,
+        { id: 'p11', funde: 1.6, sfx: [{ src: ARPA_BAJA, t: 0, vol: .8 }], nombre: 'Definición', img: IMG.definicion, desc: 'Fondo sobrio (pentagrama de luz)', mus: false, amb: [AMB.labBajo], pj: null,
           lineas: [
             { id: 't1_025', quien: 'NARRADOR', texto: 'Transportar es escribir o interpretar una obra en una tonalidad distinta, más grave o más aguda.', claves: { claves: ['Transportar', 'otra tonalidad', 'más grave o más aguda'], ts: [0, 3.4, 5.2] } },
             { id: 't1_026', quien: 'NARRADOR', img: IMG.defAbsoluto, imgs: [{ en: .36, img: IMG.defAbsolutoSi }, { en: .66, img: IMG.orquestaNoa }], texto: 'Ojo: el transporte es absoluto. El modo no cambia. Si una obra está en mi menor y la transportas una quinta más aguda, estará en si menor: sigue siendo menor. Transportar es tocar lo mismo a otra altura. Si una canción suena triste, seguirá sonando triste aunque suene más aguda.',
@@ -428,15 +443,16 @@
             { id: 't1_res1', quien: 'NARRADOR', img: IMG.aulaNoaPapel, imgs: [{ en: .5, img: IMG.resInstr }], texto: 'Repasemos. Hay instrumentos que no suenan lo que leen: son los instrumentos transpositores. El saxo alto, el clarinete, la trompa…',
               claves: { claves: ['Instrumentos transpositores'], ens: [.25], pos: 'arriba' } },
             /* (Iago 23:01) todos los transpositores de la orquesta; trombón y tuba, no */
-            { id: 't1_res1b', quien: 'NARRADOR', img: IMG.resOrq1, imgs: [{ en: .26, img: IMG.trompa }, { en: .47, img: IMG.resOrq2 }, { en: .84, img: IMG.resOrq3 }], texto: 'En la orquesta hay más instrumentos transpositores: el clarinete, la trompa, la trompeta en si bemol y el corno inglés, en fa. Otros solo cambian de octava: el flautín suena una octava más agudo de lo escrito, y el contrabajo y el contrafagot, una más grave. El trombón y la tuba, en cambio, se escriben tal como suenan.' },
-            { id: 't1_res2', quien: 'NARRADOR', img: O(IMG.resTaller, IMG.paleoTalla), imgs: [{ en: .36, img: IMG.resFlautas }, { en: .7, img: IMG.paleoPadreFlauta }], texto: 'Antes no había fábricas: cada artesano hacía sus instrumentos a mano, y cada uno salía de un tamaño distinto. Una flauta más larga suena más grave; una más corta, más aguda. Con la misma digitación, cada una daba el mismo dibujo… a otra altura.' },
+            { id: 't1_res1b', quien: 'NARRADOR', img: IMG.resOrq1, imgs: [{ en: .32, img: IMG.resOrq2 }, { en: .79, img: IMG.resOrq3 }], texto: 'Y en la orquesta hay más: la trompeta en si bemol y el corno inglés, en fa. Otros solo cambian de octava: el flautín suena una octava más agudo de lo escrito, y el contrabajo y el contrafagot, una más grave. El trombón y la tuba, en cambio, se escriben tal como suenan.' },
+            { id: 't1_res2', quien: 'NARRADOR', img: O(IMG.resTaller, IMG.paleoTalla), imgs: [{ en: .28, img: IMG.resFlautas }, { en: .55, img: IMG.paleoTalla }, { en: .78, img: IMG.paleoNinaToca }], texto: 'Antes no había fábricas de precisión. Cada artesano hacía sus instrumentos a mano: a veces, de distintos tamaños a propósito; y aunque intentara hacerlos iguales, nunca salían exactos, porque la madera, la caña o el metal nunca son del todo iguales. Además, cada ciudad tenía su propia afinación. Al final resultó más práctico mantener iguales las posiciones de los dedos, y no el sonido que daban.',
+              claves: { claves: ['Misma digitación, distinto sonido'], ens: [.8], pos: 'arriba' } },   /* (Iago 3-nov) imperfección artesanal + afinaciones locales → se estandariza la digitación */
             { id: 't1_res3', quien: 'NARRADOR', img: IMG.trompa, imgs: [{ en: .3, img: IMG.clarinete }, { en: .6, img: IMG.aulaNoaPapel }], texto: 'Por eso cada instrumento se escribe según su tamaño: la trompa cambiaba de tubo, el clarinetista elegía entre el clarinete en si bemol y el clarinete en la, y el saxo alto lee una sexta mayor más aguda de lo que suena. Así todos pueden leer con las mismas posiciones.',
               claves: { claves: ['Trompa: cambia de tubo', 'Clarinete en Si♭ o en La', 'Saxo alto: lee una 6.ª M más aguda'], ens: [.12, .38, .64], pos: 'arriba' } }
           ] },
         { id: 'p11c', nombre: 'Dos formas', img: IMG.defDosFormas, amb: [AMB.labBajo], pj: null,
           lineas: [
-            { id: 't1_027', quien: 'NARRADOR', img: IMG.orquesta, imgs: [{ en: .3, img: IMG.aula }, { en: .6, img: IMG.defDosFormas }], texto: 'Por eso, para tocar juntos, estos instrumentos necesitan transportar. Y no solo ellos: también hace falta, por ejemplo, cuando una canción queda demasiado aguda o demasiado grave para quien la canta. Hay dos formas de hacer el transporte: escribiéndolo de nuevo, que se llama transporte escrito, o en tu cabeza mientras tocas, que se llama transporte mental.',
-              claves: { claves: ['Transporte escrito', 'Transporte mental'], ts: [15.1, 18.4] } }   /* (Iago 23:04) retoma por qué hace falta transportar */
+            { id: 't1_027', quien: 'NARRADOR', img: IMG.orquesta, imgs: [{ en: .3, img: IMG.aula }, { en: .6, img: IMG.defDosFormas }], texto: 'Así que, para tocar juntos, estos instrumentos necesitan transportar. Y no solo ellos: también hace falta, por ejemplo, cuando una canción queda demasiado aguda o demasiado grave para quien la canta. Hay dos formas de hacer el transporte: escribiéndolo de nuevo, que se llama transporte escrito, o en tu cabeza mientras tocas, que se llama transporte mental.',
+              claves: { claves: ['Transporte escrito', 'Transporte mental'], ts: [16.4, 18.5] } }   /* (Iago 23:04) retoma por qué hace falta transportar */
           ] }
       ] },
       /* 12 · Cierre */
