@@ -302,7 +302,7 @@
         { id: 'p2b', fondoVid: 'vid/dron_coruna.mp4', nombre: 'Riazor 2100 · dron', img: IMG.riazor, desc: 'Estadio blanquiazul de noche, sin escudos reales', amb: [AMB.ciudad], pj: null, antes: 2.5,
           lineas: [{ id: 't1_008', quien: 'NARRADOR', imgs: [{ en: .45, img: IMG.riazorMarcador }], texto: 'Riazor brilla toda la noche: el Depor es líder y va a por su décima Liga.', espera: 1.5 }] },
         { id: 'p2c', fondoVid: 'vid/portada_coruna2100.mp4', nombre: 'Playa del Orzán 2100', img: IMG.orzan, amb: [AMB.ciudad, AMB.mar], pj: null, antes: 2,
-          lineas: [{ id: 't1_009', quien: 'NARRADOR', imgs: [{ en: .31, img: IMG.orzanCancion }, { en: .63, img: IMG.orzanAfina }], texto: 'Pero hay cosas que ya nadie sabe hacer a mano. Si una canción no te queda bien, la inteligencia artificial la cambia por ti. Si tu instrumento no está afinado, lo afina ella.', claves: { claves: ['Nadie sabe hacer nada a mano'], ts: [1.2] }, espera: 1.2 }] },
+          lineas: [{ id: 't1_009', quien: 'NARRADOR', imgs: [{ en: .31, img: IMG.orzanCancion }, { en: .63, img: IMG.orzanAfina }], texto: 'Pero hay cosas que ya nadie sabe hacer a mano. Si una canción no te queda bien, la inteligencia artificial la cambia por ti. Si tu instrumento no está afinado, lo afina ella.', claves: { claves: ['Nadie sabe hacer nada a mano'], ts: [1.2], pos: 'arriba' }, espera: 1.2 }] },
         { id: 'p2d', fondoVid: 'vid/portada_coruna2100.mp4', nombre: 'La ciudad y la Torre', img: IMG.orzan, desc: 'La ciudad irreconocible → la Torre de Hércules, igual que siempre', amb: [AMB.mar, { src: SF('amb_ciudad2100'), vol: .2 }], pj: null, antes: 2.5,
           lineas: [{ id: 't1_010', quien: 'NARRADOR', imgs: [{ en: .35, img: IMG.torre }], texto: 'La ciudad está irreconocible. Solo una cosa sigue exactamente igual que hace dos mil años.', espera: 2.5 }] }
       ] },
@@ -434,7 +434,7 @@
           lineas: [
             { id: 't1_025', quien: 'NARRADOR', texto: 'Transportar es escribir o interpretar una obra en una tonalidad distinta, más grave o más aguda.', claves: { claves: ['Transportar', 'otra tonalidad', 'más grave o más aguda'], ts: [0, 3.4, 5.2] } },
             { id: 't1_026', quien: 'NARRADOR', img: IMG.defAbsoluto, imgs: [{ en: .36, img: IMG.defAbsolutoSi }, { en: .66, img: IMG.orquestaNoa }], texto: 'Ojo: el transporte es absoluto. El modo no cambia. Si una obra está en mi menor y la transportas una quinta más aguda, estará en si menor: sigue siendo menor. Transportar es tocar lo mismo a otra altura. Si una canción suena triste, seguirá sonando triste aunque suene más aguda.',
-              claves: { claves: ['Mi m → Si m', 'sigue siendo menor'], ts: [8, 10.8] },
+              claves: { claves: ['Mi m → Si m', 'sigue siendo menor'], ts: [8, 10.8], pos: 'arriba' },
               al: [{ en: .3, fn: () => motivo(['e/4', 'f#/4', 'g/4', 'b/4'], ['e/3', 'b/3', 'g/4']) }, { en: .52, fn: () => motivo(['b/4', 'c#/5', 'd/5', 'f#/5'], ['b/2', 'f#/3', 'd/4']) }] },
           ] },
         /* (Iago, 2-nov) RESUMEN del narrador antes de «Hay dos formas…» */
