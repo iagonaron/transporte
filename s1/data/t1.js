@@ -124,14 +124,14 @@
       { tipo: 'luces', zona: [.42, .38, .58, .12], n: 22, color: '#a8d4ff' }, { tipo: 'respira', zona: [.84, .47, .1, .07], color: '#9fe4ff', vel: 3 },
       { tipo: 'reflejos', zona: [.72, .55, .28, .2], n: 16, color: '#bfe0ff' }] },
     lab: { src: 'img/t1/laboratorio.webp', ocultaPj: ['NOA', 'AMARO'], vida: VIDA.lab },
-    labCentro: { src: 'img/t1/laboratorio.webp', zoom: 2, cx: .55, cy: .4,
+    labCentro: { src: 'img/t1/lab_centro.webp',
       vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 3 }, { tipo: 'polvo', zona: [0, 0, 1, 1], n: 18, color: '#cfe8ff' }] },
-    pruebaAmaro: { src: 'img/t1/prueba.webp', zoom: 1.25, cx: .4, cy: .4, ocultaPj: ['NOA'],
-      vida: [{ tipo: 'anillos', zona: [.34, .025, .59, .875], n: 3 }, { tipo: 'onda', zona: [.93, .375, .07, .09] }, { tipo: 'polvo', zona: [.2, 0, .7, 1], n: 18, color: '#cfe8ff' }] },
+    pruebaAmaro: { src: 'img/t1/prueba_cerca.webp', ocultaPj: ['NOA'],   // (3-nov nitidez) plano cerrado propio sin Amaro, sin zoom
+      vida: [{ tipo: 'anillos', zona: [.2, 0, .65, .78], n: 3 }, { tipo: 'onda', zona: [.94, .25, .06, .08] }, { tipo: 'polvo', zona: [.2, 0, .7, 1], n: 18, color: '#cfe8ff' }] },
     llegada: { src: 'img/t1/llegada_fin.webp', vida: VIDA.llegadaFin, ocultaPj: ['NOA'] },   /* (Iago 22:32) = último fotograma de llegada.mp4 */
     modulo: { src: 'img/t1/lab_modulo.webp', ocultaPj: ['NOA'], vida: [{ tipo: 'chispas', zona: [.17, .3, .25, .4], n: 14, color: '#7fd4ff' }, { tipo: 'respira', zona: [.12, .25, .35, .5], color: '#58c8ff', vel: 2 },
       { tipo: 'polvo', zona: [.4, 0, .6, 1], n: 12, color: '#ffe2b8' }] },
-    tallador: [{ src: 'img/t1/tallador.webp', vida: VIDA.paleoCerca }, { src: 'img/t1/paleolitico.webp', zoom: 1.6, cx: .68, cy: .5, vida: VIDA.paleoCerca, ocultaPj: ['TALLADOR', 'NINA'] }],
+    tallador: [{ src: 'img/t1/paleo_padre_hija.webp', vida: VIDA.paleoCerca, ocultaPj: ['TALLADOR', 'NINA'] }],   // (Iago 3-nov) fuera el recorte ampliado de baja calidad
     trompa: [{ src: 'img/t1/viaje_trompa_s18.webp', ocultaPj: ['NOA'] }],   // ya 1920×1080: a pantalla completa
     clarinete: [{ src: 'img/t1/viaje_clarinete_s19.webp', ocultaPj: ['NOA'] }],
     orquesta: { src: 'img/t1/orquesta2100.webp', ocultaPj: ['NOA'], vida: VIDA.orquesta },
@@ -152,8 +152,8 @@
   Object.assign(IMG, {
     pasillo: [{ src: N('pasillo2100'), vida: [{ tipo: 'onda', zona: [.272, .33, .042, .05], color: '#9fe4ff', tam: 1.5 }, { tipo: 'parpadeo', zona: [.268, .29, .05, .13], color: '#9fe4ff' },
       { tipo: 'pulso', zona: [.745, .2, .06, .18], color: '#9fe4ff', vel: .5 }, { tipo: 'parpadeo', zona: [.955, .42, .045, .09], color: '#9fe4ff' }].concat(POLVO()) },
-      { src: 'img/t1/conservatorio2100.webp', zoom: 1.35, cx: .5, cy: .45, ocultaPj: ['NOA'], vida: POLVO() }],
-    aulaManos: [{ src: N('aula_manos'), ocultaPj: ['NOA'], vida: [{ tipo: 'leds', p: [[.25, .637]], f: 1.6 }].concat(POLVO()) }, { src: 'img/t1/aula2100.webp', zoom: 2.2, cx: .3, cy: .62, ocultaPj: ['NOA'], vida: POLVO() }],
+      { src: 'img/t1/conservatorio2100.webp', ocultaPj: ['NOA'], vida: POLVO() }],
+    aulaManos: [{ src: N('aula_manos'), ocultaPj: ['NOA'], vida: [{ tipo: 'leds', p: [[.25, .637]], f: 1.6 }].concat(POLVO()) }, { src: 'img/t1/aula2100.webp', ocultaPj: ['NOA', 'PIANISTA'], vida: POLVO() }],
     aulaPianista: { src: N('aula_pianista'), ocultaPj: ['PIANISTA', 'NOA'], vida: [{ tipo: 'atril', q: [.104, .304, .242, .304, .204, .637, .05, .637] }, { tipo: 'faro', zona: [.35, .06, .1, 0] }].concat(POLVO()) },
     aulaNoaPapel: { src: N('aula_noa_papel'), ocultaPj: ['NOA'], vida: [{ tipo: 'atril', q: [.729, .422, .904, .415, .867, .807, .683, .815] }, { tipo: 'respira', zona: [.655, .08, .04, .06], color: '#ffe9b0', vel: 1.5 },
       { tipo: 'leds', p: [[.215, .805]], f: 1.4 }].concat(POLVO()) },
@@ -183,10 +183,10 @@
       { tipo: 'leds', p: [[.204, .445], [.204, .47], [.204, .5], [.204, .53], [.204, .555], [.414, .47], [.414, .49], [.305, .565], [.39, .565]], color: '#ff2a2a', f: 4 }, { tipo: 'respira', zona: [0, 0, 1, 1], color: '#ff3b3b', vel: 3 }] },
     pruebaAlarma: [{ src: N('prueba_alarma'), vida: [{ tipo: 'faro', zona: [.87, .15, .3, 0], color: '#ff4a3a', vel: 3.5 }, { tipo: 'respira', zona: [0, 0, 1, 1], color: '#ff3b3b', vel: 3 },
         { tipo: 'parpadeo', zona: [.40, .37, .35, .2], color: '#ff6a5a' }, { tipo: 'leds', p: [[.775, .43], [.81, .52], [.86, .46], [.915, .41]], f: 4 }] },
-      { src: 'img/t1/prueba.webp', zoom: 1.25, cx: .4, cy: .4, luz: .75, ocultaPj: ['NOA'], vida: [{ tipo: 'respira', zona: [0, 0, 1, 1], color: '#ff3b3b', vel: 3 }] }],
+      { src: 'img/t1/prueba_cerca.webp', luz: .75, ocultaPj: ['NOA'], vida: [{ tipo: 'respira', zona: [0, 0, 1, 1], color: '#ff3b3b', vel: 3 }] }],
     pruebaNoa: { src: N('prueba_noa_traviesa'), ocultaPj: ['NOA'], vida: [{ tipo: 'respira', zona: [.0, .55, .7, .4], color: '#58c8ff', vel: 1.6 }, { tipo: 'leds', p: [[.815, .555], [.815, .58]], color: '#ff4a3a', f: 3 },
       { tipo: 'polvo', zona: [.1, .1, .8, .8], n: 16, color: '#cfe8ff' }] },
-    llegadaCerca: { src: 'img/t1/llegada_fin.webp', zoom: 1.3, cx: .5, cy: .42, ocultaPj: ['NOA'], vida: [{ tipo: 'reflejos', zona: [0, .5, 1, .3], n: 16, color: '#ffd9a0' }] },
+    llegadaCerca: { src: 'img/t1/llegada_fin.webp', ocultaPj: ['NOA'], vida: [{ tipo: 'reflejos', zona: [0, .5, 1, .3], n: 16, color: '#ffd9a0' }] },
     paleoLejos: [{ src: N('paleo_lejos'), ocultaPj: ['NOA'], vida: [{ tipo: 'chispas', zona: [.55, .45, .1, .15], n: 10, color: '#ffb35a' }, { tipo: 'reflejos', zona: [0, .6, 1, .25], n: 16, color: '#ffd9a0' }] },
       { src: 'img/t1/paleolitico.webp', vida: VIDA.paleo }],
     paleoPadreHija: { src: N('paleo_padre_hija'), ocultaPj: ['TALLADOR', 'NINA'], vida: VIDA.paleoCerca },
@@ -207,9 +207,9 @@
     defDosFormas: { src: N('def_dos_formas'), ocultaPj: ['NOA'], vida: [{ tipo: 'atril', q: [.28, .53, .47, .52, .45, .78, .22, .83], n: 3 },
       { tipo: 'polvo', zona: [.52, 0, .48, 1], n: 18, color: '#ffd98a' }, { tipo: 'respira', zona: [.55, .05, .42, .8], color: '#ffcf7a', vel: 1.2 }] },
     amaroLlamada: { src: N('amaro_llamada'), ocultaPj: ['AMARO'], vida: AMARO_LL },
-    labLlamada: { src: 'img/t1/laboratorio.webp', zoom: 2, cx: .55, cy: .4, vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 3 }, { tipo: 'polvo', zona: [0, 0, 1, 1], n: 18, color: '#cfe8ff' }] },   // mientras: la máquina (sin gente) y la pose de Amaro
-    defAbsolutoSi: { src: N('def_absoluto'), zoom: 1.45, cx: .6, cy: .55, vida: POLVO() },   // el segundo motivo, más cerca (fundido: misma lámina)
-    trompaCerca: { src: 'img/t1/viaje_trompa_s18.webp', zoom: 1.3, cx: .5, cy: .45 }, clarineteCerca: { src: 'img/t1/viaje_clarinete_s19.webp', zoom: 1.3, cx: .5, cy: .45 },
+    labLlamada: { src: 'img/t1/lab_centro.webp', vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 3 }, { tipo: 'polvo', zona: [0, 0, 1, 1], n: 18, color: '#cfe8ff' }] },   // mientras: la máquina (sin gente) y la pose de Amaro
+    defAbsolutoSi: { src: N('def_absoluto_si'), funde: 1.2, vida: POLVO() },   // el segundo motivo, más cerca: lámina propia dibujada a ×1,45 (s1/_lamina/def_absoluto_si.html), sin zoom; entra con fundido
+    trompaCerca: { src: 'img/t1/viaje_trompa_s18.webp' }, clarineteCerca: { src: 'img/t1/viaje_clarinete_s19.webp' },   // (3-nov) sin zoom (no se usan)
     resInstr: { src: N('res_instrumentos'), vida: [{ tipo: 'polvo', zona: [0, 0, 1, 1], n: 18, color: '#ffe2b8' }, { tipo: 'respira', zona: [.1, .2, .8, .5], color: '#58b8ff' }] },
     resTaller: { src: N('res_taller'), vida: POLVO() },
     torrePuerta: { src: N('torre_puerta'), vida: [{ tipo: 'respira', zona: [.43, .3, .06, .5], color: '#9fe4ff', vel: .6 }, { tipo: 'respira', zona: [.37, .76, .2, .07], color: '#7fe8ff', vel: .5 }] },   // luz por la rendija
@@ -217,7 +217,7 @@
     paleoPadreDa: { src: N('paleo_padre_da'), ocultaPj: ['TALLADOR', 'NINA'], vida: VIDA.paleoCerca },
     paleoNinaToca: { src: N('paleo_nina_toca'), ocultaPj: ['TALLADOR', 'NINA'], vida: VIDA.paleoCerca },
     resFlautas: { src: N('res_flautas'), vida: [{ tipo: 'polvo', zona: [0, 0, 1, 1], n: 16, color: '#ffe2b8' }] },
-    cierreLab: { src: 'img/t1/laboratorio.webp', zoom: 2, cx: .55, cy: .4, luz: .5, vida: [{ tipo: 'apaga', zona: [.2, .05, .6, .9], dur: 9 }, { tipo: 'polvo', zona: [0, 0, 1, 1], n: 12, color: '#cfe8ff' }] },   // mientras no llegue cierre_noa_foto: la máquina, de noche, apagándose
+    cierreLab: { src: 'img/t1/lab_centro.webp', luz: .5, vida: [{ tipo: 'apaga', zona: [.2, .05, .6, .9], dur: 9 }, { tipo: 'polvo', zona: [0, 0, 1, 1], n: 12, color: '#cfe8ff' }] },   // mientras no llegue cierre_noa_foto: la máquina, de noche, apagándose
     cierreNoa: { src: N('cierre_noa_foto'), ocultaPj: ['NOA'], vida: [{ tipo: 'apaga', zona: [0, 0, .4, .5], dur: 9, color: '#58c8ff' }, { tipo: 'respira', zona: [.86, .06, .06, .08], color: '#ffd9a0', vel: 1.4 },
       { tipo: 'polvo', zona: [0, 0, .5, .8], n: 12, color: '#cfe8ff' }] }   // la luz del Transportador se va apagando
   });
@@ -364,10 +364,9 @@
             { id: 't1_019d', quien: 'NARRADOR', img: O(IMG.paleoTalla, IMG.tallador), imgs: [{ en: .5, img: IMG.paleoAcerca }], texto: 'Él talla flautas con las cañas del río. Noa se acerca despacio, sin hacer ruido, para escucharlas.',
               sfx: [{ src: SF('sfx_tallar_cana'), en: .03, vol: .6 }, { src: B.existe(SF('sfx_pasos_hierba')) ? SF('sfx_pasos_hierba') : SF('sfx_pasos_juncos_sint'), en: .5, vol: .75 }] }
           ] },
-        { id: 'p6b', nombre: 'El tallador de flautas', img: IMG.tallador, desc: 'Un hombre talla tres flautas de caña junto al fuego y toca la grande', amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento],
-          pj: { q: 'TALLADOR', pose: 'talla' }, auto: 7.2, sfx: [{ src: SF('sfx_tallar_cana'), t: .2 }], imgs: [{ t: 1.6, img: IMG.paleoPadreFlauta }, { t: 5.2, img: IMG.paleoNoaMira }],
-          poses: [{ t: 1.6, q: 'TALLADOR', pose: 'toca' }, { t: 5.2, q: 'NOA', pose: 'sorpresa' }],
-          al: [{ t: 1.8, fn: () => flautaDibujo(FL.grande.base, 2) }] }
+        { id: 'p6b', nombre: 'El padre toca la flauta', img: IMG.paleoPadreFlauta, desc: 'El padre toca su flauta grande junto al fuego', amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento],
+          pj: null, auto: 5.8, imgs: [{ t: 3.8, img: IMG.paleoNoaMira }],   // (Iago 3-nov) fuera el plano previo de baja calidad: empieza ya tocando
+          al: [{ t: .3, fn: () => flautaDibujo(FL.grande.base, 2) }] }
       ] },
       /* (Iago 22:47) fuera el interactivo de ordenar tres flautas: solo la del padre y la de la hija («para no liar») */
       /* 8 · Tocar juntos */
