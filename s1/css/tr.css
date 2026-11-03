@@ -404,7 +404,11 @@ html,body,.app{background:var(--noche)}
 #escena::after{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity 2s ease;
   background:radial-gradient(ellipse at 50% 50%,rgba(255,190,120,0) 45%,rgba(255,180,110,.22) 75%,rgba(70,40,20,.6) 100%),rgba(255,170,90,.08)}
 #escena.recuerdo::after{opacity:1}
-/* juntos: «Con la misma digitación» primero y destacado; después, las cinco posiciones de la pequeña */
+/* (3-nov) ensoñación barata: capas hermanas pre-desenfocadas (JPEG 960×540 hecho al cargar) que solo cambian de opacidad;
+   #fondo ondula con transform. La «vida» (fusión «screen») se retira mientras dura el sueño y vuelve al enfocarse el recuerdo */
+#fondo .lam.ens{background-size:100% 100%;pointer-events:none}
+#vida,#vidaN{transition:opacity 1s ease}
+#escena.sueno #vida,#escena.sueno #vidaN{opacity:0;transition:opacity .8s ease}/* juntos: «Con la misma digitación» primero y destacado; después, las cinco posiciones de la pequeña */
 .j-ops{flex-direction:column;align-items:stretch;gap:16px}
 #escena #inter button.j-misma{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 30px;background:var(--ambar)!important;color:#1b1003}
 #escena #inter button.j-misma::before{background:var(--ambar)}
@@ -435,3 +439,7 @@ html,body,.app{background:var(--noche)}
 #dialogo{left:120px;right:120px;bottom:22px;min-height:0;padding:24px 290px 20px 34px}
 #dTexto{margin:0;font-size:29px;line-height:1.4}
 #dialogo .nav{right:24px;bottom:auto;top:50%;transform:translateY(-50%)}
+
+/* (Iago 3-nov) la pestaña del personaje POR DELANTE de la línea y el borde de la caja */
+#dialogo::after{z-index:0}
+#dQuien{z-index:3}
