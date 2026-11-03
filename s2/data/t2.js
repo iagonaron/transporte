@@ -31,10 +31,10 @@
   const S1 = '../s1/', SF1 = n => S1 + 'sfx/' + n + '.mp3', SF1o = n => B.existe(SF1(n)) ? SF1(n) : SF1(n + '_sint');
   const SF = n => 'sfx/' + n + '.mp3', SFo = n => B.existe(SF(n)) ? SF(n) : SF(n + '_sint'), SFl = n => [SF(n), SF(n + '_sint')];
   const AMB = {
-    casa: { src: SFl('amb_casa_lluvia'), vol: .34 }, casaBaja: { src: SFl('amb_casa_lluvia'), vol: .2 },
+    casa: { src: SFl('amb_casa_lluvia'), vol: .26 }, casaBaja: { src: SFl('amb_casa_lluvia'), vol: .15 },
     ciudad: { src: SF1('amb_ciudad2100'), vol: .3 }, mar: { src: SF1('amb_mar_noche'), vol: .22 },
     lab: { src: SF1('amb_laboratorio'), vol: .34 }, labBajo: { src: SF1('amb_laboratorio'), vol: .16 },
-    lluvia: { src: SFl('amb_lluvia_piedra'), vol: .34 }, lluviaBaja: { src: SFl('amb_lluvia_piedra'), vol: .14 },
+    lluvia: { src: SFl('amb_lluvia_piedra'), vol: .27 }, lluviaBaja: { src: SFl('amb_lluvia_piedra'), vol: .11 },
     archivo: { src: SFl('amb_archivo'), vol: .36 }, organo: { src: SFl('amb_organo_lejos'), vol: .2 }, organoBajo: { src: SFl('amb_organo_lejos'), vol: .1 }
   };
   const MUS = {
@@ -59,16 +59,16 @@
   const IMG = {
     edificio: I2('casa_edificio', 'Edificio de la madre junto al Orzán, anochecer, lluvia fina', { vida: LLUVIA(null, 90).concat([{ tipo: 'luces', zona: [.2, .2, .6, .5], n: 18, color: '#ffe2b0' }, { tipo: 'drones', zona: [.1, .02, .8, .2], n: 2 }]) }),
     puertaAbre: I2('casa_puerta_abre', 'La puerta del piso se abre: Noa mojada con el estuche; Lumi le da la bienvenida', { ocultaPj: ['NOA'], vida: [{ tipo: 'respira', zona: [.6, .3, .2, .3], color: '#ffcf8a', vel: 1.6 }].concat(POLVO()) }),
-    casa: I2('casa_general', 'Salón-comedor de la madre (2100): mesa para dos, ventanal con lluvia y luces del Orzán; Lumi sirve', { ocultaPj: ['NOA', 'MADRE'], vida: LLUVIA([0, 0, .35, .8], 70).concat([{ tipo: 'luces', zona: [0, .2, .33, .4], n: 14, color: '#bfe0ff' }, { tipo: 'respira', zona: [.55, .25, .1, .15], color: '#ffcf8a', vel: 1.5 }]) }),
+    casa: I2('casa_general', 'Salón-comedor de la madre (2100): mesa para dos, ventanal con lluvia y luces del Orzán; Lumi sirve', { ocultaPj: ['NOA', 'MADRE'], vida: [].concat([{ tipo: 'luces', zona: [0, .2, .33, .4], n: 14, color: '#bfe0ff' }, { tipo: 'respira', zona: [.55, .25, .1, .15], color: '#ffcf8a', vel: 1.5 }]) }),
     lumiSirve: I2('casa_lumi_sirve', 'DETALLE: Lumi sirve verdura en el plato de la madre', { ocultaPj: ['MADRE'], vida: [{ tipo: 'respira', zona: [.4, .1, .25, .25], color: '#ffcf8a', vel: 1.4 }].concat(POLVO()) }),
-    madre: I2('casa_madre', 'La madre, plano medio, mirando a Noa: cariño y reproche cansado', { ocultaPj: ['MADRE'], vida: LLUVIA([0, 0, .3, .7], 50).concat(POLVO()) }),
+    madre: I2('casa_madre', 'La madre, plano medio, mirando a Noa: cariño y reproche cansado', { ocultaPj: ['MADRE'], vida: [].concat(POLVO()) }),
     noaPlato: I2('casa_noa_plato', 'Noa, plano medio, sin levantar la vista del plato, pasota', { ocultaPj: ['NOA'], vida: POLVO() }),
     madreFoto: I2('casa_madre_foto', 'La madre mira de reojo la foto del aparador (el padre con su clarinete)', { ocultaPj: ['MADRE'], vida: [{ tipo: 'respira', zona: [.05, .3, .3, .4], color: '#ffcf8a', vel: 1 }].concat(POLVO()) }),
     noaCrispada: I2('casa_noa_crispada', 'Noa, primer plano, levanta la vista, crispada', { ocultaPj: ['NOA'], vida: POLVO() }),
-    dos: I2('casa_dos', 'Sobre el hombro de Noa: la madre, más suave; la lluvia en el ventanal entre las dos', { ocultaPj: ['NOA', 'MADRE'], vida: LLUVIA([.35, 0, .3, .7], 60).concat(POLVO()) }),
-    noaLevanta: I2('casa_noa_levanta', 'Noa de pie coge el estuche y se gira hacia la puerta; la madre, mano a medio camino', { ocultaPj: ['NOA', 'MADRE'], vida: LLUVIA([0, 0, .35, .8], 70) }),
+    dos: I2('casa_dos', 'Sobre el hombro de Noa: la madre, más suave; la lluvia en el ventanal entre las dos', { ocultaPj: ['NOA', 'MADRE'], vida: [].concat(POLVO()) }),
+    noaLevanta: I2('casa_noa_levanta', 'Noa de pie coge el estuche y se gira hacia la puerta; la madre, mano a medio camino', { ocultaPj: ['NOA', 'MADRE'], vida: [] }),
     puertaCierra: I2('casa_puerta_cierra', 'La puerta se cierra tras Noa; Lumi junto a la puerta, luz baja', { vida: [{ tipo: 'apaga', zona: [.55, .3, .25, .3], dur: 2.5, color: '#ffcf8a' }] }),
-    madreSola: I2('casa_madre_sola', 'La madre sola a la mesa, mirando la lluvia; el plato de Noa intacto', { vida: LLUVIA([0, 0, .4, .8], 80).concat(POLVO()) }),
+    madreSola: I2('casa_madre_sola', 'La madre sola a la mesa, mirando la lluvia; el plato de Noa intacto', { vida: [].concat(POLVO()) }),
     plato: I2('casa_plato', 'DETALLE: el brazo de Lumi recoge el plato de Noa sin tocar', { vida: [{ tipo: 'apaga', zona: [.3, .1, .4, .4], dur: 4, color: '#ffcf8a' }].concat(POLVO()) }),
     /* laboratorio: con reserva de T1 (y la pose encima) mientras no lleguen las nuevas */
     torre: O(I2('torre_amanecer', 'La Torre de Hércules esa misma noche, con lluvia; Noa sube deprisa hacia la entrada', { vida: [{ tipo: 'faro', zona: [.5, .2, .4, 0] }].concat(POLVO('#cfe8ff')) }),
@@ -92,21 +92,21 @@
     claustroNoa: I2('claustro_noa', 'Noa bajo un arco del claustro, mira alrededor; gotas en el pelo', { ocultaPj: ['NOA'], vida: LLUVIA([.5, 0, .5, 1], 90) }),
     quintana: I2('quintana_berenguela', 'Praza da Quintana hacia 1730 con lluvia; la Torre del Reloj (Berenguela); gente de la época', { vida: LLUVIA(null, 150) }),
     campanas: I2('berenguela_campanas', 'Contrapicado: las campanas de la Berenguela sonando bajo la lluvia', { vida: LLUVIA(null, 120) }),
-    archivo: I2('archivo_general', 'Archivo de la Capilla de Música: Don Ramón en su mesa bajo la ventana con lluvia; velas', { vida: LLUVIA([0, 0, .3, .5], 40).concat(VELA(.5, .4), POLVO('#ffe8c0')) }),
+    archivo: I2('archivo_general', 'Archivo de la Capilla de Música: Don Ramón en su mesa bajo la ventana con lluvia; velas', { vida: [].concat(VELA(.5, .4), POLVO('#ffe8c0')) }),
     pluma: I2('copista_pluma', 'DETALLE: la mano de Don Ramón copia con pluma y tinta en papel pautado', { vida: VELA(.8, .2).concat(POLVO('#ffe8c0')) }),
     maestro: I2('archivo_maestro', 'El maestro de capilla entra con prisa, partitura en alto', { vida: POLVO('#ffe8c0') }),
     himno: I2('archivo_himno', 'DETALLE: el maestro deja el himno en la mesa y señala el pentagrama; un fagot barroco apoyado en la pared', { vida: VELA(.2, .3).concat(POLVO('#ffe8c0')) }),
     copista: I2('archivo_copista', 'Don Ramón resopla y señala el montón de partes por copiar', { vida: VELA(.7, .35).concat(POLVO('#ffe8c0')) }),
-    noaAsoma: I2('archivo_noa_asoma', 'Noa se asoma por la puerta del claustro, mojada, mano a medio levantar', { ocultaPj: ['NOA'], vida: LLUVIA([.6, 0, .4, .8], 50).concat(POLVO('#ffe8c0')) }),
+    noaAsoma: I2('archivo_noa_asoma', 'Noa se asoma por la puerta del claustro, mojada, mano a medio levantar', { ocultaPj: ['NOA'], vida: [].concat(POLVO('#ffe8c0')) }),
     copistaMira: I2('archivo_copista_mira', 'Don Ramón mira a Noa de arriba abajo por encima de los anteojos', { vida: POLVO('#ffe8c0') }),
     noaExplica: I2('archivo_noa_explica', 'Noa junto a la mesa, señala la armadura; Don Ramón, sorprendido', { ocultaPj: ['NOA'], vida: VELA(.85, .3).concat(POLVO('#ffe8c0')) }),
     mesa: I2('archivo_mesa', 'Cenital SIN personas: la mesa del copista (papel pautado, pluma, tintero, vela); centro limpio', { vida: VELA(.85, .2).concat(POLVO('#ffe8c0')) }),
     copistaSorpresa: I2('archivo_copista_sorpresa', 'Don Ramón sostiene la hoja nueva a contraluz, admirado; Noa con media sonrisa', { ocultaPj: ['NOA'], vida: VELA(.2, .3).concat(POLVO('#ffe8c0')) }),
-    noaLejos: I2('archivo_noa_lejos', 'Noa, primer plano, mira la ventana con lluvia: sonrisa melancólica', { ocultaPj: ['NOA'], vida: LLUVIA([.6, 0, .4, .7], 50) }),
-    ministriles: I2('ministriles', 'Galería del claustro: los tres ministriles tocan (chirimía, sacabuche, fagot barroco); el maestro marca el compás', { vida: LLUVIA([0, 0, 1, .5], 80).concat(POLVO('#ffe8c0')) }),
+    noaLejos: I2('archivo_noa_lejos', 'Noa, primer plano, mira la ventana con lluvia: sonrisa melancólica', { ocultaPj: ['NOA'], vida: [] }),
+    ministriles: I2('ministriles', 'Galería del claustro: los tres ministriles tocan (chirimía, sacabuche, fagot barroco); el maestro marca el compás', { vida: [].concat(POLVO('#ffe8c0')) }),
     bajon: I2('ministriles_bajon', 'El bajonista, rojo y apurado: se le quiebra la nota aguda', { vida: POLVO('#ffe8c0') }),
-    tocan: I2('ministriles_tocan', 'Los tres tocan relajados el himno transportado; el maestro asiente', { vida: LLUVIA([0, 0, 1, .4], 60).concat(POLVO('#ffe8c0')) }),
-    minNoa: I2('ministriles_noa', 'Noa escucha junto a una columna, satisfecha; los ministriles desenfocados', { ocultaPj: ['NOA'], vida: LLUVIA([0, 0, .4, .6], 50) }),
+    tocan: I2('ministriles_tocan', 'Los tres tocan relajados el himno transportado; el maestro asiente', { vida: [].concat(POLVO('#ffe8c0')) }),
+    minNoa: I2('ministriles_noa', 'Noa escucha junto a una columna, satisfecha; los ministriles desenfocados', { ocultaPj: ['NOA'], vida: [] }),
     claustroPulsera: I2('claustro_pulsera', 'DETALLE: la pulsera de Noa chisporrotea bajo la lluvia', { vida: [{ tipo: 'parpadeo', zona: [.38, .3, .25, .4], color: '#9fe4ff' }, { tipo: 'arco', zona: [.48, .45, .05, .1], color: '#9fe4ff' }].concat(LLUVIA(null, 100)) }),
     /* vuelta */
     amaroSospecha: O(I2('lab_amaro_sospecha', 'Amaro a la derecha, brazos cruzados, ceja levantada; la máquina humea', { ocultaPj: ['AMARO'], vida: [{ tipo: 'humo', zona: [.2, .1, .3, .4], n: 8 }].concat(POLVO('#cfe8ff')) }),
@@ -171,14 +171,14 @@
         { id: 'p0', nombre: 'Negro', negro: true, auto: 1, amb: [AMB.ciudad], mus: MUS.entrada },
         { id: 'p0a', nombre: 'A Coruña 2100 · anochecer', fondoVid: S1 + 'vid/portada_coruna2100.mp4', img: { src: T1('coruna2100') }, pj: null, auto: 3.5, amb: [AMB.ciudad, AMB.mar] },
         { id: 'p0b', nombre: 'El edificio de la madre', img: IMG.edificio, pj: null, auto: 3.5, amb: [AMB.casaBaja, AMB.mar], mus: MUS.casa },
-        { id: 'p0c', nombre: 'La puerta se abre', img: IMG.puertaAbre, pj: null, auto: 3, amb: [AMB.casa], sfx: [{ src: SF1('sfx_puerta_scifi'), t: .1, vol: .6 }, { src: SFo('sfx_lumi'), t: 1, vol: .7 }] }
+        { id: 'p0c', nombre: 'La puerta se abre', img: IMG.puertaAbre, pj: null, auto: 3, amb: [AMB.casa], sfx: [{ src: SF1('sfx_puerta_scifi'), t: .1, vol: .6 }, { src: SFo('sfx_lumi'), t: 1, vol: .22 }] }
       ] },
       /* 1 · Casa de la madre: tensión sin reconciliación */
       { id: 'e1', titulo: 'Casa de mamá', planos: [
         { id: 'p1a', nombre: 'Casa de la madre · la cena', img: IMG.casa, amb: [AMB.casa], mus: MUS.casa, pj: null,
           lineas: [
             { id: 't2_001', quien: 'NARRADOR', texto: 'Esa noche, Noa cena en casa de su madre. Hacía semanas que no venía.', claves: { claves: ['A Coruña · 2100'], ts: [.3], pos: 'arriba' }, espera: .6 },
-            { id: 't2_002', quien: 'MADRE', img: IMG.lumiSirve, texto: 'Gracias, Lumi.', sfx: [{ src: SFo('sfx_lumi'), t: 0, vol: .7 }, { src: SFo('sfx_plato'), t: .9, vol: .6 }], espera: .5 },
+            { id: 't2_002', quien: 'MADRE', img: IMG.lumiSirve, texto: 'Gracias, Lumi.', sfx: [{ src: SFo('sfx_lumi'), t: 0, vol: .15 }, { src: SFo('sfx_plato'), t: .9, vol: .45 }], espera: .5 },
             { id: 't2_003', quien: 'MADRE', img: IMG.madre, pj: { q: 'MADRE', pose: 'decepcion' }, texto: 'Te pasas el día en el laboratorio o con el saxo. Casi no te veo.' },
             { id: 't2_004', quien: 'NOA', img: IMG.noaPlato, pj: { q: 'NOA', pose: 'aburrida' }, texto: 'Estoy aquí, ¿no?', espera: .6 },
             { id: 't2_005', quien: 'MADRE', img: IMG.madreFoto, pj: { q: 'MADRE', pose: 'decepcion' }, texto: 'Estás aquí… como estaba tu padre. Aquí, pero no.', espera: .5 },
@@ -188,9 +188,9 @@
               texto: 'Me voy. Tengo mucho trabajo, mamá. Tengo cosas más importantes que esto.' }
           ] },
         /* la puerta; la madre se queda sola; Lumi recoge el plato de Noa sin tocar (música y lluvia, sin palabras) */
-        { id: 'p1b', nombre: 'La madre se queda sola', img: IMG.puertaCierra, amb: [AMB.casa], mus: MUS.casa, pj: null, auto: 10,
-          sfx: [{ src: SFo('sfx_puerta_casa'), t: .3, vol: .8 }, { src: SFo('sfx_lumi'), t: 6.8, vol: .5 }, { src: SFo('sfx_plato'), t: 7.6, vol: .45 }],
-          imgs: [{ t: 2.4, img: IMG.madreSola }, { t: 6.4, img: IMG.plato }] }
+        { id: 'p1b', nombre: 'La madre se queda sola', img: IMG.puertaCierra, amb: [AMB.casa], mus: MUS.casa, pj: null, auto: 9,   // (Iago 3-nov) sin el plano del plato
+          sfx: [{ src: SFo('sfx_puerta_casa'), t: .3, vol: .8 }, { src: SFo('sfx_lumi'), t: 6.8, vol: .12 }],
+          imgs: [{ t: 2.4, img: IMG.madreSola }] }
       ] },
       /* 2 · Laboratorio: Amaro descubre el módulo; Noa elige el destino con el cuaderno de su padre */
       { id: 'e2', titulo: 'El módulo', planos: [
