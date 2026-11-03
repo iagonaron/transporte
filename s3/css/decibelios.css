@@ -1,0 +1,74 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TRANSPORTE 2 · interactivo «decibelios» (js/decibelios.js): cuatro señales, cuatro sonómetros de aguja.
+   Estética «Onda» (2100): noche, cian de fósforo, ámbar para la zona objetivo y lo que se toca, verde al encajar.
+   Chrome 94: sin :has(), color-mix() ni CSS anidado.
+   ══════════════════════════════════════════════════════════════════════ */
+#inter.i-db{flex-direction:column;align-items:center;justify-content:center;gap:20px}
+/* pantalla de la máquina */
+.db-pant{display:flex;align-items:center;gap:20px;width:1746px;padding:10px 26px 10px 16px;border:1px solid rgba(99,230,255,.32);border-radius:3px;background:var(--hud),var(--cristal)}
+.db-anillos{width:62px;height:62px;flex:none}
+.db-anillos .an{fill:none;stroke:rgba(99,230,255,.22);stroke-width:4;transform-origin:0 0}
+.db-anillos .an.on{stroke:#7dffa8;filter:drop-shadow(0 0 4px #7dffa8)}
+.db-anillos .nuc{fill:#0b1a33;stroke:var(--cian);stroke-width:2}
+.db-anillos.gira .an:nth-child(1){animation:dbGira 2.2s linear infinite}.db-anillos.gira .an:nth-child(2){animation:dbGira 1.7s linear infinite reverse}
+.db-anillos.gira .an:nth-child(3){animation:dbGira 1.3s linear infinite}.db-anillos.gira .an:nth-child(4){animation:dbGira 1s linear infinite reverse}
+@keyframes dbGira{to{transform:rotate(360deg)}}
+.db-ptxt{flex:1;font:600 28px var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--cian)}
+.db-cuenta{font:700 34px var(--f-ui);color:var(--tinta);font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.i-db.activa .db-pant{border-color:rgba(125,255,168,.6)}
+.i-db.activa .db-ptxt{color:#7dffa8}
+.i-db.activa .db-cuenta{color:#1b1003;background:#7dffa8;padding:0 14px;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+
+/* las cuatro columnas */
+.db-canales{display:flex;gap:22px}
+.db-can{position:relative;width:420px;display:flex;flex-direction:column;align-items:center;padding:16px 18px 30px;border:1px solid rgba(99,230,255,.32);border-radius:3px;background:var(--hud),rgba(6,12,29,.93);transition:border-color .3s,box-shadow .3s}
+.db-can.ok{border-color:rgba(125,255,168,.7);box-shadow:0 0 22px rgba(125,255,168,.18)}
+.db-cab{align-self:stretch;display:flex;align-items:center;gap:12px;padding:0 4px 6px;border-bottom:1px solid rgba(99,230,255,.18)}
+.db-cab b{font:600 28px var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--tinta)}
+.db-cab span{flex:1;font:500 22px var(--f-texto);color:var(--tenue)}
+.db-cab .luz{width:22px;height:22px;transform:skewX(-14deg);border:2px solid rgba(99,230,255,.35)}
+.db-can.ok .db-cab .luz{background:#7dffa8;border-color:#e6fff0;box-shadow:0 0 12px #7dffa8}
+
+/* sonómetro de aguja */
+.db-medidor{display:block;width:384px;height:auto;margin-top:4px;overflow:visible}
+.db-medidor .m-arco{fill:none;stroke:rgba(147,168,207,.45);stroke-width:2}
+.db-medidor .m-rojo{fill:none;stroke:rgba(255,107,107,.55);stroke-width:6}
+.db-medidor .m-zona{fill:none;stroke:var(--ambar);stroke-width:40;opacity:.8}
+.db-medidor .m-obj-caja{fill:rgba(255,181,71,.16);stroke:var(--ambar);stroke-width:2}
+.db-medidor .m-obj{fill:var(--ambar);font:700 26px 'Saira SC',sans-serif;text-anchor:middle}
+.db-can.ok .m-obj-caja{fill:rgba(125,255,168,.16);stroke:#7dffa8}.db-can.ok .m-obj{fill:#7dffa8}
+.db-medidor .m-centro{stroke:#fff;stroke-width:3}
+.db-medidor .m-may{stroke:var(--tinta);stroke-width:2.5}
+.db-medidor .m-men{stroke:rgba(147,168,207,.7);stroke-width:1.5}
+.db-medidor .m-num{fill:var(--tenue);font:500 19px 'Plex',sans-serif;text-anchor:middle}
+.db-medidor .m-ud{fill:rgba(147,168,207,.6);font:600 22px 'Saira SC',sans-serif;letter-spacing:.1em;text-anchor:middle}
+.db-medidor .m-aguja line{stroke:var(--cian);stroke-width:4;stroke-linecap:round;filter:drop-shadow(0 0 5px rgba(99,230,255,.8))}
+.db-medidor .m-eje{fill:#0b1a33;stroke:var(--cian);stroke-width:3}
+.db-can.cerca .m-zona{opacity:1;filter:drop-shadow(0 0 8px rgba(255,181,71,.7))}
+.db-can.alto .m-aguja line{stroke:#ff8a8a;filter:drop-shadow(0 0 5px rgba(255,107,107,.8))}
+.db-can.ok .m-zona{stroke:#7dffa8;filter:drop-shadow(0 0 8px rgba(125,255,168,.7))}
+.db-can.ok .m-aguja line{stroke:#7dffa8;filter:drop-shadow(0 0 5px rgba(125,255,168,.9))}
+
+/* lectura grande y objetivo */
+.db-num{margin-top:2px;font:700 64px/1 var(--f-ui);font-variant-numeric:tabular-nums;color:var(--tinta);min-height:64px}
+.db-can.cerca .db-num{color:var(--ambar)}
+.db-can.alto .db-num{color:#ff8a8a}
+.db-can.ok .db-num{color:#7dffa8}
+.db-obj{margin-top:6px;font:400 22px var(--f-texto);color:var(--tenue)}
+.db-obj b{font:600 24px var(--f-ui);color:var(--ambar);letter-spacing:.04em}
+.db-can.ok .db-obj b{color:#7dffa8}
+
+/* deslizador propio (como el de calibrar de T1): − pista + */
+.db-ctl{align-self:stretch;display:flex;align-items:center;gap:30px;margin-top:18px}
+#escena #inter .db-ctl button.cuad{width:56px;min-width:56px;height:56px;min-height:56px;font:600 38px/1 var(--f-ui)}
+.db-pista{position:relative;flex:1;height:84px;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;outline:none}
+.db-pista::before{content:'';position:absolute;left:0;right:0;top:30px;height:24px;background:rgba(99,230,255,.14);border:1px solid rgba(99,230,255,.35)}
+.db-pista .db-rel{position:absolute;left:0;top:31px;height:22px;width:0;background:linear-gradient(90deg,rgba(99,230,255,.2),var(--cian));pointer-events:none}
+.db-pista .db-tir{position:absolute;top:4px;width:40px;height:76px;margin-left:-20px;background:var(--tinta);border:2px solid var(--cian);box-shadow:0 0 14px rgba(99,230,255,.6);
+  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);pointer-events:none}
+.db-pista:focus-visible .db-tir,.db-can.mueve .db-tir{background:var(--ambar);border-color:#fff}
+.db-can.ok .db-tir{background:#7dffa8}
+.db-can.ok .db-rel{background:linear-gradient(90deg,rgba(125,255,168,.2),#7dffa8)}
+.db-can.fija .db-pista{cursor:default}
+.db-pista .db-ext{position:absolute;left:0;right:0;bottom:-24px;display:flex;justify-content:space-between;font:500 17px var(--f-texto);color:var(--tenue);pointer-events:none}
+.db-pista .db-ext b{font-weight:500}
