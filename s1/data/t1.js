@@ -211,6 +211,7 @@
     trompaCerca: { src: 'img/t1/viaje_trompa_s18.webp', zoom: 1.3, cx: .5, cy: .45 }, clarineteCerca: { src: 'img/t1/viaje_clarinete_s19.webp', zoom: 1.3, cx: .5, cy: .45 },
     resInstr: { src: N('res_instrumentos'), vida: [{ tipo: 'polvo', zona: [0, 0, 1, 1], n: 18, color: '#ffe2b8' }, { tipo: 'respira', zona: [.1, .2, .8, .5], color: '#58b8ff' }] },
     resTaller: { src: N('res_taller'), vida: POLVO() },
+    torrePuerta: { src: N('torre_puerta'), vida: [{ tipo: 'respira', zona: [.4, .35, .2, .55], color: '#9fe4ff', vel: .6 }] },   // luz por la rendija
     resOrq1: { src: N('res_orquesta1') }, resOrq2: { src: N('res_orquesta2') }, resOrq3: { src: N('res_orquesta3') },
     paleoPadreDa: { src: N('paleo_padre_da'), ocultaPj: ['TALLADOR', 'NINA'], vida: VIDA.paleoCerca },
     paleoNinaToca: { src: N('paleo_nina_toca'), ocultaPj: ['TALLADOR', 'NINA'], vida: VIDA.paleoCerca },
@@ -301,16 +302,17 @@
       ] },
       /* 3 · El laboratorio */
       { id: 'e3', titulo: 'El laboratorio', planos: [
-        { id: 'p3a', nombre: 'Laboratorio bajo la Torre', img: IMG.lab, desc: 'Piedra romana y cables; el Transportador en el centro; la foto del padre en una mesa',
-          amb: [AMB.lab], mus: MUS.coruna, pj: null, vida: VIDA.lab, sfx: [{ src: SF('sfx_puerta_scifi'), t: .2 }], antes: 2,
+        /* (Iago 3-nov) mientras dice «Debajo de la Torre…», primero la puerta real de la Torre con luz por la rendija; luego se abre al laboratorio */
+        { id: 'p3a', nombre: 'Laboratorio bajo la Torre', img: O(IMG.torrePuerta, IMG.lab), desc: 'Puerta de la Torre (luz por la rendija) → piedra romana y cables; el Transportador en el centro',
+          amb: [AMB.lab], mus: MUS.coruna, pj: null, vida: VIDA.lab, antes: 2,
           lineas: [
-            { id: 't1_011', quien: 'NARRADOR', imgs: [{ en: .46, img: IMG.labCentro }], texto: 'Debajo de la Torre trabaja un laboratorio que no aparece en ningún mapa. Hacen lo único que la inteligencia artificial todavía no sabe hacer: una máquina que viaja como viaja el sonido, en ondas.', claves: { claves: ['El Transportador'], ts: [8.4], pos: 'arriba' } },
+            { id: 't1_011', quien: 'NARRADOR', imgs: [{ en: .27, img: IMG.lab }, { en: .5, img: IMG.labCentro }], sfx: [{ src: SF('sfx_puerta_scifi'), en: .24 }], texto: 'Debajo de la Torre trabaja un laboratorio que no aparece en ningún mapa. Hacen lo único que la inteligencia artificial todavía no sabe hacer: una máquina que viaja como viaja el sonido, en ondas.', claves: { claves: ['El Transportador'], ts: [8.4], pos: 'arriba' } },
             { id: 't1_012', quien: 'NARRADOR', img: IMG.fotoPadre, imgs: [{ en: .47, img: IMG.cocheLluvia }], texto: 'La empezó el padre de Noa. No llegó a terminarla: hace tres años, un coche sin conductor tomó una mala decisión.', espera: .8 },
             { id: 't1_013', quien: 'AMARO', img: IMG.labCentro, imgs: [{ en: .53, img: IMG.labHolomapa }], pj: { q: 'AMARO', pose: 'explica' }, poses: [{ en: .62, pose: 'tableta' }], texto: 'El Transportador te llevará fuera de la Torre, a treinta metros de aquí. Solo eso. Si funciona, mañana podríamos ir de la Torre a cualquier sitio del mundo en un instante. Pero solo a otro lugar: la misma hora, el mismo día.' },
             { id: 't1_014', quien: 'NOA', img: IMG.fotoPadre, pj: { q: 'NOA', pose: 'neutra' }, texto: 'Le prometí que sería yo quien la probara.' }
           ] },
         { id: 'p3b', nombre: 'Detalle · el módulo', img: IMG.modulo, desc: 'Noa conecta a escondidas un viejo módulo con una pegatina gastada', amb: [AMB.lab], pj: null, auto: 3.8,
-          sfx: [{ src: SF('sfx_ui_clic'), t: 1.3 }, { src: SF('sfx_destello'), t: 1.6 }] }
+          sfx: [{ src: SF('sfx_ui_clic'), t: .35 }, { src: SF('sfx_destello'), t: .6 }] }   // (Iago 3-nov) el clic de enchufar, casi al aparecer el plano
       ] },
       /* 4 · La prueba: calibrar (octavas) → el módulo de Noa revienta → alarma. Tensión continua hasta el salto. */
       { id: 'e4', titulo: 'La prueba', planos: [
