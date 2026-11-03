@@ -69,8 +69,8 @@
   const SFo = n => B.existe(SF(n)) ? SF(n) : SF(n + '_sint');   // el bueno si ya está; si no, el marcador sintetizado
   const AMB = {
     aula: { src: SF('amb_aula'), vol: .3 }, ciudad: { src: SF('amb_ciudad2100'), vol: .42 }, mar: { src: SF('amb_mar_noche'), vol: .3 },
-    lab: { src: SF('amb_laboratorio'), vol: .36 }, labBajo: { src: SF('amb_laboratorio'), vol: .16 }, paleo: { src: SF('amb_paleolitico'), vol: .42 },
-    fuego: { src: SF('amb_fuego'), vol: .3 }, fuegoBajo: { src: SF('amb_fuego'), vol: .14 }, paleoBajo: { src: SF('amb_paleolitico'), vol: .18 },
+    lab: { src: SF('amb_laboratorio'), vol: .36 }, labBajo: { src: SF('amb_laboratorio'), vol: .16 }, paleo: { src: SF('amb_paleolitico'), vol: .24 },
+    fuego: { src: SF('amb_fuego'), vol: .3 }, fuegoBajo: { src: SF('amb_fuego'), vol: .14 }, paleoBajo: { src: SF('amb_paleolitico'), vol: .1 },
     orquesta: { src: SF('amb_orquesta_afinando'), vol: .34 }, orquestaBajo: { src: SF('amb_orquesta_afinando'), vol: .08 },
     pasillo: { src: SF('amb_pasillo'), vol: .42 },
     grillos: { src: [SF('amb_grillos'), SF('amb_grillos_sint')], vol: .2 }, viento: { src: [SF('amb_viento_juncos'), SF('amb_viento_juncos_sint')], vol: .22 }, ciudadLejos: { src: SF('amb_ciudad2100'), vol: .3 }
@@ -346,7 +346,7 @@
         { id: 'p6a', funde: 1.2, nombre: 'La llegada · −40 000', img: IMG.llegada, amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento], mus: MUS.paleo, pj: null, antes: 1.2,
           lineas: [
             { id: 't1_019', quien: 'NOA', texto: 'Demasiado antiguo… creo que he calculado mal el tiempo.', claves: { claves: ['−40 000 años'], ts: [0], pos: 'izq' }, espera: .8 },
-            { id: 't1_019b', quien: 'NARRADOR', img: IMG.llegadaCerca, texto: 'Al parecer, el Transportador no solo la ha desplazado treinta metros: la ha llevado cuarenta mil años atrás.' },   /* (Iago 22:45) sobra lo de la playa */
+            { id: 't1_019b', quien: 'NARRADOR', texto: 'Al parecer, el Transportador no solo la ha desplazado treinta metros: la ha llevado cuarenta mil años atrás.' },   /* (Iago 22:45) sobra lo de la playa */
             { id: 't1_019c', quien: 'NARRADOR', img: IMG.paleoLejos, imgs: [{ en: .45, img: IMG.paleoPadreHija }], texto: 'Junto al fuego hay un padre y su hija. Hace cuarenta mil años, las personas ya eran como nosotros: el mismo cuerpo, la misma voz… y las mismas ganas de hacer música.' },
             { id: 't1_019d', quien: 'NARRADOR', img: O(IMG.paleoTalla, IMG.tallador), imgs: [{ en: .5, img: IMG.paleoAcerca }], texto: 'Él talla flautas con las cañas del río. Noa se acerca despacio, sin hacer ruido, para escucharlas.',
               sfx: [{ src: SF('sfx_tallar_cana'), en: .03, vol: .6 }, { src: B.existe(SF('sfx_pasos_hierba')) ? SF('sfx_pasos_hierba') : SF('sfx_pasos_juncos_sint'), en: .5, vol: .75 }] }
@@ -362,7 +362,7 @@
         /* (Iago 22:46) el padre le da la flautita a la hija y ella toca lo mismo, más agudo */
         { id: 'p8a', nombre: 'El padre le da la flauta pequeña', img: O(IMG.paleoPadreDa, IMG.tallador), mus: MUS.paleo, amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento], pj: null, auto: 3.2 },
         { id: 'p8a2', nombre: 'La niña toca', img: O(IMG.paleoNinaToca, IMG.tallador), mus: MUS.paleoBajo, amb: [AMB.paleo, AMB.fuego, AMB.grillos, AMB.viento], pj: null, auto: 4.4,
-          al: [{ t: .4, fn: () => flautaDibujo(FL.grande.base + 12, 1) }] },   // lo mismo que el padre, una octava más aguda
+          al: [{ t: .4, fn: () => flautaDibujo(FL.pequena.base, 1) }] },   // (Iago 3-nov) con la MISMA digitación que el padre: suena otra cosa (aún no encaja)
         { id: 'p8', nombre: 'El tallador y la niña', mus: MUS.paleoBajo, img: IMG.tallador, desc: 'El tallador con la flauta grande y una niña con la pequeña', pj: null, amb: [AMB.paleoBajo, AMB.fuegoBajo, AMB.grillos],
           inter: { tipo: 'juntos', fondoToca: IMG.paleoPadreFlauta, fondo: IMG.tallador, opciones: [5, 4, 3, 2, 1], flautas: [FL.grande, FL.pequena], quienG: 'Él · grande', quienP: 'Ella · pequeña', digitaciones: DIBUJO, ritmo: RITMO,
             cartel: 'Él toca la grande y ella la pequeña. Prueba primero con la <b>misma digitación</b> (los dos tapan todos los agujeros) y escucha. Después prueba las otras posiciones de la pequeña y <b>elige con cuál tiene que empezar</b> para que suene igual que la grande, pero más aguda.',
