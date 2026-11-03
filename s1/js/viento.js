@@ -16,48 +16,41 @@
     trompa: { o1: 'sawtooth', o2: 'sine', m2: 2, g2: .15, corte: 2.6, abre: 1.8, form: [[450, 2, 1.2]], gan: .42, atk: .1, vib: .003, ruido: .03 },
     oboe: { o1: 'sawtooth', o2: 'square', m2: 3, g2: .08, corte: 6, abre: 1.3, form: [[1150, 6, 1.6], [2900, 5, .7]], gan: .26, atk: .035, vib: .006, ruido: .05 }
   };
-  /* saxo alto con muestras reales (mus/saxo/, cada 3 semitonos; tonejs-instruments, MIT); si no están, el sintetizado */
-  const SAX = { D3: 50, F3: 53, Gs3: 56, B3: 59, D4: 62, F4: 65, Gs4: 68, B4: 71, D5: 74, F5: 77, Gs5: 80 };
-  V.SAX_RUTAS = Object.keys(SAX).map(k => 'mus/saxo/' + k + '.mp3');
-  function saxoMuestra(midi, t, dur, vel) {
-    let mejor = null, d = 99;
-    Object.keys(SAX).forEach(k => { const r = 'mus/saxo/' + k + '.mp3', dd = Math.abs(SAX[k] - midi); if (B.buf[r] && dd < d) { d = dd; mejor = [r, SAX[k]]; } });
-    if (!mejor) return false;
-    const C = B.ac(), s = C.createBufferSource(), g = C.createGain();
-    s.buffer = B.buf[mejor[0]]; s.playbackRate.value = Math.pow(2, (midi - mejor[1]) / 12);
-    const v = .9 * vel;
-    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .015);
-    g.gain.setValueAtTime(v, t + Math.max(.03, dur)); g.gain.linearRampToValueAtTime(0, t + dur + .12);
-    s.connect(g); g.connect(B.bus.inst); s.start(t); s.stop(t + dur + .15);
-    vivos.push(s); s.onended = () => { const i = vivos.indexOf(s); if (i >= 0) vivos.splice(i, 1); };
-    return true;
-  }
-  /* MUESTRAS REALES (Iago, 2-nov: Splice) para trompa, clarinete, oboe y flauta: mus/<instr>/<instr>_<nota>.mp3 (nota: C4, Cs4, C#4, Db4…).
-     Se descubren solas en el inventario (data/recursos.js); sampler por playbackRate desde la muestra más cercana, envolvente suave.
-     Mientras no estén, el sintetizado de siempre. */
+  /* MUESTRAS REALES (3-nov, sets multimuestra hechos con audio/vsco_interactivos.py): mus/<instr>/<instr>_<nota>.mp3 (nota: C4, Cs4, C#4, Db4…),
+     una sostenida cada 2–3 semitonos en el registro que se usa, mono, todas a −20 LUFS, con su ataque y su cola natural.
+       saxo (alto): tonejs-instruments (MIT, grabación de Karoryfer) · clarinete, trompa, oboe: VSCO-2-CE (CC0)
+       flauta (de caña, Paleolítico): la quena de Splice, completada con notas intermedias (rubberband con formantes)
+     Se descubren solas en el inventario (data/recursos.js); sampler por playbackRate desde la muestra más cercana (≤ 1,5 st).
+     Si faltan, el sintetizado de siempre. */
+  V.SAX_RUTAS = [];   // (el saxo ya va con las demás, en MUESTRAS_RUTAS)
   const PC = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
   const MUE = {};
-  /* afinación medida de cada muestra (C4, 2-nov) y muestras staccato (solo notas cortas) */
-  const CENTS = { flauta_A5: 19, flauta_E5: 8, flauta_G4: 4, flauta_E6: 3, clarinete_F3: 15, clarinete_As3: 10 };
-  const CORTA = { clarinete_A4: 1, clarinete_Fs4: 1, clarinete_C5: 1 };
+  /* afinación medida de cada muestra (cents; + = alta; vsco_interactivos.json, 3-nov) y muestras staccato (solo notas cortas; ahora ninguna) */
+  const CENTS = { clarinete_C5: 2, clarinete_D5: 1, clarinete_F4: 3, clarinete_G4: 4, flauta_A5: 18, flauta_E5: -9, flauta_G4: -4,
+    oboe_As4: 2, oboe_C5: 2, oboe_D5: 2, oboe_F4: 2, oboe_G4: 3, trompa_C4: -1, trompa_D3: -2, trompa_D4: -1, trompa_E4: -1, trompa_F3: -1 };
+  const CORTA = {};
   Object.keys(B.RECURSOS || {}).forEach(r => {
-    const m = /^mus\/(trompa|clarinete|oboe|flauta)\/[a-z]+_([a-g])(s|#|b)?(-?\d)\.(mp3|wav|ogg)$/i.exec(r);
+    const m = /^mus\/(saxo|trompa|clarinete|oboe|flauta)\/[a-z]+_([a-g])(s|#|b)?(-?\d)\.(mp3|wav|ogg)$/i.exec(r);
     if (!m) return;
     const midi = 12 * (+m[4] + 1) + PC[m[2].toLowerCase()] + (m[3] === 's' || m[3] === '#' ? 1 : m[3] === 'b' ? -1 : 0);
     const base = r.replace(/^.*\//, '').replace(/\.\w+$/, '');
     (MUE[m[1].toLowerCase()] = MUE[m[1].toLowerCase()] || []).push([r, midi, CENTS[base] || 0, CORTA[base] ? 1 : 0]);
   });
   V.MUESTRAS_RUTAS = [].concat.apply([], Object.keys(MUE).map(k => MUE[k].map(x => x[0])));
-  const ENV = { trompa: [.06, .25], clarinete: [.03, .18], oboe: [.03, .16], flauta: [.05, .22] };
+  /* [rampa de entrada, suelta] (s): la muestra ya trae su ataque real, así que la rampa es mínima (solo evita el clic);
+     ganancia por instrumento = el nivel que tenían las muestras de antes (lo que Iago ya oyó equilibrado con voz y música) */
+  const ENV = { saxo: [.006, .12], trompa: [.008, .2], clarinete: [.006, .14], oboe: [.006, .14], flauta: [.01, .18] };
+  const GAN = { saxo: 2.0, clarinete: 2.15, trompa: 3.4, oboe: 2.3, flauta: 4.0 };
   function muestra(tipo, midi, t, dur, vel) {
     const l = MUE[tipo]; if (!l) return false;
     const cerca = cand => { let m = null, dd = 99; cand.forEach(x => { const d = Math.abs(x[1] - midi); if (B.buf[x[0]] && d < dd) { dd = d; m = x; } }); return [m, dd]; };
     let [mejor, d] = cerca(l.filter(x => !x[3]));   // primero las sostenidas
     if (!mejor || dur <= .45) { const o = cerca(l); if (o[0] && (!mejor || o[1] < d)) mejor = o[0]; }   // (Iago 22:55) las staccato solo para notas cortas: las largas, siempre con una sostenida
     if (!mejor) return false;
-    const C = B.ac(), s = C.createBufferSource(), g = C.createGain(), e = ENV[tipo] || [.03, .2];
+    const C = B.ac(), s = C.createBufferSource(), g = C.createGain(), e0 = ENV[tipo] || [.01, .18];
+    const e = [e0[0], dur <= .45 ? e0[1] * .75 : e0[1]];   // las cortas sueltan antes (que no se emborronen); las largas, con su cola
     s.buffer = B.buf[mejor[0]]; s.playbackRate.value = Math.pow(2, (midi - mejor[1]) / 12 - (mejor[2] || 0) / 1200);   // con su corrección de afinación
-    const v = .85 * vel, fin = t + Math.min(dur, s.buffer.duration / s.playbackRate.value - e[1]);
+    const v = (GAN[tipo] || .85) * vel, fin = t + Math.min(dur, s.buffer.duration / s.playbackRate.value - e[1]);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + e[0]);
     g.gain.setValueAtTime(v, Math.max(t + e[0] + .01, fin)); g.gain.linearRampToValueAtTime(0, Math.max(t + e[0] + .01, fin) + e[1]);
     s.connect(g); g.connect(B.bus.inst); s.start(t); s.stop(Math.max(t + e[0] + .01, fin) + e[1] + .05);
@@ -65,7 +58,6 @@
     return true;
   }
   V.nota = function (tipo, midi, t, dur, vel) {
-    if (tipo === 'saxo' && saxoMuestra(midi, t || B.ac().currentTime, Math.max(.08, dur || .5), vel == null ? .8 : vel)) return;
     if (MUE[tipo] && muestra(tipo, midi, t || B.ac().currentTime, Math.max(.08, dur || .5), vel == null ? .8 : vel)) return;
     const C = B.ac(), P = PERFIL[tipo] || PERFIL.saxo, f = B.frec(midi);
     t = t || C.currentTime; dur = Math.max(.08, dur || .5); vel = vel == null ? .8 : vel;

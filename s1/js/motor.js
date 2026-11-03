@@ -413,7 +413,8 @@
     B.musica(null); B.ambiente([]);
     B.sfx('sfx/sfx_salto_tiempo.mp3', .8);
     const fl = B.existe('sfx/sfx_flash_blanco.mp3') ? 'sfx/sfx_flash_blanco.mp3' : 'sfx/sfx_flash_blanco_sint.mp3';
-    B.espera(Math.max(0, dur - 1.7), c).then(ok => { if (!ok) return; B.sfx(fl, .8); blanco(true, 1.6); });
+    B.espera(Math.max(0, dur - 2.9), c).then(ok => { if (!ok) return; B.sfx(fl, .8); });   // (Iago 3-nov) el destello suena entero antes de cambiar de página
+    B.espera(Math.max(0, dur - 1.7), c).then(ok => { if (!ok) return; blanco(true, 1.6); });
     const vt = B.hayVideo(TUNEL) ? B.precargaVideo(TUNEL) : Promise.resolve(null);
     return vt.then(url => B.tunel(capa, { dur: dur, de: o.desde == null ? 2100 : o.desde, a: o.hasta == null ? 2100 : o.hasta, video: url || null, contador: o.desde != null }, c))
       .then(() => B.espera(.2, c)).then(() => { if (o.alFinal) o.alFinal(); return true; });

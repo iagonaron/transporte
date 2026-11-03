@@ -71,7 +71,7 @@
       if (!pjAct || pjAct.q !== q || pjAct.pose !== pose) return;   // ya se pidió otra pose
       /* cada personaje mira hacia el centro (hacia quien le habla): si la pose mira hacia fuera, se voltea */
       const mira = (p.mira || {})[pose], quiere = lado === 'izq' ? 'der' : 'izq';
-      const w = B.el('div', 'tr-pj ' + lado + (marco ? ' marco-' + marco : '') + (!marco && mira && mira !== 'frente' && mira !== quiere ? ' espejo' : ''));   // marco 'llamada': la cara en la pantalla de la pulsera w.style.setProperty('--alto', alto); w.dataset.pose = q + '_' + pose;
+      const w = B.el('div', 'tr-pj ' + lado + (marco ? ' marco-' + marco : '') + (mira && mira !== 'frente' && mira !== quiere ? ' espejo' : ''));   // marco 'llamada': la cara en la pantalla de la pulsera w.style.setProperty('--alto', alto); w.dataset.pose = q + '_' + pose;
       w.appendChild(nodo);
       capa.appendChild(w);
       B.$$('.tr-pj', capa).forEach(e => { if (e !== w) e.remove(); });
