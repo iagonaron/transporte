@@ -22,7 +22,7 @@
       mira: { neutra: 'izq', aburrida: 'izq', traviesa: 'izq', sorpresa: 'izq', pensativa: 'izq', emocion: 'izq', pulsera_fastidio: 'frente', pulsera_interes: 'frente' } },
     AMARO: { nombre: 'Dra. Amaro', color: '#c9b6ff', lado: 'der', alto: .84, _: 'explica', poses: ['explica', 'tableta', 'alarma', 'helada'],
       mira: { explica: 'izq', tableta: 'der', alarma: 'der', helada: 'der' } },   // explica ya la volteó C4 en el fichero
-    MADRE: { nombre: 'Mamá', color: '#ffc48a', lado: 'der', alto: .8, marco: 'llamada', _: 'llama', poses: ['llama', 'decepcion'] },
+    MADRE: { nombre: 'Mamá', color: '#ffc48a', lado: 'der', alto: .8, marco: 'llamada', _: 'llama', poses: ['llama', 'decepcion'], mira: { llama: 'der', decepcion: 'der' } },   // (Iago 3-nov) caras hacia el centro: se voltea
     PIANISTA: { nombre: 'Pianista', color: '#ffe08a', lado: 'der', alto: .8, _: 'sonrie', poses: ['sonrie', 'resopla'], mira: { sonrie: 'izq', resopla: 'der' } },
     TALLADOR: { nombre: 'Tallador', color: '#e9b07a', lado: 'der', alto: .84, _: 'talla', poses: ['toca', 'talla', 'sorpresa', 'sonrie'], mira: { toca: 'izq', talla: 'frente', sorpresa: 'der', sonrie: 'izq' } },
     TROMPISTA: { nombre: 'Trompista', color: '#ffd9a0', lado: 'der', poses: [] }, CLARINETISTA: { nombre: 'Clarinetista', color: '#ffd9a0', lado: 'der', poses: [] },
