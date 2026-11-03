@@ -122,9 +122,14 @@ window.TR = window.TR || {};
     }
     return (irInterior = b);
   }
+  /* (3-nov) la cadena de la voz interior (con su reverb) se monta UNA vez, al cargar, y se reutiliza: montar el convolver al empezar
+     la frase daba un tirón en la ensoñación */
+  let cadenaInt = null;
+  B.prepVoz = function () { try { B.ac(); vozInterior(); } catch (e) { } };
   function vozInterior() {
+    if (cadenaInt) return cadenaInt;
     const C = B.ac();
-    const ent = C.createGain();
+    const ent = cadenaInt = C.createGain();
     const hp = C.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 170; hp.Q.value = .6;
     const lp = C.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 6000; lp.Q.value = .5;
     const pr = C.createBiquadFilter(); pr.type = 'peaking'; pr.frequency.value = 3200; pr.gain.value = -4.5; pr.Q.value = .9;   // presencia rebajada: suena más lejos

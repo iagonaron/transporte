@@ -86,11 +86,14 @@
     if (capas.length && !raf) { t0 = performance.now(); raf = requestAnimationFrame(tic); }
   };
   V.quita = function () { V.pon([]); };
+  /* (3-nov) durante la ensoñación la «vida» está oculta (opacidad 0): no se dibuja, para no gastar en el aula */
+  let dormida = false;
+  V.duerme = function (on) { dormida = !!on; };
   function tic(ms) {
     raf = null;
     if (!capas.length) return;
     raf = requestAnimationFrame(tic);
-    if (ms - ult < 33) return;
+    if (dormida || ms - ult < 33) return;
     ult = ms;
     const t = (ms - t0) / 1000;
     cx.clearRect(0, 0, W, H); cx2.clearRect(0, 0, W, H);

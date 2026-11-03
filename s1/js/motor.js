@@ -50,11 +50,13 @@
     const f = $('fondo');
     const q = src ? B.primero(src) : null;
     const clave = q ? JSON.stringify(q) : null;
-    if (clave === fondoAct && !o.forzar) { if (!pendiente) trasPintar(o.funde); return fondoOpc; }
+    if (clave === fondoAct && !o.forzar) {
+      if (o.ensueno) B.$$('#fondo .lam').forEach(e => { if (e._clave === clave && !e._de) ensuena(e, o.ensueno.modo, o.ensueno.dur); });   // misma lámina: se anima la que ya se ve
+      if (!pendiente) trasPintar(o.funde); return fondoOpc; }
     /* fundido cruzado lento (Iago, 2-nov) cuando la lámina es la misma imagen con otro encuadre o con halos (o si el plano lo pide) */
-    const fd = o.funde != null ? o.funde : (q && fondoOpc && !q.falta && !fondoOpc.falta && q.src === fondoOpc.src ? 1.2 : 0);
+    const fd = o.funde != null ? o.funde : (q && fondoOpc && !q.falta && !fondoOpc.falta && (q.src === fondoOpc.src || q.funde) ? (q.funde || 1.2) : 0);   // q.funde: lámina hermana (p. ej. def_absoluto → def_absoluto_si) que entra con fundido
     fondoAct = clave; fondoOpc = q;
-    const nuevo = B.el('div', 'lam');
+    const nuevo = B.el('div', 'lam'); nuevo._clave = clave;
     if (!q) nuevo.classList.add('negra');
     else if (!q.falta) {
       const u = 'url("' + (B.img[q.src] || q.src) + '")';
@@ -74,11 +76,12 @@
       const fdLam = M._congelado ? 0 : fd;   // desde un vídeo congelado, lo que se funde es el vídeo (encima), no la lámina
       if (fdLam) { nuevo.style.opacity = '0'; nuevo.style.transition = 'opacity ' + fdLam + 's ease'; }
       if (vfondo && vfondo.parentNode === f) f.insertBefore(nuevo, vfondo); else f.appendChild(nuevo);
-      if (o.anima && nuevo.animate) nuevo.animate(o.anima.k, o.anima.o);   // p. ej. el recuerdo entra desenfocado y cálido y se enfoca
+      if (o.ensueno) ensuena(nuevo, o.ensueno.modo, o.ensueno.dur);   // el recuerdo entra desenfocado y cálido y se enfoca
+      else if (o.anima && nuevo.animate) nuevo.animate(o.anima.k, o.anima.o);
       requestAnimationFrame(() => requestAnimationFrame(() => {
         if (mi !== gen) return;
-        if (fdLam) { nuevo.style.opacity = '1'; trasPintar(0); setTimeout(() => { if (mi === gen) B.$$('.lam', f).forEach(e => { if (e !== nuevo) e.remove(); }); }, fdLam * 1000 + 60); return; }
-        B.$$('.lam', f).forEach(e => { if (e !== nuevo) e.remove(); });
+        if (fdLam) { nuevo.style.opacity = '1'; trasPintar(0); setTimeout(() => { if (mi === gen) B.$$('.lam', f).forEach(e => { if (e !== nuevo && e._de !== nuevo) e.remove(); }); }, fdLam * 1000 + 60); return; }
+        B.$$('.lam', f).forEach(e => { if (e !== nuevo && e._de !== nuevo) e.remove(); });   // (las capas de la ensoñación de la lámina nueva se quitan solas)
         trasPintar(fd);
       }));
     };
@@ -131,13 +134,123 @@
   const ENS = [[0, 0, 1, 1, 0, 1, 0], [.22, 1.6, 1.05, 1.06, .1, 1.012, .5], [.48, 4.2, 1.12, 1.02, .2, 1.026, -.6], [.74, 7, 1.2, .94, .3, 1.04, .7], [1, 10, 1.28, .88, .36, 1.05, -.35]];
   const ensPaso = x => ({ offset: x[0], filter: 'blur(' + x[1] + 'px) brightness(' + x[2] + ') saturate(' + x[3] + ') sepia(' + x[4] + ')', transform: 'scale(' + x[5] + ') skewX(' + x[6] + 'deg)' });
   const ENS_ENTRA = ENS.map(ensPaso), ENS_SALE = [[0, 10, 1.28, .88, .36, 1.05, -.35], [.45, 3.6, 1.1, .97, .18, 1.022, .4], [1, 0, 1, 1, 0, 1, 0]].map(ensPaso);
+  /* ENSOÑACIÓN BARATA (Iago 3-nov: en el ordenador del aula iba a tirones, «como si cargara»). Animar filter:blur() a 1920×1080
+     obliga a re-desenfocar la lámina entera en cada fotograma (y en la salida, dos láminas a la vez); en un equipo sin GPU fuerte
+     lo hace la CPU. Ahora el desenfoque y el tinte se PRE-RENDERIZAN al cargar (lienzo 960×540 con ctx.filter → JPEG en memoria,
+     descodificado y retenido; dos niveles: medio y pleno) y durante la ensoñación solo hay FUNDIDOS DE OPACIDAD entre capas hermanas
+     (una capa cada una: sin superficies intermedias) y una ONDULACIÓN ligera con transform (escala y deriva, sin sesgo) sobre #fondo.
+     La «vida» (partículas con fusión «screen», cara de componer) se retira mientras dura el sueño y vuelve al enfocar el recuerdo.
+     Las listas con filtros de arriba quedan de reserva si el navegador no tiene ctx.filter. */
+  /* medio a 1920×1080 (va quieto: el compositor lo copia 1:1) · pleno a 960×540 (es el que ondula; con 10 px de desenfoque no se nota) */
+  const ENS_NIV = [{ w: 1920, blur: 4.2, f: 'brightness(1.12) saturate(1.02) sepia(.2)' }, { w: 960, blur: 10, f: 'brightness(1.28) saturate(.88) sepia(.36)' }];
+  const ONDA = [[0, 1, 0, 0], [.22, 1.012, .25, -.12], [.48, 1.026, -.3, .1], [.74, 1.04, .35, -.08], [1, 1.05, -.15, .05]];   // [offset, escala, dx %, dy %]
+  const ondaPaso = x => ({ offset: x[0], transform: 'translate(' + x[2] + '%,' + x[3] + '%) scale(' + x[1] + ')' });
+  const ONDA_ENTRA = ONDA.map(ondaPaso), ONDA_SALE = [[0, 1.05, -.15, .05], [.45, 1.022, .2, -.06], [1, 1, 0, 0]].map(ondaPaso);
+  const ENSL = new Map();   // clave de la lámina (JSON del encuadre) → [url medio, url pleno]
+  let ondaAnim = null;
+  const hayFiltroCanvas = (function () { try { const c = document.createElement('canvas').getContext('2d'); return !!c && 'filter' in c; } catch (e) { return false; } })();
+  /* región de la imagen fuente que se ve en el escenario 1920×1080 (mismo cálculo que background-size/-position de M.fondo) */
+  function encuadre(q, iw, ih) {
+    const SW = 1920, SH = 1080; let dw, dh, ox, oy;
+    if (q.zoom && q.zoom > 1) {
+      const z = q.zoom, cx = q.cx == null ? .5 : q.cx, cy = q.cy == null ? .5 : q.cy;
+      const px = B.clamp((cx * z - .5) / (z - 1), 0, 1), py = B.clamp((cy * z - .5) / (z - 1), 0, 1);
+      dw = SW * z; dh = dw * ih / iw; ox = px * (SW - dw); oy = py * (SH - dh);
+    } else { const k = Math.max(SW / iw, SH / ih); dw = iw * k; dh = ih * k; ox = (SW - dw) / 2; oy = (SH - dh) / 2; }
+    return { sx: -ox / dw * iw, sy: -oy / dh * ih, sw: SW / dw * iw, sh: SH / dh * ih };
+  }
+  function lienzoEns(im, r, niv) {
+    const W = niv.w, H = Math.round(niv.w * 9 / 16), b = niv.blur * W / 1920, m = Math.ceil(b * 3), esc = W / r.sw, ms = m / esc;
+    const iw = im.naturalWidth, ih = im.naturalHeight;
+    const t = document.createElement('canvas'); t.width = W + 2 * m; t.height = H + 2 * m; const tx = t.getContext('2d');
+    /* margen para que el desenfoque no oscurezca los bordes: primero la región ampliada recortada a la imagen (estirada), encima la exacta */
+    const x0 = Math.max(0, r.sx - ms), y0 = Math.max(0, r.sy - ms), x1 = Math.min(iw, r.sx + r.sw + ms), y1 = Math.min(ih, r.sy + r.sh + ms);
+    tx.drawImage(im, x0, y0, x1 - x0, y1 - y0, 0, 0, t.width, t.height);
+    tx.drawImage(im, r.sx - ms, r.sy - ms, r.sw + 2 * ms, r.sh + 2 * ms, 0, 0, t.width, t.height);
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const cx = c.getContext('2d', { alpha: false }); cx.filter = 'blur(' + b + 'px) ' + niv.f; cx.drawImage(t, -m, -m); cx.filter = 'none';
+    return new Promise(res => c.toBlob(bl => {
+      if (!bl) return res(null);
+      const u = URL.createObjectURL(bl), i2 = new Image(); i2.src = u; B.vivas.push(i2);   // descodificada y retenida
+      const ok = () => res(u); (i2.decode ? i2.decode() : Promise.resolve()).then(ok, ok);
+    }, 'image/jpeg', .9));
+  }
+  function prepEns(q) {
+    if (!hayFiltroCanvas || !q || q.falta || q.ajuste === 'contain') return Promise.resolve();
+    const clave = JSON.stringify(q); if (ENSL.has(clave)) return Promise.resolve();
+    ENSL.set(clave, null);
+    return decod(B.img[q.src] || q.src).then(im => {
+      if (!im || !im.naturalWidth) return;
+      const r = encuadre(q, im.naturalWidth, im.naturalHeight);
+      return Promise.all(ENS_NIV.map(n => lienzoEns(im, r, n))).then(us => { if (us[0] && us[1]) ENSL.set(clave, us); });
+    }).catch(e => console.warn('ensoñación', e));
+  }
+  function capaEns(url, de) { const e = B.el('div', 'lam ens'); e.style.backgroundImage = 'url("' + url + '")'; e.style.opacity = '0'; e._de = de; return e; }
+  const vidaSueno = on => { $('escena').classList.toggle('sueno', !!on); if (B.vida.duerme) B.vida.duerme(!!on); };   // la «vida» se retira (y no se dibuja) durante el sueño
+  function paraOnda() { if (ondaAnim) { try { ondaAnim.cancel(); } catch (e) { } ondaAnim = null; } }
+  const ensReserva = [];
+  const quitaEns = de => { B.$$('#fondo .lam.ens').forEach(e => { if (!de || e._de === de) e.parentNode.removeChild(e); });   // capas de la ensoñación (de una lámina o todas)
+    if (!de) { ensReserva.splice(0).forEach(a => { try { a.cancel(); } catch (e) { } }); B.$$('#fondo .lam').forEach(e => { e.style.visibility = ''; }); } };
+  /* lam: la lámina; modo 'entra' (se queda desenfocada) | 'sale' (el recuerdo llega desenfocado y se enfoca) */
+  function ensuena(lam, modo, dur) {
+    const us = ENSL.get(lam._clave), entra = modo === 'entra', f = $('fondo');
+    if (!us || !lam.animate) { if (lam.animate) ensReserva.push(lam.animate(entra ? ENS_ENTRA : ENS_SALE, { duration: dur, easing: entra ? 'linear' : 'ease-out', fill: entra ? 'forwards' : 'none' })); return; }   // de reserva: filtros animados
+    quitaEns(lam);   // (si se repite el plano, no se apilan)
+    const a = capaEns(us[0], lam), b = capaEns(us[1], lam), sig = lam.nextSibling;
+    f.insertBefore(a, sig); f.insertBefore(b, sig);   // encima de su lámina (y debajo del vídeo de fondo, si lo hubiera)
+    /* la ondulación va solo en la capa más desenfocada (la que más se ve en el sueño): las de debajo quedan quietas y el compositor
+       no re-muestrea todo el escenario en cada fotograma; lo que queda tapado del todo se oculta (visibility) para no pintarlo */
+    paraOnda();
+    b.animate(entra ? ONDA_ENTRA : ONDA_SALE, { duration: dur, easing: entra ? 'linear' : 'ease-out', fill: entra ? 'forwards' : 'none' });
+    if (entra) {
+      vidaSueno(true);
+      const fa = a.animate([{ opacity: 0 }, { opacity: 1, offset: .55 }, { opacity: 1 }], { duration: dur, easing: 'ease-in-out', fill: 'forwards' });
+      b.animate([{ opacity: 0 }, { opacity: 0, offset: .3 }, { opacity: 1 }], { duration: dur, easing: 'ease-in', fill: 'forwards' });
+      B.espera(dur * .56 / 1000, ctl).then(ok => { if (ok && a.isConnected) lam.style.visibility = 'hidden'; });   // la nítida, ya tapada por el medio
+      fa.onfinish = () => { if (b.isConnected) a.style.visibility = 'hidden'; };   // el medio, ya tapado por el pleno
+      return;
+    }
+    /* sale: el recuerdo desenfocado (pleno) funde sobre la lámina anterior, también desenfocada; cuando ya la tapa, debajo aparecen su
+       nivel medio y la lámina nítida, se retira lo anterior y se va enfocando: pleno → medio → nítida */
+    const k = Math.min(.4, 1100 / dur);
+    lam.style.transition = ''; lam.style.opacity = ''; lam.style.visibility = 'hidden'; a.style.visibility = 'hidden';
+    a.style.opacity = '1';
+    a.animate([{ opacity: 1 }, { opacity: 1, offset: .6 }, { opacity: 0 }], { duration: dur, easing: 'ease-out', fill: 'forwards' });
+    b.animate([{ opacity: 0 }, { opacity: 1, offset: k }, { opacity: 0, offset: .6 }, { opacity: 0 }], { duration: dur, easing: 'ease-in-out', fill: 'forwards' });
+    B.espera(dur * k / 1000 + .02, ctl).then(() => {
+      if (!a.isConnected) return;
+      lam.style.visibility = ''; a.style.visibility = '';
+      B.$$('#fondo .lam').forEach(e => { if (e !== lam && e._de !== lam) e.parentNode.removeChild(e); });   // lo anterior, ya tapado
+    });
+    B.espera(dur / 1000 + .05, ctl).then(() => { if (a.parentNode) a.parentNode.removeChild(a); if (b.parentNode) b.parentNode.removeChild(b); vidaSueno(false); });   // enfocada: fuera las capas y vuelve la «vida»
+  }
+  /* PRECALENTAR (un plano antes): las capas del sueño y la lámina del recuerdo se ponen un instante casi transparentes encima de todo,
+     para que el compositor las rasterice y suba ANTES (la primera vez era lo que más tironeaba); luego se quitan */
+  function precalienta(p) {
+    const f = $('fondo'), q = B.primero(p.img); if (!q || q.falta) return;
+    const us = ENSL.get(JSON.stringify(q)), ps = [];
+    if (us) us.forEach(u => ps.push(capaEns(u, 'pre')));
+    if (p.ensueno === 'sale') { const e = B.el('div', 'lam'); e._de = 'pre'; const u = 'url("' + (B.img[q.src] || q.src) + '")'; e.style.backgroundImage = u;
+      if (q.zoom && q.zoom > 1) { const z = q.zoom, cx = q.cx == null ? .5 : q.cx, cy = q.cy == null ? .5 : q.cy, px = B.clamp((cx * z - .5) / (z - 1), 0, 1), py = B.clamp((cy * z - .5) / (z - 1), 0, 1);
+        e.style.backgroundSize = (z * 100) + '% auto'; e.style.backgroundPosition = (px * 100).toFixed(2) + '% ' + (py * 100).toFixed(2) + '%'; }
+      ps.push(e); }
+    ps.forEach(e => { e.style.opacity = '.004'; f.appendChild(e); });
+    setTimeout(() => ps.forEach(e => { if (e.parentNode) e.parentNode.removeChild(e); }), 700);
+  }
+  /* todo lo de la ensoñación, listo antes de empezar (la pantalla de carga lo espera) */
+  M.prepEnsuenos = function () {
+    const ps = []; S.escenas.forEach(e => e.planos.forEach((p, k) => {
+      if (!p.ensueno) return;
+      ps.push(prepEns(B.primero(p.img)));
+      if (p.ensueno === 'entra' && k > 0) ps.push(prepEns(B.primero(e.planos[k - 1].img)));   // por si la lámina que se ve es la del plano anterior
+    }));
+    return Promise.all(ps);
+  };
   /* ── montar un plano ── */
   function montaPlano(p) {
     $('escena').classList.toggle('con-inter', false);
     const ensDur = (RAPIDO ? .3 : (p.ensuenoDur || p.auto || 3.5)) * 1000;
-    const anima = p.ensueno === 'sale' ? { k: ENS_SALE, o: { duration: ensDur, easing: 'ease-out', fill: 'none' } } : p.ensueno === 'entra' ? { k: ENS_ENTRA, o: { duration: ensDur, easing: 'linear', fill: 'forwards' } } : null;
-    const q = M.fondo(p.negro ? null : p.img, { nombre: p.nombre, desc: p.desc, funde: p.funde, anima: anima });
-    if (p.ensueno === 'entra') B.$$('#fondo .lam').forEach(e => { if (e.animate) e.animate(anima.k, anima.o); });   // misma lámina que antes: se anima la que ya se ve
+    const q = M.fondo(p.negro ? null : p.img, { nombre: p.nombre, desc: p.desc, funde: p.funde, ensueno: p.ensueno ? { modo: p.ensueno, dur: ensDur } : null });
     fondoVideo(p.fondoVid);
     if (p.amb !== undefined) B.ambiente(p.amb);
     if (p.mus === false) B.musica(null); else if (p.mus) B.musica(p.mus);
@@ -381,6 +494,7 @@
   const TUNEL = B.hayVideo('vid/tunel_bucle.mp4') ? 'vid/tunel_bucle.mp4' : 'vid/tunel.mp4';   // el bucle perfecto (fundido cruzado interno de 1 s) si está
   /* DESTELLO dentro del túnel (Iago, 2-nov: viaje de vuelta): ~3 s de un vídeo (o lámina) envuelto en la nebulosa del túnel,
      sin fecha ni rótulo; con su sonido (sfx) y sus sucesos (fn). d = { t, dur, video, desde (s del vídeo), img, sfx, vol, fn } */
+  const ecos = new Set();
   function destello(capa, d, c) {
     const dur = RAPIDO ? .4 : (d.dur || 3), box = B.el('div', 'destello'); let v = null;
     if (d.video && B.hayVideo(d.video)) {
@@ -398,7 +512,9 @@
       B.espera(RAPIDO ? .05 : .45, c).then(ok => ok && tx.isConnected && tx.classList.add('on'));
     }
     requestAnimationFrame(() => requestAnimationFrame(() => box.classList.add('on')));
-    if (d.sfx) B.sfx(d.sfx, d.vol == null ? 1 : d.vol);
+    /* (Iago 3-nov) el eco de la voz NO se corta: ni al irse el destello ni al cambiar de plano (sigue su cola de reverb hasta el silencio);
+       solo lo corta un salto del profe (salta) */
+    if (d.sfx) { const h = B.sfx(d.sfx, d.vol == null ? 1 : d.vol); if (h) { ecos.add(h); h.fuente.addEventListener('ended', () => ecos.delete(h)); } }
     if (d.fn) d.fn(c);
     const quita = () => { box.classList.remove('on'); if (tx) tx.classList.remove('on'); setTimeout(() => { if (v) try { v.pause(); } catch (e) { } box.remove(); if (tx) tx.remove(); }, 1100); };
     B.espera(Math.max(.2, dur - .7), c).then(quita);
@@ -421,6 +537,9 @@
   };
   function plano(p, c) {
     M.plano = p.id; document.body.setAttribute('data-plano', p.id);
+    if (!p.ensueno) { paraOnda(); quitaEns(); vidaSueno(false); }   // fuera de la ensoñación: lámina nítida, sin ondulación y con la «vida» de siempre
+    { const pls = (S.escenas[escIdx] || {}).planos || [], k = pls.indexOf(p);   // la ensoñación que viene (en este plano o el siguiente), ya rasterizada
+      if (k >= 0 && !p.ensueno) [pls[k + 1], pls[k + 2]].forEach(x => { if (x && x.ensueno) setTimeout(() => { if (M.plano === p.id) precalienta(x); }, 150); }); }
     if (M._blanco && !p.blancoSale) setTimeout(() => blanco(false, 1.6), 250);   // del blanco a lo siguiente
     else if (M._blanco) setTimeout(() => { if (M.plano === p.id) sueltaBlanco(p); }, 6000);   // red de seguridad: si su vídeo no llega a verse
     const vidOk = p.video && B.hayVideo(p.video);
@@ -471,6 +590,7 @@
   }
   function salta(i, k) {
     if (ctl) ctl.matar();
+    ecos.forEach(h => h.parar(.35)); ecos.clear();   // los ecos de los destellos solo se cortan con un salto del profe
     M.terminado = false; M.finInter(); caja(false); B.capas.limpia(); B.vida.quita();
     const cv = $('video'); cv.classList.remove('on'); cv.innerHTML = ''; cv.style.opacity = ''; alPintar.length = 0; M._congelado = false; blanco(false, .1); $('cartel').classList.remove('on'); $('cartel').innerHTML = '';
     if (window.TR.viento) B.viento.parar();
@@ -527,6 +647,29 @@
     }));
     return r.concat(B.capas.recursos(S), B.arr(S.recursos));
   }
+  /* (Iago 3-nov, aula lenta) TRANSICIONES ESPECIALES — el túnel (saltos y teletransporte final), el salto con su blanco, la llegada,
+     los destellos del viaje de vuelta, la vuelta y la ensoñación: sus vídeos se bajan enteros y sus láminas se descodifican y se
+     GUARDAN descodificadas ANTES de empezar (la pantalla de carga lo espera) */
+  const especial = p => !!(p.tunel || p.ensueno || p.blanco || p.blancoPleno || p.blancoSale || p.destellos);
+  function videosTrans() {
+    const v = []; const pon = x => { if (x && B.hayVideo(x) && v.indexOf(x) < 0) v.push(x); };
+    if (S.escenas.some(e => e.planos.some(p => p.tunel))) pon(TUNEL);
+    S.escenas.forEach(e => e.planos.forEach(p => { if (!especial(p)) return; pon(p.video); pon(p.fondoVid); if (p.blancoPleno) pon(p.blancoPleno.precarga); B.arr(p.destellos).forEach(d => pon(d.video)); }));
+    return v;
+  }
+  function imgsTrans() {
+    const r = []; const pon = x => { const q = x ? B.primero(x) : null; if (q && !q.falta && r.indexOf(q.src) < 0) r.push(q.src); };
+    const pl = []; S.escenas.forEach(e => e.planos.forEach(p => pl.push(p)));
+    pl.forEach((p, i) => { if (!especial(p)) return; pon(p.img); B.arr(p.destellos).forEach(d => pon(d.img)); if (pl[i + 1]) pon(pl[i + 1].img); if (i > 0 && p.ensueno) pon(pl[i - 1].img); });
+    return r;
+  }
+  B.vivas = [];   // láminas de las transiciones, descodificadas y retenidas (el navegador no las tira)
+  function decodTrans() {
+    return Promise.all(imgsTrans().map(src => new Promise(res => {
+      const im = new Image(); im.src = B.img[src] || src; B.vivas.push(im);
+      const ok = () => res(); (im.decode ? im.decode() : Promise.resolve()).then(ok, ok); setTimeout(ok, 6000);
+    })));
+  }
   function videos() { const v = []; if (B.hayVideo(TUNEL) && S.escenas.some(e => e.planos.some(p => p.tunel))) v.push(TUNEL); S.escenas.forEach(e => e.planos.forEach(p => { if (p.video && B.hayVideo(p.video)) v.push(p.video); if (p.fondoVid && B.hayVideo(p.fondoVid)) v.push(p.fondoVid); B.arr(p.destellos).forEach(d => { if (d.video && B.hayVideo(d.video)) v.push(d.video); }); })); return v; }
 
   /* ══════════ ARRANQUE ══════════ */
@@ -553,10 +696,19 @@
       $('bDesde0').addEventListener('click', ev => { ev.stopPropagation(); desde = { e: 0, k: 0 }; pulsa(); });
     }
     const piano = window.Sonido ? Sonido.listo() : Promise.resolve();
-    Promise.all([piano, B.precarga(recursos(), pr => {
-      const k = pr.total ? Math.min(99, Math.round(pr.bytes / pr.total * 100)) : 99;
+    /* la barra cuenta los recursos (láminas y sonidos) y los vídeos de las transiciones especiales */
+    const vTr = videosTrans(), vHecho = {}, vTot = vTr.reduce((a, v) => a + ((B.RECURSOS && B.RECURSOS[v]) || 2e6), 0);
+    let rHecho = 0, rTot = 0;
+    const barra = () => {
+      let vh = 0; Object.keys(vHecho).forEach(k => { vh += vHecho[k]; });
+      const tot = rTot + vTot, k = tot ? Math.min(99, Math.round((rHecho + vh) / tot * 100)) : 99;
       if (!cargado) est.textContent = 'Cargando… ' + k + ' %';
-    })]).then(() => {
+    };
+    const pVid = Promise.all(vTr.map(v => B.precargaVideo(v, f => { vHecho[v] = f * ((B.RECURSOS && B.RECURSOS[v]) || 2e6); barra(); })
+      .then(() => { vHecho[v] = (B.RECURSOS && B.RECURSOS[v]) || 2e6; barra(); })));
+    const pRec = B.precarga(recursos(), pr => { rHecho = pr.bytes; rTot = pr.total; barra(); })
+      .then(() => { if (B.prepVoz) B.prepVoz(); return Promise.all([M.prepEnsuenos(), decodTrans()]); });   // tras bajar: ensoñación pre-renderizada y láminas de las transiciones descodificadas
+    Promise.all([piano, pRec, pVid]).then(() => {
       cargado = true; ini.classList.add('listo'); est.textContent = '';
       videos().forEach(v => B.precargaVideo(v));   // los vídeos siguen bajando mientras empieza la sesión
       if (pulsado) arranca();
