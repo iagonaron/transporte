@@ -101,7 +101,7 @@
     B.arr(lista).forEach(x => { const t = x.t != null ? x.t : (x.en || 0) * dur; B.espera(Math.max(0, t), c).then(ok => ok && B.lamina.pon(x.lamina, c)); });
   }
   function programaImgs(lista, dur, c) {
-    B.arr(lista).forEach(x => { const t = x.t != null ? x.t : (x.en || 0) * dur; B.espera(Math.max(0, t), c).then(ok => ok && M.cambia(x.img)); });
+    B.arr(lista).forEach(x => { const t = x.t != null ? x.t : (x.en || 0) * dur; B.espera(Math.max(0, t), c).then(ok => { if (!ok) return; M.cambia(x.img); if (x.vid) fondoVideo(x.vid); }); });   // (3-nov) x.vid: vídeo en bucle sobre esa lámina
   }
   /* vídeo de fondo en bucle, mudo (p. ej. el dron sobre Coruña): si no está, se queda la lámina */
   let vfondo = null;
