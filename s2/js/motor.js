@@ -101,19 +101,19 @@
     B.arr(lista).forEach(x => { const t = x.t != null ? x.t : (x.en || 0) * dur; B.espera(Math.max(0, t), c).then(ok => ok && B.lamina.pon(x.lamina, c)); });
   }
   function programaImgs(lista, dur, c) {
-    B.arr(lista).forEach(x => { const t = x.t != null ? x.t : (x.en || 0) * dur; B.espera(Math.max(0, t), c).then(ok => { if (!ok) return; M.cambia(x.img); if (x.vid) fondoVideo(x.vid); }); });   // (3-nov) x.vid: vídeo en bucle sobre esa lámina
+    B.arr(lista).forEach(x => { const t = x.t != null ? x.t : (x.en || 0) * dur; B.espera(Math.max(0, t), c).then(ok => { if (!ok) return; M.cambia(x.img); if (x.vid) fondoVideo(x.vid, x.vidUnaVez); }); });   // (3-nov) x.vid: vídeo en bucle sobre esa lámina
   }
   /* vídeo de fondo en bucle, mudo (p. ej. el dron sobre Coruña): si no está, se queda la lámina */
   let vfondo = null;
   let vfondoSrc = null;
-  function fondoVideo(src) {
+  function fondoVideo(src, unaVez) {
     if (src && src === vfondoSrc && vfondo) return;
     vfondoSrc = src && B.hayVideo(src) ? src : null;
     if (vfondo) { const v = vfondo; vfondo = null; const quita = () => { try { v.pause(); } catch (e) { } v.remove(); }; if (pendiente) alPintar.push(quita); else quita(); }
     if (!src || !B.hayVideo(src)) return;
     B.precargaVideo(src).then(url => {
       if (!url || vfondoSrc !== src) return;
-      const v = vfondo = B.el('video', 'vfondo'); v.muted = true; v.loop = true; v.playsInline = true; v.style.opacity = '0'; v.src = url;
+      const v = vfondo = B.el('video', 'vfondo'); v.muted = true; v.loop = !unaVez; v.playsInline = true; v.style.opacity = '0'; v.src = url;
       v.addEventListener('playing', () => { v.style.opacity = ''; }, { once: true });   // hasta que pinta su primer fotograma, se ve la lámina
       $('fondo').appendChild(v); const p = v.play(); if (p && p.catch) p.catch(() => { });
       B.vida.quita();   // la «vida» se pensó para la lámina: con el vídeo del dron sobra
