@@ -544,3 +544,116 @@ html,body,.app{background:var(--noche)}
 #dialogo{left:120px;right:120px;bottom:22px;min-height:0;padding:24px 290px 20px 34px}
 #dTexto{margin:0;font-size:29px;line-height:1.4}
 #dialogo .nav{right:24px;bottom:auto;top:50%;transform:translateY(-50%)}
+
+/* ══════════════════════════════════════════════════════════════════════
+   (3-nov) PIEL «ÉPOCA» — los interactivos de Santiago, hacia 1730 (Iago: «estética coherente con la época, no futurista»).
+   Papel pautado de archivo a la luz de la vela (papel crema envejecido, grano y manchas en SVG, bordes irregulares),
+   notación en tinta sepia (escrito.js · PIEL.epoca), resalte en almagre, IM Fell (imprenta antigua) para todo el texto,
+   botones como tarjetas de papel grueso sobre una bandeja de madera, ruedas como tiras de papel en marco de latón y
+   «Corregir»/«Continuar» en lacre. Se activa con inter.piel = 'epoca' (t2.js): #inter.epoca y #escena.piel-epoca
+   (cartel y barra mientras dure). El ejercicio final (2100) sigue en «Onda». Para quitarla: borra este bloque.
+   ══════════════════════════════════════════════════════════════════════ */
+.esc-hoja{display:flex;flex-direction:column;gap:6px}
+/* IM Fell tiene cifras antiguas (el 1 parece una «ı»): las cifras y la «ª» se toman de Lora (mismo nombre de familia, unicode-range) */
+@font-face{font-family:'IM Fell';font-weight:400;font-style:normal;src:url(../fonts/f-fell.woff2) format('woff2');font-display:swap;unicode-range:U+0000-002F,U+003A-00A9,U+00AB-FFFF}
+@font-face{font-family:'IM Fell';font-weight:400;font-style:italic;src:url(../fonts/f-fell-italica.woff2) format('woff2');font-display:swap;unicode-range:U+0000-002F,U+003A-00A9,U+00AB-FFFF}
+@font-face{font-family:'IM Fell';font-weight:400;font-style:normal;src:url(../fonts/f-lora.woff2) format('woff2');font-display:swap;unicode-range:U+0030-0039,U+00AA}
+@font-face{font-family:'IM Fell';font-weight:400;font-style:italic;src:url(../fonts/f-lora-italica.woff2) format('woff2');font-display:swap;unicode-range:U+0030-0039,U+00AA}
+:root{--e-tinta:#26180c;--e-tinta2:#4f3720;--e-almagre:#a8321b;--e-crema:#f3e3bc;--e-oro:#ffd98a;
+  --f-epoca:'IM Fell','Palatino Linotype','Book Antiqua',Georgia,serif;
+  --e-grano:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .21 0 0 0 0 .09 0 0 0 .55 -.18'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --e-manchas:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='520'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006 .009' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .3 0 0 0 0 .12 0 0 0 1.1 -.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E");
+  --e-veta:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='240'%3E%3Cfilter id='v'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0025 .11' numOctaves='3' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .08 0 0 0 0 .04 0 0 0 0 .01 0 0 0 1.3 -.45'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23v)'/%3E%3C/svg%3E");
+  --e-borde:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 400' preserveAspectRatio='none'%3E%3Cfilter id='f' x='-3%25' y='-3%25' width='106%25' height='106%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.035' numOctaves='3' seed='11'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='9'/%3E%3C/filter%3E%3Crect x='6' y='6' width='988' height='388' rx='3' filter='url(%23f)'/%3E%3C/svg%3E");
+  --e-papel:var(--e-grano),var(--e-manchas),radial-gradient(ellipse at 50% 38%,#f8eed6 0%,#efe0bb 55%,#dcc38f 100%)}
+/* fondo: la mesa del archivo, más cálida y en penumbra */
+#escena.piel-epoca #fondo .lam{filter:brightness(.4) sepia(.4) saturate(.9)}
+#escena.piel-epoca #vida{opacity:.65}
+/* ── la hoja de papel pautado ── */
+#inter.epoca .esc,#inter.epoca .dif{gap:12px}
+#inter.epoca .esc-hoja{position:relative;isolation:isolate;gap:2px;padding:14px 40px 16px;color:var(--e-tinta)}
+#inter.epoca .esc-hoja::before{content:'';position:absolute;inset:0;z-index:-1;background:var(--e-papel);background-size:260px 260px,100% 100%,100% 100%;
+  box-shadow:inset 0 0 46px rgba(120,72,24,.42),inset 0 0 8px rgba(95,58,20,.55);-webkit-mask:var(--e-borde) 0 0/100% 100% no-repeat;mask:var(--e-borde) 0 0/100% 100% no-repeat}
+#inter.epoca .esc-hoja::after{content:'';position:absolute;inset:14px 10px 6px;z-index:-2;border-radius:6px;box-shadow:0 16px 34px rgba(0,0,0,.7),0 3px 8px rgba(0,0,0,.5)}
+#inter.epoca .partitura{background:transparent!important;border:0!important;border-radius:0!important;padding:0 2px!important}
+#inter.epoca .esc-pe+.esc-pe{border-top:1px solid rgba(38,24,12,.28);padding-top:6px}
+#inter.epoca .esc-cab{font:400 36px/1.2 var(--f-epoca);color:var(--e-tinta);letter-spacing:0}
+#inter.epoca .esc-cab b{font-style:italic;font-weight:400;color:var(--e-almagre)}
+#inter.epoca .esc-num{padding:0 14px;font:italic 400 26px var(--f-epoca);color:var(--e-tinta);background:transparent;border:1.5px solid var(--e-tinta);border-radius:6px}
+#inter.epoca .esc-pe>small{font:italic 400 25px/1.25 var(--f-epoca);color:var(--e-tinta2)}
+#inter.epoca .esc-pe>small b{font-style:normal;font-weight:400;color:var(--e-tinta)}
+/* ── la bandeja de madera de los controles ── */
+#inter.epoca .esc-ctl{margin-top:0;padding:12px 26px 14px;border:2px solid #1f1108!important;border-radius:12px;
+  background:var(--e-veta),linear-gradient(180deg,#6a4424 0%,#4c2f17 45%,#3a2210 100%)!important;background-size:100% 100%,100% 100%!important;
+  box-shadow:inset 0 1px 0 rgba(255,222,170,.25),inset 0 -3px 8px rgba(0,0,0,.45),0 12px 26px rgba(0,0,0,.55)}
+#inter.epoca .esc-g>small{font:italic 400 26px var(--f-epoca);letter-spacing:0;text-transform:none;color:var(--e-crema);text-shadow:0 1px 2px rgba(0,0,0,.6)}
+#inter.epoca .esc-lbl{font:italic 400 30px var(--f-epoca);color:var(--e-oro);text-shadow:0 1px 2px rgba(0,0,0,.6)}
+#inter.epoca .esc-res{font:400 23px/1.25 var(--f-epoca);color:var(--e-crema)}
+#inter.epoca .esc-res .pct{font:400 52px/1 var(--f-epoca)}
+#inter.epoca .esc-res.ok{color:#b6e79b}#inter.epoca .esc-res.medio{color:var(--e-oro)}#inter.epoca .esc-res.mal{color:#ffb19f}
+/* ── ruedas: tira de papel en un marco de latón ── */
+#inter.epoca .rueda{clip-path:none;border:3px solid #b8913f;border-radius:9px;background:var(--e-grano),linear-gradient(90deg,#dfc999,#f5e8c9 28%,#f5e8c9 72%,#dbc390);
+  box-shadow:inset 0 0 0 1px #5e4116,inset 0 8px 12px rgba(80,50,18,.28),inset 0 -8px 12px rgba(80,50,18,.28),0 2px 0 #1f1108,0 0 0 1px #1f1108}
+#inter.epoca .rueda::before{background:linear-gradient(rgba(229,212,170,.95),rgba(240,226,192,0))}
+#inter.epoca .rueda::after{background:linear-gradient(0deg,rgba(229,212,170,.95),rgba(240,226,192,0))}
+#inter.epoca .rueda .rIt{font:400 32px var(--f-epoca);color:rgba(38,24,12,.42)}
+#inter.epoca .rueda .rIt.sel{color:var(--e-almagre)}
+#inter.epoca .rueda .rBanda{border-top:1.5px solid rgba(168,50,27,.75);border-bottom:1.5px solid rgba(168,50,27,.75);background:rgba(168,50,27,.07)}
+#inter.epoca .rueda.quieta{opacity:.7}
+/* ── botones: tarjetas de papel grueso (y lacre para la acción principal) ── */
+#escena.piel-epoca #inter button,#escena.piel-epoca #barra button,#escena.piel-epoca #cartel button{clip-path:none!important;border-radius:10px!important;border:2px solid #4a2e15!important;
+  background:var(--e-grano),linear-gradient(#f8eed8,#e4d0a3)!important;background-size:260px 260px,100% 100%!important;color:var(--e-tinta)!important;
+  font-family:var(--f-epoca)!important;font-weight:400!important;letter-spacing:0!important;text-transform:none!important;
+  box-shadow:0 3px 0 #2a170a,0 6px 12px rgba(0,0,0,.38);filter:none!important;transition:transform .12s,box-shadow .12s,background .12s}
+#escena.piel-epoca #inter button::before,#escena.piel-epoca #barra button::before,#escena.piel-epoca #cartel button::before{display:none!important}
+#escena.piel-epoca #inter button:hover:not(:disabled),#escena.piel-epoca #barra button:hover:not(:disabled),#escena.piel-epoca #cartel button:hover:not(:disabled),
+#escena.piel-epoca #inter button:focus-visible,#escena.piel-epoca #barra button:focus-visible,#escena.piel-epoca #cartel button:focus-visible{background:var(--e-grano),linear-gradient(#fffbf1,#efdfb9)!important;background-size:260px 260px,100% 100%!important;
+  transform:translateY(-1px);box-shadow:0 4px 0 #2a170a,0 9px 16px rgba(0,0,0,.42),0 0 0 3px rgba(255,217,138,.55);outline:none}
+#escena.piel-epoca #inter button:active:not(:disabled),#escena.piel-epoca #barra button:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 #2a170a,0 2px 4px rgba(0,0,0,.3)}
+#escena.piel-epoca #inter button:disabled,#escena.piel-epoca #barra button:disabled{opacity:.5;box-shadow:0 2px 0 #2a170a}
+#escena.piel-epoca #inter button.acc{font-size:34px!important;font-family:var(--f-epoca),'Segoe UI Symbol','DejaVu Sans',serif!important}
+#escena.piel-epoca #inter button.acc.on,#escena.piel-epoca #inter button.acc.on:hover{background:linear-gradient(#c2472a,#8f2614)!important;color:#fff4dd!important;border-color:#4f120a!important;box-shadow:0 3px 0 #3a0d06,0 6px 12px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,210,180,.35)}
+#escena.piel-epoca #inter .esc-her button{font-size:25px!important}
+/* lacre: «Corregir», «Entendido» y «Continuar» cuando ya se puede seguir */
+#escena.piel-epoca #inter button.prim,#escena.piel-epoca #cartel button.prim,#escena.piel-epoca #barra button.bCorr.late{background:radial-gradient(ellipse at 35% 25%,#cf5634,#9c2a16 55%,#741a0c)!important;color:#fff4dd!important;border-color:#4a1007!important;
+  font-size:32px!important;text-shadow:0 1px 1px rgba(60,8,2,.6);box-shadow:0 3px 0 #3a0d06,0 7px 14px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,200,170,.4)}
+#escena.piel-epoca #inter button.prim:hover:not(:disabled),#escena.piel-epoca #cartel button.prim:hover,#escena.piel-epoca #barra button.bCorr.late:hover{background:radial-gradient(ellipse at 35% 25%,#de6640,#ad3219 55%,#7f1f10)!important;box-shadow:0 4px 0 #3a0d06,0 9px 16px rgba(0,0,0,.45),0 0 0 3px rgba(255,217,138,.6)}
+#escena.piel-epoca #barra button.bCorr:not(.late){opacity:.45}
+#escena.piel-epoca #inter button.prim:disabled{opacity:.55}
+/* ── cartel y barra: papel ── */
+#escena.piel-epoca #cartel{background:rgba(12,6,0,.55)}
+#escena.piel-epoca #cartel .cart,#escena.piel-epoca #barra{border:2px solid #6b4824!important;border-radius:10px!important;background:var(--e-papel)!important;background-size:260px 260px,100% 100%,100% 100%!important;
+  box-shadow:inset 0 0 40px rgba(120,72,24,.4),inset 0 0 6px rgba(95,58,20,.5),0 14px 34px rgba(0,0,0,.6)}
+#escena.piel-epoca #cartel .cart{padding:44px 56px 36px}
+#escena.piel-epoca #cartel .cart p{font:400 37px/1.42 var(--f-epoca);color:var(--e-tinta)}
+#escena.piel-epoca #barra .bt{font:400 31px/1.35 var(--f-epoca);color:var(--e-tinta)}
+#escena.piel-epoca #cartel .cart b,#escena.piel-epoca #barra .bt b{font-style:italic;font-weight:400;color:var(--e-almagre)}
+#escena.piel-epoca #barra button{font-size:27px!important}
+/* ── diferencias (si algún día vuelven a 1730) ── */
+#inter.epoca .dif-pe{background:rgba(255,250,236,.35)!important;border:1.5px solid rgba(38,24,12,.45)!important;border-radius:6px!important}
+#inter.epoca .arm-ton{font:400 36px var(--f-epoca);color:var(--e-tinta)}
+#inter.epoca .arm-flecha span{font:italic 400 34px var(--f-epoca);color:var(--e-almagre)}
+#inter.epoca .arm-flecha i{background:var(--e-almagre)}#inter.epoca .arm-flecha i::after{border-left-color:var(--e-almagre)}
+#escena.piel-epoca #inter button.nota{font-size:28px!important}
+#escena.piel-epoca #inter button.nota.n-ok{background:linear-gradient(#4f8f43,#2c6a27)!important;color:#f4ffe8!important;border-color:#173d12!important}
+#escena.piel-epoca #inter button.nota.n-sol{background:var(--e-grano),linear-gradient(#f8eed8,#e4d0a3)!important;color:#2c6a27!important;border:3px dashed #2c6a27!important}
+#escena.piel-epoca #inter button.nota.n-mal{background:linear-gradient(#d24a37,#a0241a)!important;color:#fff1e8!important;border-color:#55100a!important}
+#escena.piel-epoca #inter button.dir.on{background:linear-gradient(#c2472a,#8f2614)!important;color:#fff4dd!important}
+#inter.epoca .dif-res>div{font:400 34px var(--f-epoca);border:2px solid #6b4824;border-radius:8px;background:var(--e-papel);background-size:260px 260px,100% 100%,100% 100%;color:var(--e-tinta)}
+#inter.epoca .dif-res small{font:italic 400 22px var(--f-epoca);letter-spacing:0;text-transform:none;color:var(--e-tinta2)}
+#inter.epoca .dif-res .ok{color:#2c6a27}#inter.epoca .dif-res .mal,#inter.epoca .dif-res s{color:#b3241b}
+#inter.epoca .dif-res p{font:400 26px/1.35 var(--f-epoca);color:var(--e-crema)}
+/* diferencias simplificadas (notas:false): botones de dirección con texto aclaratorio */
+#escena #inter button.dir.largo{display:flex;align-items:center;gap:16px;width:470px;min-height:76px;padding:8px 22px;text-align:left}
+#escena #inter button.dir.largo svg{flex:none}
+.dir-t{display:flex;flex-direction:column;gap:2px;line-height:1.1}
+.dir-t b{font-size:29px;font-weight:600}.dir-t small{font-size:21px;opacity:.85}
+#escena #inter button.dir.largo.on{background:var(--ambar)!important;color:#1b1003}#escena #inter button.dir.largo.on::before{background:var(--ambar)}
+#escena.piel-epoca #inter .dir-t b{font-weight:400;font-size:31px}#escena.piel-epoca #inter .dir-t small{font-style:italic;font-size:23px;opacity:.9}
+#escena.piel-epoca #inter button.dir.largo.on,#escena.piel-epoca #inter button.dir.largo.on:hover{background:linear-gradient(#c2472a,#8f2614)!important;color:#fff4dd!important;border-color:#4f120a!important}
+#escena.piel-epoca #inter button.dir.largo:disabled{opacity:.75}
+#inter.epoca .esc-ctl{gap:40px}
+/* (Iago 3-nov) ejercicio final opcional: «Terminar», discreto, siempre a mano en la barra */
+#escena #barra button.disc{font-size:20px!important;min-height:48px!important;padding:6px 16px!important;opacity:.75}
+#escena #barra button.disc:hover{opacity:1}
+#escena #cartel .cart .fila{flex-wrap:wrap;justify-content:center}
