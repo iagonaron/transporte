@@ -91,7 +91,10 @@ a.nodo.off .t,a.nodo.off .hz{color:#5b6d93}
 /* al llegar desde una sesión por el teletransporte (?tp=1): un destello blanco que se disuelve */
 (function(){ if (!/[?&]tp=1/.test(location.search)) return; var d = document.getElementById('destello'); d.style.transition = 'none'; d.style.opacity = '1';
   try { history.replaceState(history.state, '', location.pathname + location.hash); } catch (e) {}
-  requestAnimationFrame(function(){ requestAnimationFrame(function(){ d.style.transition = 'opacity 1.4s ease-out'; d.style.opacity = '0'; }); }); })();
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ d.style.transition = 'opacity 2.2s ease-out'; d.style.opacity = '0'; }); });
+  /* (Iago 3-nov) el sonido sigue al llegar: el destello «se disuelve» (si el navegador deja sonar sin gesto) */
+  try { var callado = false; try { callado = localStorage.getItem('transporte_ambiente') === 'off'; } catch (e) {}
+    if (!callado) { var a = new Audio('s1/sfx/sfx_flash_sale.mp3'); a.volume = .8; var pr = a.play(); if (pr && pr.catch) pr.catch(function(){}); } } catch (e) {} })();
 /* los enlaces llevan la cuenta (#c=…) a cada sesión */
 [].forEach.call(document.querySelectorAll('a.nodo[data-ir]'), function(a){ a.href = a.getAttribute('data-ir') + location.hash; });
 /* el escenario 1920×1080 se escala para caber entero */
