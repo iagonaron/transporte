@@ -80,13 +80,13 @@
     labRegMod: O(I2('lab_registro_modulo', 'DETALLE: pantalla del registro con un bloque en ámbar (el módulo que no está en los planos)', { vida: [{ tipo: 'parpadeo', zona: [.2, .15, .6, .6], color: '#ffcf8a' }] }),
       { src: T1('lab_registro'), vida: [{ tipo: 'parpadeo', zona: [.36, .14, .6, .52], color: '#9fe4ff' }, { tipo: 'traza', zona: [.40, .62, .52, .025], periodo: .17 }] }),
     labNoa: O(I2('lab_noa_brazos', 'Noa a la izquierda, brazos cruzados, desafiante, mirando a Amaro', { ocultaPj: ['NOA'], vida: POLVO('#cfe8ff') }),
-      { src: T1('laboratorio'), zoom: 2, cx: .55, cy: .4, vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 3 }].concat(POLVO('#cfe8ff')) }),
+      { src: T1('lab_centro'), vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 3 }].concat(POLVO('#cfe8ff')) }),
     labDos: O(I2('lab_dos', 'Plano a dos: Noa a la izquierda, Amaro a la derecha, el Transportador entre ellas', { ocultaPj: ['NOA', 'AMARO'], vida: [{ tipo: 'anillos', zona: [.38, .05, .3, .6], n: 3 }].concat(POLVO('#cfe8ff')) }),
-      { src: T1('laboratorio'), zoom: 2, cx: .55, cy: .4, vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 3 }].concat(POLVO('#cfe8ff')) }),
+      { src: T1('lab_centro'), vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 3 }].concat(POLVO('#cfe8ff')) }),
     labCuaderno: I2('lab_cuaderno', 'Noa saca a escondidas el cuaderno de su padre; Amaro de espaldas en la consola', { ocultaPj: ['NOA', 'AMARO'], vida: POLVO('#cfe8ff') }),
     cuaderno: I2('cuaderno_santiago', 'DETALLE: página del cuaderno del padre (boceto de la Torre del Reloj, pentagramas); la web escribe el rótulo', { vida: POLVO() }),
     pulsera: I2('pulsera_teclea', 'DETALLE: el dedo de Noa teclea en su pulsera; el cuaderno debajo', { vida: [{ tipo: 'vibra', zona: [.45, .35, .15, .25] }, { tipo: 'parpadeo', zona: [.4, .25, .25, .4], color: '#9fe4ff' }] }),
-    maquina: { src: T1('prueba'), zoom: 1.25, cx: .4, cy: .4, vida: [{ tipo: 'anillos', zona: [.34, .025, .59, .875], n: 3 }, { tipo: 'pulso', zona: [.55, .3, .2, .3], color: '#58b8ff' }].concat(POLVO('#cfe8ff')) },
+    maquina: { src: T1('prueba_cerca'), vida: [{ tipo: 'anillos', zona: [.2, 0, .65, .78], n: 3 }, { tipo: 'pulso', zona: [.42, .1, .18, .3], color: '#58b8ff' }]   /* (3-nov nitidez) plano cerrado propio, sin zoom */.concat(POLVO('#cfe8ff')) },
     /* Santiago, hacia 1730 */
     llegada: I2('claustro_llegada', 'Claustro de la catedral con lluvia fina: Noa aparece entre anillos de luz', { ocultaPj: ['NOA'], vida: LLUVIA().concat([{ tipo: 'anillos', zona: [.3, .5, .4, .3], n: 2, color: '#9fe4ff' }]) }),
     claustroNoa: I2('claustro_noa', 'Noa bajo un arco del claustro, mira alrededor; gotas en el pelo', { ocultaPj: ['NOA'], vida: LLUVIA([.5, 0, .5, 1], 90) }),
@@ -110,21 +110,21 @@
     claustroPulsera: I2('claustro_pulsera', 'DETALLE: la pulsera de Noa chisporrotea bajo la lluvia', { vida: [{ tipo: 'parpadeo', zona: [.38, .3, .25, .4], color: '#9fe4ff' }, { tipo: 'arco', zona: [.48, .45, .05, .1], color: '#9fe4ff' }].concat(LLUVIA(null, 100)) }),
     /* vuelta */
     amaroSospecha: O(I2('lab_amaro_sospecha', 'Amaro a la derecha, brazos cruzados, ceja levantada; la máquina humea', { ocultaPj: ['AMARO'], vida: [{ tipo: 'humo', zona: [.2, .1, .3, .4], n: 8 }].concat(POLVO('#cfe8ff')) }),
-      { src: T1('laboratorio'), zoom: 2, cx: .55, cy: .4, vida: [{ tipo: 'humo', zona: [.3, .1, .4, .5], n: 8 }, { tipo: 'anillos', zona: [.16, 0, .7, 1], n: 2 }] }),
+      { src: T1('lab_centro'), vida: [{ tipo: 'humo', zona: [.3, .1, .4, .5], n: 8 }, { tipo: 'anillos', zona: [.16, 0, .7, 1], n: 2 }] }),
     noaSonrisa: O(I2('lab_noa_sonrisa', 'Noa a la izquierda, media sonrisa, gotas de lluvia de Santiago en el pelo', { ocultaPj: ['NOA'], vida: POLVO('#cfe8ff') }),
-      { src: T1('laboratorio'), zoom: 2, cx: .55, cy: .4, vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 2 }].concat(POLVO('#cfe8ff')) }),
+      { src: T1('lab_centro'), vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 2 }].concat(POLVO('#cfe8ff')) }),
     amaroFirme: O(I2('lab_amaro_firme', 'Amaro señala la consola con firmeza: «el destino lo elijo yo»', { ocultaPj: ['AMARO'], vida: POLVO('#cfe8ff') }),
       { src: T1('prueba_consola'), vida: [{ tipo: 'traza', zona: [.40, .48, .33, .07], periodo: .16 }, { tipo: 'parpadeo', zona: [.38, .33, .36, .25], color: '#9fe4ff' }] }),
     registro: O(I2('registro_dos', 'DETALLE: pantalla del registro con dos puntos de coordenadas (la web pone las cifras)', { vida: [{ tipo: 'parpadeo', zona: [.1, .1, .5, .6], color: '#9fe4ff' }] }),
       { src: T1('lab_registro'), vida: [{ tipo: 'traza', zona: [.40, .62, .52, .025], periodo: .17 }].concat(POLVO('#cfe8ff')) }),
     dedo: O(I2('registro_dedo', 'DETALLE: el dedo de Noa borra el segundo punto; Amaro de espaldas al fondo', { vida: [{ tipo: 'parpadeo', zona: [.2, .1, .6, .6], color: '#9fe4ff' }] }),
-      { src: T1('lab_registro'), zoom: 1.4, cx: .7, cy: .45, vida: POLVO('#cfe8ff') }),
+      { src: T1('lab_registro'), vida: POLVO('#cfe8ff') }),
     /* resumen y cierre */
     mesaLuz: O(I2('archivo_mesa', 'Cenital SIN personas: la mesa del copista', { luz: .45, vida: POLVO('#ffe8c0') }), { src: T1('definicion'), vida: POLVO() }),
     nocheNoa: O(I2('lab_noche_noa', 'Noa sola en el laboratorio de noche; el Transportador apagado; el cuaderno en la mesa', { ocultaPj: ['NOA'], vida: [{ tipo: 'apaga', zona: [.3, .1, .4, .7], dur: 9, color: '#58c8ff' }].concat(POLVO('#cfe8ff')) }),
-      { src: T1('laboratorio'), zoom: 2, cx: .55, cy: .4, luz: .5, vida: [{ tipo: 'apaga', zona: [.2, .05, .6, .9], dur: 9 }].concat(POLVO('#cfe8ff')) }),
+      { src: T1('lab_centro'), luz: .5, vida: [{ tipo: 'apaga', zona: [.2, .05, .6, .9], dur: 9 }].concat(POLVO('#cfe8ff')) }),
     cierre: O(I2('cierre_cuaderno', 'Noa sola de noche junto al Transportador apagado, hojea el cuaderno a la luz de la pulsera', { ocultaPj: ['NOA'], vida: [{ tipo: 'respira', zona: [.2, .4, .2, .3], color: '#9fe4ff', vel: 1.2 }].concat(POLVO('#cfe8ff')) }),
-      { src: T1('laboratorio'), zoom: 2, cx: .55, cy: .4, luz: .45, vida: POLVO('#cfe8ff') }),
+      { src: T1('lab_centro'), luz: .45, vida: POLVO('#cfe8ff') }),
     cuadernoOtra: I2('cuaderno_otra', 'DETALLE: otra página del cuaderno: una fecha medio borrada (ilegible) y el boceto de un concierto', { vida: [{ tipo: 'respira', zona: [.1, .1, .8, .8], color: '#9fe4ff', vel: .8 }] })
   };
   B._IMG = IMG;
@@ -143,18 +143,86 @@
      s2/mus/himno_original.mp3 (con la quiebra del re4) y himno_fa.mp3; los hace audio/render_himno.py con estas mismas VOCES y NEGRA,
      la 1.ª nota a 0,05 s del principio del fichero (así suena a la vez que antes: +0,1 s). Si falta el mp3, las notas sueltas de siempre. */
   const HIMNO_MP3 = { orig: 'mus/himno_original.mp3', fa: 'mus/himno_fa.mp3' };
+  /* (Iago 3-nov, 17:45) el ORIGINAL dura más: el himno entero una vez y, al volver a empezar, en el re4 (negra 11) se le quiebra al bajón;
+     después, el «wah-wah-waaah» del sacabuche (va dentro de himno_original.mp3). tocaHimno → { dur, quiebra, h }: s desde ahora */
+  const Q_NEGRA = 11, vozOrig = ins => VOCES[ins].concat(VOCES[ins].slice(0, ins === 'sacabuche' ? 1 : 3));
   function tocaHimno(semis, quiebra) {
     const mp3 = quiebra && semis === 0 ? HIMNO_MP3.orig : !quiebra && semis === -2 ? HIMNO_MP3.fa : null;
-    if (mp3 && B.buf[mp3]) { const h = B.suena(mp3, { t: B.ac().currentTime + .05, bus: B.bus.sfx, vol: 1, grupo: 'sfx' }); if (V().suelta) V().suelta(h); return; }
-    const t0 = B.ac().currentTime + .1, corta = quiebra ? 2.6 : 99;
-    Object.keys(VOCES).forEach(ins => { let t = 0; VOCES[ins].forEach(([m, d], i) => {
+    if (mp3 && B.buf[mp3]) { const h = B.suena(mp3, { t: B.ac().currentTime + .05, bus: B.bus.sfx, vol: 1, grupo: 'sfx' }); if (V().suelta) V().suelta(h); return { dur: .05 + B.buf[mp3].duration, quiebra: .1 + Q_NEGRA * NEGRA, h: h }; }
+    const t0 = B.ac().currentTime + .1, corta = quiebra ? Q_NEGRA + .6 : 99;
+    Object.keys(VOCES).forEach(ins => { let t = 0; (quiebra ? vozOrig(ins) : VOCES[ins]).forEach(([m, d], i) => {
       if (t >= corta) return;
       const vel = ins === 'chirimia' ? .62 : ins === 'sacabuche' ? .6 : .72, dd = Math.min(d, corta - t) * NEGRA;
-      if (quiebra && ins === 'bajon' && i === 2) V().quiebra('bajon', m + semis, t0 + t * NEGRA, d * NEGRA * 1.4, .8);
+      if (quiebra && ins === 'bajon' && i === 10) V().quiebra('bajon', m + semis, t0 + t * NEGRA, d * NEGRA * 1.4, .8);
       else V().nota(ins, m + semis, t0 + t * NEGRA, dd * .95, vel);
       t += d; }); });
+    return { dur: .1 + (quiebra ? Q_NEGRA + 1.8 : 9.6) * NEGRA, quiebra: .1 + Q_NEGRA * NEGRA, h: null };
   }
   B._tocaHimno = tocaHimno;
+  /* (Iago 3-nov, 17:45) escena 6 como «interactivo» propio (sin oscurecer la lámina): un rótulo de época con la tonalidad mientras suena;
+     fase 'orig': suena el original y, al llegar la quiebra, se ve al bajonista apurado (cfg.imgQuiebra); sigue solo al acabar.
+     fase 'fa': botón grande «▶ Ahora escucha la tonalidad transportada» → se ven los ministriles tocando bien (cfg.img) y suena himno_fa.mp3;
+     «Continuar» solo cuando ya ha sonado entero (y «↻ Otra vez»). Estilos en línea con las variables de la piel «época» (tr.css). */
+  const HM_PAPEL = 'border:2px solid #6b4824;border-radius:10px;background:var(--e-papel);background-size:260px 260px,100% 100%,100% 100%;color:var(--e-tinta);font-family:var(--f-epoca);';
+  const HM_LACRE = 'position:relative;border:2px solid #4a1007;border-radius:10px;background:radial-gradient(ellipse at 35% 25%,#cf5634,#9c2a16 55%,#741a0c);color:#fff4dd;' +
+    'font-family:var(--f-epoca);cursor:pointer;box-shadow:0 4px 0 #3a0d06,0 9px 16px rgba(0,0,0,.45);text-shadow:0 1px 0 rgba(60,10,0,.6);transition:filter .15s,opacity .2s;';
+  const HM_SIGNO = s => '<span style="font-family:\'Segoe UI Symbol\',\'DejaVu Sans\',serif;font-style:normal">' + s + '</span>';
+  function hmBoton(html, css, id) {
+    const b = B.el('button', 'ag', html); b.type = 'button'; if (id) b.id = id; b.style.cssText = HM_LACRE + css;
+    b.addEventListener('mouseenter', () => { if (!b.disabled) b.style.filter = 'brightness(1.13)'; });
+    b.addEventListener('mouseleave', () => { b.style.filter = ''; });
+    b.addEventListener('focus', () => { if (!b.disabled) b.style.boxShadow = '0 4px 0 #3a0d06,0 9px 16px rgba(0,0,0,.45),0 0 0 4px rgba(255,217,138,.75)'; });
+    b.addEventListener('blur', () => { b.style.boxShadow = '0 4px 0 #3a0d06,0 9px 16px rgba(0,0,0,.45)'; });
+    return b;
+  }
+  B.inter.himno = function (cfg, c) {
+    const Mo = B.motor, p = B.$('#inter'), RAP = B.param('rapido') === '1', AULA = !!Mo.aula;
+    B.$('#escena').classList.remove('con-inter', 'piel-epoca');   // la lámina se ve entera, sin oscurecer
+    p.innerHTML = ''; p.className = 'on i-himno';
+    const rot = B.el('div', 'hm-rot', cfg.rotulo);
+    rot.style.cssText = HM_PAPEL + 'position:absolute;left:50%;top:0;transform:translateX(-50%);padding:14px 40px 12px;font-size:46px;line-height:1.2;white-space:nowrap;' +
+      'box-shadow:0 8px 22px rgba(0,0,0,.55),inset 0 0 0 4px rgba(107,72,36,.16);opacity:0;transition:opacity .6s ease';
+    p.appendChild(rot);
+    const muestra = () => requestAnimationFrame(() => { rot.style.opacity = '1'; });
+    if (cfg.fase === 'orig') {
+      muestra();
+      const r = tocaHimno(0, true);
+      if (cfg.imgQuiebra) B.espera(RAP ? .1 : Math.max(0, r.quiebra - .12), c).then(ok => ok && Mo.cambia(cfg.imgQuiebra));
+      return B.espera(RAP ? .3 : Math.max(1, r.dur - .6), c);   // la cola de la reverberación sigue en el plano siguiente
+    }
+    const bOye = hmBoton(HM_SIGNO('▶') + ' Ahora escucha la tonalidad transportada', 'position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);font-size:48px;padding:26px 60px;white-space:nowrap', 'bHimnoOye');
+    const fila = B.el('div', 'hm-fila'); fila.style.cssText = 'position:absolute;right:0;bottom:0;display:flex;gap:22px;align-items:center';
+    const bOtra = hmBoton(HM_SIGNO('↻') + ' Otra vez', 'font-size:32px;padding:14px 34px;display:none', 'bHimnoOtra');
+    const bSig = hmBoton('Continuar ' + HM_SIGNO('▶'), 'font-size:34px;padding:14px 40px;opacity:.5;cursor:default', 'bHimnoSig');
+    bSig.disabled = true; bSig.title = 'Primero escucha el himno transportado';
+    fila.appendChild(bOtra); fila.appendChild(bSig); p.appendChild(bOye); p.appendChild(fila);
+    const pulso = bOye.animate ? bOye.animate([{ boxShadow: '0 4px 0 #3a0d06,0 9px 16px rgba(0,0,0,.45),0 0 0 0 rgba(255,217,138,.0)' },
+      { boxShadow: '0 4px 0 #3a0d06,0 9px 16px rgba(0,0,0,.45),0 0 0 14px rgba(255,217,138,.45)' }, { boxShadow: '0 4px 0 #3a0d06,0 9px 16px rgba(0,0,0,.45),0 0 0 0 rgba(255,217,138,.0)' }],
+      { duration: 1600, iterations: Infinity, easing: 'ease-in-out' }) : null;
+    return new Promise(res => {
+      let sonando = false, oido = false, h = null, fin = false;
+      const acaba = ok => { if (fin) return; fin = true; if (pulso) pulso.cancel(); if (h && ok) try { h.parar(.4); } catch (e) { } res(ok); };
+      if (c) c.alMorir.push(() => acaba(false));
+      const toca = () => {
+        if (sonando || fin) return; sonando = true;
+        if (pulso) pulso.cancel(); bOye.style.display = 'none'; bOtra.style.display = 'none';
+        if (cfg.img) Mo.cambia(cfg.img);
+        muestra();
+        const r = tocaHimno(-2, false); h = r.h;
+        B.espera(RAP ? .3 : r.dur + .15, c).then(ok => {
+          if (!ok || fin) return;
+          sonando = false; oido = true; h = null;
+          bOtra.style.display = ''; bSig.disabled = false; bSig.style.opacity = ''; bSig.style.cursor = 'pointer'; bSig.title = ''; bSig.focus();
+          if (AULA) B.espera(1.5, c).then(ok2 => ok2 && acaba(true));
+        });
+      };
+      bOye.addEventListener('click', ev => { ev.stopPropagation(); toca(); });
+      bOtra.addEventListener('click', ev => { ev.stopPropagation(); toca(); });
+      bSig.addEventListener('click', ev => { ev.stopPropagation(); if (!bSig.disabled && oido) acaba(true); });
+      setTimeout(() => { if (!fin) bOye.focus(); }, 80);
+      if (AULA) B.espera(2, c).then(ok => ok && !oido && toca());
+    });
+  };
   const ARM = (titulo, cambios, ens) => ({ tipo: 'armaduras', titulo: titulo, izq: { ton: 'Sol Mayor', f: 1 }, der: { ton: 'Fa Mayor', f: -1 }, flecha: '2.ª M ↓', cambios: cambios, ens: ens, total: cambios ? '2 ↓' : null });
   const REG = borra => ({ tipo: 'registro', titulo: 'Registro · último viaje', filas: [{ a: 'Santiago de Compostela', b: '≈ 1730' }, { a: '42.88 · −8.54 · ████', b: 'sin fecha', estado: 'parpadea' }], borra: borra });
 
@@ -243,7 +311,7 @@
       { id: 'e4', titulo: 'El copista', planos: [
         { id: 'p4a', nombre: 'Archivo de la Capilla de Música', img: IMG.archivo, amb: [AMB.archivo, AMB.organoBajo], mus: MUS.santiagoBajo, pj: null, antes: .8,
           lineas: [
-            { id: 't2_018', quien: 'NARRADOR', imgs: [{ en: .5, img: IMG.pluma, vid: 'vid/copista.mp4' }], sfx: [{ src: SFo('sfx_pluma'), en: .5, vol: .7 }],
+            { id: 't2_018', quien: 'NARRADOR', imgs: [{ en: .5, img: IMG.pluma, vid: 'vid/copista.mp4', vidUnaVez: true }], sfx: [{ src: SFo('sfx_pluma'), en: .5, vol: .7 }],
               texto: 'En el archivo de la Capilla de Música trabaja un copista. Ya existe la imprenta, pero la música de la catedral no se imprime: el maestro la compone para sus músicos, y cada parte se copia a mano, nota a nota.', claves: { claves: ['Copia a mano'], ens: [.62], pos: 'arriba' } },
             { id: 't2_019', quien: 'MAESTRO', img: IMG.maestro, imgs: [{ en: .5, img: IMG.himno }], sfx: [{ src: SFo('sfx_pasos_piedra'), t: 0, vol: .7 }, { src: SFo('sfx_papel'), en: .5, vol: .7 }],
               texto: '¡Don Ramón! Los ministriles tocan este himno mañana en la procesión, y está demasiado agudo para el fagot. Cópielo un tono más grave.', claves: { claves: ['Un tono más grave'], ens: [.86], pos: 'arriba' } },
@@ -273,10 +341,11 @@
       ] },
       /* 6 · Los ministriles lo tocan: el original (al bajón se le quiebra el re agudo) y el transportado */
       { id: 'e6', titulo: 'Los ministriles', planos: [
-        { id: 'p6a', nombre: 'Ensayo · el original (Sol M)', img: IMG.ministriles, amb: [AMB.lluviaBaja], mus: false, pj: null, auto: 5.2, imgs: [{ t: 2.1, img: IMG.bajon }],
-          claves: null, al: [{ t: .4, fn: () => tocaHimno(0, true) }] },
-        { id: 'p6b', nombre: 'Ensayo · un tono más grave (Fa M)', img: IMG.tocan, amb: [AMB.lluviaBaja], mus: false, pj: null, auto: 8, antes: 0,
-          al: [{ t: .6, fn: () => tocaHimno(-2, false) }] },
+        /* (Iago 3-nov, 17:45) el original más largo, con su rótulo; el bajonista apurado (IMG.bajon) solo al quebrarse; luego el botón para oír el transportado */
+        { id: 'p6a', nombre: 'Ensayo · el original (Sol M)', img: IMG.ministriles, amb: [AMB.lluviaBaja], mus: false, pj: null, auto: .3, claves: null,
+          inter: { tipo: 'himno', fase: 'orig', imgQuiebra: IMG.bajon, rotulo: 'Tonalidad original · <b style="font-style:italic;font-weight:400;color:var(--e-almagre)">Sol M (1' + HM_SIGNO('♯') + ')</b>' } },
+        { id: 'p6b', nombre: 'Ensayo · un tono más grave (Fa M)', img: IMG.ministriles, amb: [AMB.lluviaBaja], mus: false, pj: null, auto: .2,
+          inter: { tipo: 'himno', fase: 'fa', img: IMG.tocan, rotulo: 'Tonalidad transportada · <b style="font-style:italic;font-weight:400;color:var(--e-almagre)">Fa M (1' + HM_SIGNO('♭') + ')</b>' } },
         { id: 'p6c', nombre: 'Las diferencias · Sol M → Fa M', img: IMG.minNoa, amb: [AMB.lluviaBaja, AMB.organoBajo], mus: MUS.santiagoBajo, pj: null,
           lineas: [
             /* (Iago 3-nov) diferencias simplificadas: cuántas y hacia dónde (sin listar las notas) */
