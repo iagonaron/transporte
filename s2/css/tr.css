@@ -657,3 +657,7 @@ html,body,.app{background:var(--noche)}
 #escena #barra button.disc{font-size:20px!important;min-height:48px!important;padding:6px 16px!important;opacity:.75}
 #escena #barra button.disc:hover{opacity:1}
 #escena #cartel .cart .fila{flex-wrap:wrap;justify-content:center}
+
+/* (Iago 3-nov) la pestaña del personaje POR DELANTE de la línea y el borde de la caja */
+#dialogo::after{z-index:0}
+#dQuien{z-index:3}
