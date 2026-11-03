@@ -243,7 +243,7 @@
       { id: 'e4', titulo: 'El copista', planos: [
         { id: 'p4a', nombre: 'Archivo de la Capilla de Música', img: IMG.archivo, amb: [AMB.archivo, AMB.organoBajo], mus: MUS.santiagoBajo, pj: null, antes: .8,
           lineas: [
-            { id: 't2_018', quien: 'NARRADOR', imgs: [{ en: .5, img: IMG.pluma }], sfx: [{ src: SFo('sfx_pluma'), en: .5, vol: .7 }],
+            { id: 't2_018', quien: 'NARRADOR', imgs: [{ en: .5, img: IMG.pluma, vid: 'vid/copista.mp4' }], sfx: [{ src: SFo('sfx_pluma'), en: .5, vol: .7 }],
               texto: 'En el archivo de la Capilla de Música trabaja un copista. Ya existe la imprenta, pero la música de la catedral no se imprime: el maestro la compone para sus músicos, y cada parte se copia a mano, nota a nota.', claves: { claves: ['Copia a mano'], ens: [.62], pos: 'arriba' } },
             { id: 't2_019', quien: 'MAESTRO', img: IMG.maestro, imgs: [{ en: .5, img: IMG.himno }], sfx: [{ src: SFo('sfx_pasos_piedra'), t: 0, vol: .7 }, { src: SFo('sfx_papel'), en: .5, vol: .7 }],
               texto: '¡Don Ramón! Los ministriles tocan este himno mañana en la procesión, y está demasiado agudo para el fagot. Cópielo un tono más grave.', claves: { claves: ['Un tono más grave'], ens: [.86], pos: 'arriba' } },
