@@ -122,7 +122,7 @@
 
   /* ── montar un plano ── */
   function montaPlano(p) {
-    $('escena').classList.toggle('con-inter', false);
+    $('escena').classList.toggle('con-inter', false); $('escena').classList.remove('piel-epoca');
     const q = M.fondo(p.negro ? null : p.img, { nombre: p.nombre, desc: p.desc, funde: p.funde });
     fondoVideo(p.fondoVid);
     if (p.amb !== undefined) B.ambiente(p.amb);
@@ -241,7 +241,9 @@
       capa.innerHTML = '';
       const box = B.el('div', 'cart'); box.innerHTML = '<p>' + txt + '</p>';
       const b = B.el('button', 'prim', o.boton || 'Entendido'); b.type = 'button';
-      box.appendChild(b); capa.appendChild(box); capa.classList.add('on');
+      if (o.extra) { const f = B.el('div', 'fila'); f.appendChild(b); B.arr(o.extra).forEach(x => f.appendChild(x)); box.appendChild(f); }   /* (3-nov) botones de más (p. ej. «Transportarnos al menú principal») */
+      else box.appendChild(b);
+      capa.appendChild(box); capa.classList.add('on');
       const sigue = () => { capa.classList.remove('on'); capa.innerHTML = ''; M.barra(txt, o.botones); res(true); };
       b.addEventListener('click', ev => { ev.stopPropagation(); sigue(); });
       if (AULA && o.aulaSolo !== false) setTimeout(() => { if (capa.classList.contains('on')) sigue(); }, 4500);
@@ -272,7 +274,7 @@
       if (c) c.alMorir.push(() => res(false));
     });
   };
-  M.finInter = function () { M.barra(null); $('cartel').classList.remove('on'); $('inter').innerHTML = ''; $('inter').className = ''; $('escena').classList.remove('con-inter'); };
+  M.finInter = function () { M.barra(null); $('cartel').classList.remove('on'); $('inter').innerHTML = ''; $('inter').className = ''; $('escena').classList.remove('con-inter', 'piel-epoca'); };
 
   /* ══════════ VÍDEO ══════════ con «Cargando… %»; si falta, un marcador que dura lo previsto */
   /* al acabar un vídeo o un túnel no se quita la capa: se queda el último fotograma hasta que la lámina siguiente está pintada */
@@ -370,7 +372,8 @@
     B.musica(null); B.ambiente([]);
     B.sfx('../s1/sfx/sfx_salto_tiempo.mp3', .8);
     const fl = B.existe('../s1/sfx/sfx_flash_blanco.mp3') ? '../s1/sfx/sfx_flash_blanco.mp3' : '../s1/sfx/sfx_flash_blanco_sint.mp3';
-    B.espera(Math.max(0, dur - 1.7), c).then(ok => { if (!ok) return; B.sfx(fl, .8); blanco(true, 1.6); });
+    B.espera(Math.max(0, dur - 2.9), c).then(ok => { if (!ok) return; B.sfx(fl, .8); });   // (Iago 3-nov) el destello suena entero antes de cambiar de página
+    B.espera(Math.max(0, dur - 1.7), c).then(ok => { if (!ok) return; blanco(true, 1.6); });
     const vt = B.hayVideo(TUNEL) ? B.precargaVideo(TUNEL) : Promise.resolve(null);
     return vt.then(url => B.tunel(capa, { dur: dur, de: o.desde == null ? 2100 : o.desde, a: o.hasta == null ? 2100 : o.hasta, video: url || null, contador: o.desde != null }, c))
       .then(() => B.espera(.2, c)).then(() => { if (o.alFinal) o.alFinal(); return true; });
@@ -395,6 +398,7 @@
       const f = B.inter[p.inter.tipo];
       if (!f) { console.warn('Interactivo desconocido', p.inter.tipo); return true; }
       caja(false); $('escena').classList.add('con-inter'); B.capas.quitaClaves();
+      $('escena').classList.toggle('piel-epoca', p.inter.piel === 'epoca');   /* (3-nov) piel «época» (Santiago, 1730): panel, cartel y barra */
       if (p.ambInter !== undefined) B.ambiente(p.ambInter);   // el ambiente baja mientras suenan los instrumentos del interactivo
       return Promise.resolve(f(p.inter, c)).then(ok2 => { M.finInter(); return ok2; });
     });
@@ -456,6 +460,15 @@
     const cierra = ev => { if (!m.contains(ev.target)) { m.remove(); document.removeEventListener('pointerdown', cierra, true); } };
     setTimeout(() => document.addEventListener('pointerdown', cierra, true), 0);
   }
+  /* teletransporte al menú principal (el hash #c= del profe viaja intacto) */
+  function aMenu() { M.teletransporte({ dur: 3.6, alFinal: () => { const v = window.MOD_VOLVER || '../prueba.html'; location.href = v + (v.indexOf('?') < 0 ? '?' : '&') + 'tp=1' + location.hash; } }); }
+  /* (Iago 3-nov) salir al menú desde un interactivo opcional (ejercicio final): la sesión cuenta como vista */
+  M.alMenu = function () {
+    if (M._yendo) return; M._yendo = true;
+    if (ctl) ctl.matar(); M.finInter(); caja(false); B.capas.limpia();
+    try { B.progreso.fin(); B.progreso.plano(null); } catch (e) { }
+    aMenu();
+  };
   function fin() {
     caja(false); B.capas.limpia(); B.vida.quita(); B.progreso.fin(); B.progreso.plano(null);
     const capa = $('cartel'); capa.innerHTML = '';
@@ -463,8 +476,7 @@
     box.innerHTML = '<p class="sup">' + B.esc(S.titulo) + '</p><h2>' + B.esc(S.subtitulo || '') + '</h2>' + (B.notaFinal != null ? '<p class="nota">Tu nota en el ejercicio final: <b>' + String(B.notaFinal).replace('.', ',') + '</b></p>' : '');
     if (B.lamina) B.lamina.pon(null);
     const b = B.el('button', 'prim', 'Transportarnos al menú principal'); b.type = 'button';
-    b.addEventListener('click', () => { b.disabled = true; capa.classList.remove('on'); capa.innerHTML = '';
-      M.teletransporte({ dur: 3.6, alFinal: () => { const v = window.MOD_VOLVER || '../prueba.html'; location.href = v + (v.indexOf('?') < 0 ? '?' : '&') + 'tp=1' + location.hash; } }); });
+    b.addEventListener('click', () => { b.disabled = true; capa.classList.remove('on'); capa.innerHTML = ''; aMenu(); });
     const r = B.el('button', '', '↺ Repetir'); r.type = 'button'; r.addEventListener('click', () => { capa.classList.remove('on'); salta(0, 0); });
     const f = B.el('div', 'fila'); f.appendChild(r); f.appendChild(b); box.appendChild(f);
     capa.appendChild(box); capa.classList.add('on');

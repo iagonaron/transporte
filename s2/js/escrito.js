@@ -176,12 +176,20 @@
   /* ══════════ PENTAGRAMA (VexFlow) ══════════
      op = { modo:'orig'|'alu', fifths, otroF (para alinear compases entre los dos pentagramas), hl (índice resaltado en ámbar),
             sel (nota seleccionada), corr (pinta verde/rojo), notas (lista alternativa: p. ej. la solución) }  → geo */
-  const W = 1000, TINTA = '#eaf3ff', AMBAR = '#ffb547', CIAN = '#63e6ff', VERDE = '#7dffa8', ROJO = '#ff6b6b';
+  const W = 1000;
+  /* (3-nov) dos pieles de tinta: «onda» (2100, futurista) y «época» (Santiago, 1730: tinta sepia sobre papel, resalte en almagre).
+     La piel la decide el contenedor: si está dentro de .epoca, se pinta en tinta. */
+  const PIEL = {
+    onda: { tinta: '#eaf3ff', resalte: '#ffb547', verde: '#7dffa8', rojo: '#ff6b6b', apagada: 'rgba(234,243,255,.35)', fantasma: 'rgba(99,230,255,.75)', fondoX: 'rgba(6,12,29,.92)' },
+    epoca: { tinta: '#26180c', resalte: '#a8321b', verde: '#2c6a27', rojo: '#c0261c', apagada: 'rgba(38,24,12,.3)', fantasma: 'rgba(38,24,12,.42)', fondoX: '#f3e6c6' } };
+  const pal = h => (h && h.closest && h.closest('.epoca')) ? PIEL.epoca : PIEL.onda;
+  E.pal = pal;
   const baseDur = d => d === 'qd' ? 'q' : d === 'hd' ? 'h' : d, conPunto = d => d === 'qd' || d === 'hd';
   const keyDe = n => n.step.toLowerCase() + (n.alter === 1 ? '#' : n.alter === -1 ? 'b' : '') + '/' + n.octave;
   E.pinta = function (host, ex, op) {
     op = op || {};
     const VF = Vex.Flow; host.innerHTML = '';
+    const K = pal(host), TINTA = K.tinta, AMBAR = K.resalte, VERDE = K.verde, ROJO = K.rojo;
     const alu = op.modo === 'alu', H = op.alto || (alu ? 140 : 128), ys = op.y == null ? (alu ? 14 : 8) : op.y;
     const r = new VF.Renderer(host, VF.Renderer.Backends.SVG); r.resize(W, H);
     const ctx = r.getContext(); ctx.setFillStyle(TINTA); ctx.setStrokeStyle(TINTA);
@@ -205,7 +213,7 @@
           if (alu) { if (nota.alter) sn.addModifier(new VF.Accidental(nota.alter === 1 ? '#' : 'b'), 0); else if (nota.nat) sn.addModifier(new VF.Accidental('n'), 0); }
           if (op.corr) col = correctaAltura(ex, gi, nota) ? VERDE : ROJO;
           else if (gi === op.sel || gi === op.hl) col = AMBAR;
-          else if (op.apagadas && op.apagadas.indexOf(gi) >= 0) col = 'rgba(234,243,255,.35)';
+          else if (op.apagadas && op.apagadas.indexOf(gi) >= 0) col = K.apagada;
         } else {
           sn = new VF.StaveNote({ keys: ['b/4'], duration: baseDur(nn.dur) + 'r', clef: 'treble' });
           col = 'rgba(0,0,0,0)';
@@ -217,17 +225,18 @@
         return sn;
       });
       const voice = new VF.Voice({ num_beats: ex.compas.num, beat_value: ex.compas.den }).setStrict(false).addTickables(sns);
-      let area; try { area = (x + wC - 12) - st.getNoteStartX(); } catch (e) { area = wC - (ci === 0 ? extra : 16); }
-      new VF.Formatter().joinVoices([voice]).format([voice], Math.max(40, area));
-      /* corchetes por PULSO (como beamsPorPulso de Teoría PRO): solo corcheas/semicorcheas seguidas dentro del mismo pulso */
+      /* corchetes por PULSO (como beamsPorPulso de Teoría PRO): solo corcheas/semicorcheas seguidas dentro del mismo pulso.
+         (3-nov) se crean ANTES de formatear y con TODAS las plicas del grupo en la misma dirección (B.pauta.plicas) */
       const beams = [], PB = ex.compas.den === 8 ? 1.5 : 1; let pos = 0, grupo = [], pulso = -1;
-      const cierra = () => { if (grupo.length > 1) beams.push(new VF.Beam(grupo)); grupo = []; };
+      const cierra = () => { if (grupo.length > 1) { B.pauta.plicas(grupo); beams.push(new VF.Beam(grupo)); } grupo = []; };
       mn.forEach((nn, ki) => {
         const d = durBeats(nn.dur), p = Math.floor(pos / PB + 1e-6), rest = !!(sns[ki].isRest && sns[ki].isRest());
         if ((nn.dur === '8' || nn.dur === '16') && !rest) { if (p !== pulso) cierra(); grupo.push(sns[ki]); pulso = p; } else { cierra(); pulso = -1; }
         pos += d;
       });
       cierra();
+      let area; try { area = (x + wC - 12) - st.getNoteStartX(); } catch (e) { area = wC - (ci === 0 ? extra : 16); }
+      new VF.Formatter().joinVoices([voice]).format([voice], Math.max(40, area));
       beams.forEach(b => { const ns = b.getNotes ? b.getNotes() : (b.notes || []), c = ns.length && ns.every(x => x._col === ns[0]._col) ? ns[0]._col : TINTA; b.setStyle({ fillStyle: c, strokeStyle: c }); });
       voice.draw(ctx, st); beams.forEach(b => b.setContext(ctx).draw());
       const cg = { stave: st, notes: [] };
@@ -254,7 +263,7 @@
   function svgEl(tag, at) { const e = document.createElementNS(NS, tag); Object.keys(at).forEach(k => e.setAttribute(k, at[k])); return e; }
   function fantasma(svg, st, x, s, dur) {
     quitaFantasma(svg);
-    const y = yNota(st, s), COL = 'rgba(99,230,255,.75)', g = svgEl('g', { id: 'fantasma', 'pointer-events': 'none' });
+    const y = yNota(st, s), COL = pal(svg).fantasma, g = svgEl('g', { id: 'fantasma', 'pointer-events': 'none' });
     const code = String(dur || 'q').replace(/[dr]/g, ''), blanca = code === 'h', nf = code === '8' ? 1 : code === '16' ? 2 : 0;
     const top = st.getYForLine(0), bot = st.getYForLine(4), sp = (bot - top) / 4;
     for (let ly = top - sp; ly >= y - 1; ly -= sp) g.appendChild(svgEl('line', { x1: x - 11, y1: ly, x2: x + 11, y2: ly, stroke: COL, 'stroke-width': 1.6 }));
@@ -262,8 +271,11 @@
     const head = svgEl('ellipse', { cx: x, cy: y, rx: 6.4, ry: 4.5, transform: 'rotate(-18 ' + x + ' ' + y + ')' });
     if (blanca) { head.setAttribute('fill', 'none'); head.setAttribute('stroke', COL); head.setAttribute('stroke-width', '1.8'); } else head.setAttribute('fill', COL);
     g.appendChild(head);
-    const sx = x + 5.8; g.appendChild(svgEl('line', { x1: sx, y1: y - 1, x2: sx, y2: y - 34, stroke: COL, 'stroke-width': 1.6 }));
-    for (let f = 0; f < nf; f++) g.appendChild(svgEl('path', { d: 'M ' + sx + ' ' + (y - 34 + f * 7) + ' q 9 4 7 14', fill: 'none', stroke: COL, 'stroke-width': 2.2 }));
+    /* (3-nov) plica como la escribiría el copista: desde la 3.ª línea hacia arriba, plica abajo a la IZQUIERDA y corchete hacia arriba;
+       por debajo, plica arriba a la DERECHA y corchete hacia abajo. El corchete siempre a la derecha de la plica. */
+    const abajo = y <= st.getYForLine(2) + .5, sx = abajo ? x - 5.8 : x + 5.8, ey = abajo ? y + 34 : y - 34, sg = abajo ? -1 : 1;
+    g.appendChild(svgEl('line', { x1: sx, y1: y + (abajo ? 1 : -1), x2: sx, y2: ey, stroke: COL, 'stroke-width': 1.6 }));
+    for (let f = 0; f < nf; f++) g.appendChild(svgEl('path', { d: 'M ' + sx + ' ' + (ey + sg * f * 7) + ' q 9 ' + (4 * sg) + ' 7 ' + (14 * sg), fill: 'none', stroke: COL, 'stroke-width': 2.2 }));
     if (/d/.test(String(dur))) g.appendChild(svgEl('circle', { cx: x + 12, cy: y, r: 1.8, fill: COL }));
     svg.appendChild(g);
   }
@@ -283,18 +295,18 @@
   };
 
   /* ══════════ PANEL DEL ALUMNO (montarEscrito) ══════════
-     cfg = { guiado, cabecera, instrumento, alCorregir(p, ex), pistas:true } → api { ex, corrige(), solucion(), bloquea() } */
+     cfg = { guiado, cabecera, instrumento, alCorregir(p, ex), pistas:true, alterar:false (oculta ♭ ♮ ♯) } → api { ex, corrige(), solucion(), bloquea() } */
   E.panel = function (host, ex, cfg) {
     cfg = cfg || {};
     const el = B.el, btn = (txt, cls, fn, tit) => { const b = el('button', cls || '', txt); b.type = 'button'; if (tit) { b.title = tit; b.setAttribute('aria-label', tit); } b.addEventListener('click', ev => { ev.stopPropagation(); fn(b); }); return b; };
     host.innerHTML = '';
-    const w = el('div', 'esc');
+    const w = el('div', 'esc'), hoja = el('div', 'esc-hoja');   /* (3-nov) la «hoja»: en la piel época, el papel pautado */
     const cab = el('div', 'esc-cab'); cab.innerHTML = (cfg.cabecera ? '<span class="esc-num">' + cfg.cabecera + '</span>' : '') + 'Transporta la melodía: <b>' + ex.transp.lbl + '</b>';
-    w.appendChild(cab);
+    w.appendChild(hoja); hoja.appendChild(cab);
     const pO = el('div', 'esc-pe'); pO.appendChild(el('small', '', 'Melodía original · <b>' + ex.key.name + ' Mayor</b> (' + E.armTxt(ex.key.fifths) + ')'));
-    const hO = el('div', 'partitura esc-orig'); pO.appendChild(hO); w.appendChild(pO);
+    const hO = el('div', 'partitura esc-orig'); pO.appendChild(hO); hoja.appendChild(pO);
     const pA = el('div', 'esc-pe'); pA.appendChild(el('small', '', '<b>Tu transporte</b> · pasa el ratón o el dedo por el pentagrama y pulsa para colocar cada nota (el ritmo se pone solo)'));
-    const hA = el('div', 'partitura esc-alu'); pA.appendChild(hA); w.appendChild(pA);
+    const hA = el('div', 'partitura esc-alu'); pA.appendChild(hA); hoja.appendChild(pA);
     const ctl = el('div', 'esc-ctl'); w.appendChild(ctl);
     host.appendChild(w);
     let sel = null, bloqueado = false, corregido = false, geo = null;
@@ -336,8 +348,8 @@
     /* × junto a la nota seleccionada: la borra (y se puede deshacer) */
     function cruz() {
       const r = destinoGi(sel), a = ex.aluNotas[sel]; if (!r || !a) return;
-      const y = yNota(r.cg.stave, a), g = svgEl('g', { class: 'esc-x', transform: 'translate(' + (r.nt.x + 20) + ',' + (y - 24) + ')' });
-      g.appendChild(svgEl('circle', { r: 9, fill: 'rgba(6,12,29,.92)', stroke: ROJO, 'stroke-width': 1.6 }));
+      const K = pal(geo.svg), ROJO = K.rojo, y = yNota(r.cg.stave, a), g = svgEl('g', { class: 'esc-x', transform: 'translate(' + (r.nt.x + 20) + ',' + (y - 24) + ')' });
+      g.appendChild(svgEl('circle', { r: 9, fill: K.fondoX, stroke: ROJO, 'stroke-width': 1.6 }));
       g.appendChild(svgEl('path', { d: 'M -4 -4 L 4 4 M 4 -4 L -4 4', stroke: ROJO, 'stroke-width': 2 }));
       g.addEventListener('pointerdown', ev => { ev.stopPropagation(); if (ev.cancelable) ev.preventDefault(); });
       g.addEventListener('pointerup', ev => { ev.stopPropagation(); ex.undo.push({ gi: sel, prev: Object.assign({}, ex.aluNotas[sel]) }); ex.aluNotas[sel] = null; sel = null; limpiaCorr(); redraw(); });
@@ -366,7 +378,8 @@
     const wArm = Rueda.crea(rArm, armV.map(o => o.txt), 7, ix => { ex.aluArm = armV[ix].f; limpiaCorr(); redraw(); });
     const gAcc = el('div', 'esc-g'); gAcc.appendChild(el('small', '', 'Alterar nota')); const fAcc = el('div', 'esc-f');
     const bAb = btn('♭', 'cuad acc', () => acc(-1), 'Bemol en la nota seleccionada'), bAn = btn('♮', 'cuad acc', () => acc(0), 'Becuadro en la nota seleccionada'), bAs = btn('♯', 'cuad acc', () => acc(1), 'Sostenido en la nota seleccionada');
-    [bAb, bAn, bAs].forEach(b => fAcc.appendChild(b)); gAcc.appendChild(fAcc); ctl.appendChild(gAcc);
+    [bAb, bAn, bAs].forEach(b => fAcc.appendChild(b)); gAcc.appendChild(fAcc);
+    if (cfg.alterar !== false) ctl.appendChild(gAcc);   /* (3-nov) alterar:false → sin ♭ ♮ ♯ (T2: melodías sin alteraciones accidentales) */
     function acc(v) {
       if (sel == null || bloqueado) return; const a = ex.aluNotas[sel]; if (!a) return;
       const ya = (a.alter === v && v !== 0) || (v === 0 && a.nat);

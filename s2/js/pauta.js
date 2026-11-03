@@ -26,6 +26,21 @@
   T.nombre = function (k) { const n = T.lee(k); return T.NOMBRE[n.l] + ({ '-2': '𝄫', '-1': '♭', '0': '', '1': '♯', '2': '𝄪' }[String(n.a)]); };
 
   const P = B.pauta = {};
+  /* (3-nov) PLICAS de un grupo con barra: todas en la misma dirección, la que pide la nota más alejada de la 3.ª línea
+     (por encima → abajo; por debajo → arriba; empate → abajo si la mayoría está en la línea central o por encima).
+     Con plica abajo, VexFlow la pone a la izquierda de la cabeza; con plica arriba, a la derecha. */
+  P.plicas = function (ns) {
+    const VF = Vex.Flow; let up = 0, dn = 0, enc = 0, deb = 0;
+    ns.forEach(n => { if (n.isRest && n.isRest()) return; (n.getKeyProps() || []).forEach(k => { const d = k.line - 3; if (d > up) up = d; if (-d > dn) dn = -d; if (d >= 0) enc++; else deb++; }); });
+    const dir = up > dn ? VF.Stem.DOWN : dn > up ? VF.Stem.UP : (enc >= deb ? VF.Stem.DOWN : VF.Stem.UP);
+    ns.forEach(n => { if (!(n.isRest && n.isRest())) n.setStemDirection(dir); });
+    return dir;
+  };
+  /* barras por grupos (generateBeams solo para saber QUÉ notas van juntas) con las plicas de P.plicas; antes de formatear */
+  P.barras = function (sn, grupos) {
+    const VF = Vex.Flow;
+    return VF.Beam.generateBeams(sn, { groups: grupos }).map(b => { const ns = b.getNotes(); P.plicas(ns); return new VF.Beam(ns); });
+  };
   const DUR = { 1: ['8', 0], 2: ['q', 0], 3: ['q', 1], 4: ['h', 0], 6: ['h', 1], 7: ['h', 2], 8: ['w', 0] };
   P.dibuja = function (cont, op) {
     const VF = Vex.Flow;
@@ -73,12 +88,12 @@
           const v = new VF.Voice({ num_beats: nb, beat_value: bv }).setStrict(false).addTickables(sn);
           if (pe.armadura) VF.Accidental.applyAccidentals([v], pe.armadura); else VF.Accidental.applyAccidentals([v], 'C');
           sn.forEach((nota, j) => { const col = pe.compases[ci][j].col || tinta; nota.getModifiers().forEach(m => m.setStyle && m.setStyle({ fillStyle: col, strokeStyle: col })); });
-          vozs.push(v); porPe.push({ s: s, sn: sn, pe: pe, pi: pi });
+          vozs.push(v); porPe.push({ s: s, sn: sn, pe: pe, pi: pi, beams: P.barras(sn, grupos) });
         });
         const fm = new VF.Formatter(); vozs.forEach(v => fm.joinVoices([v]));
         fm.format(vozs, w - (c === 0 ? extra : 0) - 22);
         porPe.forEach((o, k) => {
-          const beams = VF.Beam.generateBeams(o.sn, { groups: grupos });
+          const beams = o.beams;
           beams.forEach(b => b.setStyle({ fillStyle: tinta, strokeStyle: tinta }));
           vozs[k].draw(ctx, o.s); beams.forEach(b => b.setContext(ctx).draw());
           let t = t0Compas[ci];

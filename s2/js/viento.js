@@ -21,48 +21,42 @@
     sacabuche: { o1: 'sawtooth', o2: 'sine', m2: 1, g2: .3, corte: 3.4, abre: 2.1, form: [[560, 2.2, 1.3], [1150, 3, .5]], gan: .36, atk: .07, vib: .002, ruido: .025 },
     bajon: { o1: 'sawtooth', o2: 'square', m2: 2, g2: .1, corte: 4.6, abre: 1.5, form: [[470, 3, 1.5], [1180, 4, .8], [2400, 5, .25]], gan: .34, atk: .05, vib: .003, ruido: .05 }
   };
-  /* saxo alto con muestras reales (mus/saxo/, cada 3 semitonos; tonejs-instruments, MIT); si no están, el sintetizado */
-  const SAX = { D3: 50, F3: 53, Gs3: 56, B3: 59, D4: 62, F4: 65, Gs4: 68, B4: 71, D5: 74, F5: 77, Gs5: 80 };
-  V.SAX_RUTAS = Object.keys(SAX).map(k => '../s1/mus/saxo/' + k + '.mp3');
-  function saxoMuestra(midi, t, dur, vel) {
-    let mejor = null, d = 99;
-    Object.keys(SAX).forEach(k => { const r = '../s1/mus/saxo/' + k + '.mp3', dd = Math.abs(SAX[k] - midi); if (B.buf[r] && dd < d) { d = dd; mejor = [r, SAX[k]]; } });
-    if (!mejor) return false;
-    const C = B.ac(), s = C.createBufferSource(), g = C.createGain();
-    s.buffer = B.buf[mejor[0]]; s.playbackRate.value = Math.pow(2, (midi - mejor[1]) / 12);
-    const v = .9 * vel;
-    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .015);
-    g.gain.setValueAtTime(v, t + Math.max(.03, dur)); g.gain.linearRampToValueAtTime(0, t + dur + .12);
-    s.connect(g); g.connect(B.bus.inst); s.start(t); s.stop(t + dur + .15);
-    vivos.push(s); s.onended = () => { const i = vivos.indexOf(s); if (i >= 0) vivos.splice(i, 1); };
-    return true;
-  }
-  /* MUESTRAS REALES (Iago, 2-nov: Splice) para trompa, clarinete, oboe y flauta: mus/<instr>/<instr>_<nota>.mp3 (nota: C4, Cs4, C#4, Db4…).
-     Se descubren solas en el inventario (data/recursos.js); sampler por playbackRate desde la muestra más cercana, envolvente suave.
-     Mientras no estén, el sintetizado de siempre. */
+  /* MUESTRAS REALES (3-nov, sets multimuestra hechos con audio/vsco_interactivos.py): mus/<instr>/<instr>_<nota>.mp3 (nota: C4, Cs4, C#4, Db4…),
+     una sostenida cada 2–3 semitonos en el registro que se usa, mono, todas a −20 LUFS, con su ataque y su cola natural.
+       T2 (s2/mus/): chirimía = oboe VSCO-2-CE (CC0) con el color del himno · sacabuche = trombón antiguo VSCO · bajón = fagot VSCO
+       T1 (../s1/mus/): saxo (tonejs-instruments, MIT), clarinete, trompa, oboe (VSCO), flauta de caña (quena de Splice completada)
+     Se descubren solas en el inventario (data/recursos.js); sampler por playbackRate desde la muestra más cercana (≤ 1,5 st).
+     Si faltan, el sintetizado de siempre. */
+  V.SAX_RUTAS = [];   // (el saxo ya va con las demás, en MUESTRAS_RUTAS)
   const PC = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
   const MUE = {};
-  /* afinación medida de cada muestra (C4, 2-nov) y muestras staccato (solo notas cortas) */
-  const CENTS = { flauta_A5: 19, flauta_E5: 8, flauta_G4: 4, flauta_E6: 3, clarinete_F3: 15, clarinete_As3: 10 };
-  const CORTA = { clarinete_A4: 1, clarinete_Fs4: 1, clarinete_C5: 1 };
+  /* afinación medida de cada muestra (cents; + = alta; vsco_interactivos.json, 3-nov) y muestras staccato (solo notas cortas; ahora ninguna) */
+  const CENTS = { clarinete_C5: 2, clarinete_D5: 1, clarinete_F4: 3, clarinete_G4: 4, flauta_A5: 18, flauta_E5: -9, flauta_G4: -4,
+    oboe_As4: 2, oboe_C5: 2, oboe_D5: 2, oboe_F4: 2, oboe_G4: 3, trompa_C4: -1, trompa_D3: -2, trompa_D4: -1, trompa_E4: -1, trompa_F3: -1,
+    chirimia_As3: 3, chirimia_As4: 2, chirimia_C4: 2, chirimia_C5: 2, chirimia_D4: 2, chirimia_D5: 2, chirimia_F4: 2, chirimia_F5: 3, chirimia_G4: 3, chirimia_G5: 3 };
+  const CORTA = {};
   Object.keys(B.RECURSOS || {}).forEach(r => {
-    const m = /^(?:\.\.\/s1\/)?mus\/(trompa|clarinete|oboe|flauta|chirimia|sacabuche|bajon)\/[a-z]+_([a-g])(s|#|b)?(-?\d)\.(mp3|wav|ogg)$/i.exec(r);
+    const m = /^(?:\.\.\/s1\/)?mus\/(saxo|trompa|clarinete|oboe|flauta|chirimia|sacabuche|bajon)\/[a-z]+_([a-g])(s|#|b)?(-?\d)\.(mp3|wav|ogg)$/i.exec(r);
     if (!m) return;
     const midi = 12 * (+m[4] + 1) + PC[m[2].toLowerCase()] + (m[3] === 's' || m[3] === '#' ? 1 : m[3] === 'b' ? -1 : 0);
     const base = r.replace(/^.*\//, '').replace(/\.\w+$/, '');
     (MUE[m[1].toLowerCase()] = MUE[m[1].toLowerCase()] || []).push([r, midi, CENTS[base] || 0, CORTA[base] ? 1 : 0]);
   });
   V.MUESTRAS_RUTAS = [].concat.apply([], Object.keys(MUE).map(k => MUE[k].map(x => x[0])));
-  const ENV = { trompa: [.06, .25], clarinete: [.03, .18], oboe: [.03, .16], flauta: [.05, .22], chirimia: [.03, .14], sacabuche: [.06, .22], bajon: [.04, .18] };
+  /* [rampa de entrada, suelta] (s): la muestra ya trae su ataque real, así que la rampa es mínima (solo evita el clic);
+     ganancia por instrumento = el nivel que tenían las muestras de antes (lo que Iago ya oyó equilibrado con voz y música) */
+  const ENV = { saxo: [.006, .12], trompa: [.008, .2], clarinete: [.006, .14], oboe: [.006, .14], flauta: [.01, .18], chirimia: [.006, .12], sacabuche: [.008, .18], bajon: [.006, .15] };
+  const GAN = { saxo: 2.0, clarinete: 2.15, trompa: 3.4, oboe: 2.3, flauta: 4.0, chirimia: 1.15, sacabuche: 1.2, bajon: 1.2 };   // (T2: la chirimía en vivo, al nivel del himno grabado)
   function muestra(tipo, midi, t, dur, vel) {
     const l = MUE[tipo]; if (!l) return false;
     const cerca = cand => { let m = null, dd = 99; cand.forEach(x => { const d = Math.abs(x[1] - midi); if (B.buf[x[0]] && d < dd) { dd = d; m = x; } }); return [m, dd]; };
     let [mejor, d] = cerca(l.filter(x => !x[3]));   // primero las sostenidas
     if (!mejor || (dur <= .45 || d > 5)) { const o = cerca(l); if (o[0] && (!mejor || o[1] < d)) mejor = o[0]; }   // notas cortas (o lejos): también las staccato
     if (!mejor) return false;
-    const C = B.ac(), s = C.createBufferSource(), g = C.createGain(), e = ENV[tipo] || [.03, .2];
+    const C = B.ac(), s = C.createBufferSource(), g = C.createGain(), e0 = ENV[tipo] || [.01, .18];
+    const e = [e0[0], dur <= .45 ? e0[1] * .75 : e0[1]];   // las cortas sueltan antes (que no se emborronen); las largas, con su cola
     s.buffer = B.buf[mejor[0]]; s.playbackRate.value = Math.pow(2, (midi - mejor[1]) / 12 - (mejor[2] || 0) / 1200);   // con su corrección de afinación
-    const v = .85 * vel, fin = t + Math.min(dur, s.buffer.duration / s.playbackRate.value - e[1]);
+    const v = (GAN[tipo] || .85) * vel, fin = t + Math.min(dur, s.buffer.duration / s.playbackRate.value - e[1]);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + e[0]);
     g.gain.setValueAtTime(v, Math.max(t + e[0] + .01, fin)); g.gain.linearRampToValueAtTime(0, Math.max(t + e[0] + .01, fin) + e[1]);
     s.connect(g); g.connect(B.bus.inst); s.start(t); s.stop(Math.max(t + e[0] + .01, fin) + e[1] + .05);
@@ -70,7 +64,6 @@
     return true;
   }
   V.nota = function (tipo, midi, t, dur, vel) {
-    if (tipo === 'saxo' && saxoMuestra(midi, t || B.ac().currentTime, Math.max(.08, dur || .5), vel == null ? .8 : vel)) return;
     if (MUE[tipo] && muestra(tipo, midi, t || B.ac().currentTime, Math.max(.08, dur || .5), vel == null ? .8 : vel)) return;
     const C = B.ac(), P = PERFIL[tipo] || PERFIL.saxo, f = B.frec(midi);
     t = t || C.currentTime; dur = Math.max(.08, dur || .5); vel = vel == null ? .8 : vel;
@@ -124,7 +117,10 @@
     V.nota(tipo, midi - 1, t1 + .3, Math.max(.1, dur * .7 - .3), vel * .35);   // lo que queda: una nota ahogada y baja
     [o, o2, lfo, nb].forEach(x => { x.start(t1); x.stop(t + dur + .05); vivos.push(x); x.onended = () => { const i = vivos.indexOf(x); if (i >= 0) vivos.splice(i, 1); }; });
   };
-  V.parar = function () { vivos.slice().forEach(o => { try { o.stop(); } catch (e) { } }); vivos.length = 0; if (window.Sonido) Sonido.parar(); };
+  /* (T2) audio grabado que hace de instrumento (el himno de los ministriles, s2/mus/himno_*.mp3): se apaga con un fundido corto al saltar de plano */
+  const sueltos = [];
+  V.suelta = function (h) { if (h) { sueltos.push(h); if (h.fuente) h.fuente.addEventListener('ended', () => { const i = sueltos.indexOf(h); if (i >= 0) sueltos.splice(i, 1); }); } return h; };
+  V.parar = function () { vivos.slice().forEach(o => { try { o.stop(); } catch (e) { } }); vivos.length = 0; sueltos.splice(0).forEach(h => { try { h.parar(.25); } catch (e) { } }); if (window.Sonido) Sonido.parar(); };
   /* piano (muestras de Modulación) */
   V.piano = function (midi, t, dur, vol) { if (window.Sonido) Sonido.nota(midi, t, dur, vol == null ? .45 : vol); };
   /* oscilador seno que suena mientras se mueve un deslizador */
