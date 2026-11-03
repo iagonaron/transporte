@@ -325,11 +325,10 @@
       const svg = geo.svg; svg.classList.add('activa');
       let tocando = false;
       const mueve = ev => { const pt = svgPt(svg, ev); if (!pt) return; const b = cercana(pt); if (!b) return quitaFantasma(svg); let x = b.nt.x, dur = b.nt.dur;
-        /* (3-nov-2026, Iago en el iPad: «quiero ir al compás 2 y me sigue sustituyendo con notas del compás 1») la nota va donde se toca */
         fantasma(svg, b.cg.stave, x, alturaY(b.cg.stave, pt.y), dur); };
       const coloca = ev => {
         const pt = svgPt(svg, ev); if (!pt) return; let b = cercana(pt); if (!b) return;
-        /* (3-nov-2026, Iago) antes, en táctil, un hueco vacío que no era el siguiente se redirigía al siguiente (Teoría PRO, R3); ahora la nota va al hueco que se toca, como con el ratón */
+        /* (Iago 3-nov, iPad) en táctil, igual que con ratón: la nota va al hueco que tocas, no al siguiente vacío */
         const s = alturaY(b.cg.stave, pt.y), gi = b.nt.gi, prev = ex.aluNotas[gi];
         if (prev && prev.step === s.step && prev.octave === s.octave) { sel = gi; redraw(); return; }   // tocar la nota ya puesta: solo seleccionarla
         ex.undo.push({ gi: gi, prev: prev ? Object.assign({}, prev) : null });
