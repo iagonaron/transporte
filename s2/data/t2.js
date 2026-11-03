@@ -15,7 +15,7 @@
       mira: { neutra: 'izq', aburrida: 'izq', traviesa: 'izq', sorpresa: 'izq', pensativa: 'izq', emocion: 'izq' } },
     AMARO: { nombre: 'Dra. Amaro', color: '#c9b6ff', lado: 'der', alto: .84, dir: PJ1, _: 'explica', poses: ['explica', 'tableta', 'alarma', 'helada'],
       mira: { explica: 'izq', tableta: 'der', alarma: 'der', helada: 'der' } },
-    MADRE: { nombre: 'Mamá', color: '#ffc48a', lado: 'der', alto: .8, dir: PJ1, _: 'decepcion', poses: ['decepcion'], mira: { decepcion: 'der' } },   // (Iago 3-nov) caras hacia el centro: se voltea
+    MADRE: { nombre: 'Iria (madre de Noa)', color: '#ffc48a', lado: 'der', alto: .8, dir: PJ1, _: 'decepcion', poses: ['decepcion'], mira: { decepcion: 'der' } },   // (Iago 3-nov) caras hacia el centro: se voltea
     COPISTA: { nombre: 'Don Ramón', color: '#e9c48a', lado: 'der', poses: [] },
     MAESTRO: { nombre: 'Maestro de capilla', color: '#ffd9a0', lado: 'der', poses: [] }
   };

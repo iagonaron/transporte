@@ -17,7 +17,6 @@ TR.RECURSOS = {
 "../s1/img/t1/coruna_prisa.webp": 322264,
 "../s1/img/t1/def_absoluto.webp": 217172,
 "../s1/img/t1/def_absoluto_si.webp": 232584,
-"../s1/img/t1/def_absoluto_si.webp.png": 7592565,
 "../s1/img/t1/def_dos_formas.webp": 258086,
 "../s1/img/t1/definicion.webp": 77374,
 "../s1/img/t1/dron_riazor.webp": 385896,
