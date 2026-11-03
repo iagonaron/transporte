@@ -85,6 +85,7 @@ TR.RECURSOS = {
 "img/t1/res_orquesta3.webp": 97232,
 "img/t1/res_taller.webp": 311450,
 "img/t1/riazor_marcador.webp": 300852,
+"img/t1/torre_puerta.webp": 386728,
 "img/t1/viaje_clarinete_s19.webp": 234390,
 "img/t1/viaje_diptico.webp": 281444,
 "img/t1/viaje_trompa_s18.webp": 248768,

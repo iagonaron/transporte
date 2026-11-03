@@ -212,7 +212,7 @@
     trompaCerca: { src: 'img/t1/viaje_trompa_s18.webp', zoom: 1.3, cx: .5, cy: .45 }, clarineteCerca: { src: 'img/t1/viaje_clarinete_s19.webp', zoom: 1.3, cx: .5, cy: .45 },
     resInstr: { src: N('res_instrumentos'), vida: [{ tipo: 'polvo', zona: [0, 0, 1, 1], n: 18, color: '#ffe2b8' }, { tipo: 'respira', zona: [.1, .2, .8, .5], color: '#58b8ff' }] },
     resTaller: { src: N('res_taller'), vida: POLVO() },
-    torrePuerta: { src: N('torre_puerta'), vida: [{ tipo: 'respira', zona: [.4, .35, .2, .55], color: '#9fe4ff', vel: .6 }] },   // luz por la rendija
+    torrePuerta: { src: N('torre_puerta'), vida: [{ tipo: 'respira', zona: [.43, .3, .06, .5], color: '#9fe4ff', vel: .6 }, { tipo: 'respira', zona: [.37, .76, .2, .07], color: '#7fe8ff', vel: .5 }] },   // luz por la rendija
     resOrq1: { src: N('res_orquesta1') }, resOrq2: { src: N('res_orquesta2') }, resOrq3: { src: N('res_orquesta3') },
     paleoPadreDa: { src: N('paleo_padre_da'), ocultaPj: ['TALLADOR', 'NINA'], vida: VIDA.paleoCerca },
     paleoNinaToca: { src: N('paleo_nina_toca'), ocultaPj: ['TALLADOR', 'NINA'], vida: VIDA.paleoCerca },
