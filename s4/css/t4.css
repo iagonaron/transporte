@@ -157,3 +157,14 @@
 .mt-afect.desc b{color:#ffb547}
 .mt-afect i{display:block;font-style:normal;font-size:14px;opacity:.75}
 @keyframes mtAf{0%{opacity:0;transform:translateX(-50%) translateY(10px) scale(.96)}10%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}82%{opacity:1}100%{opacity:0}}
+
+/* (Iago 4-nov 22:07) el cambio de la alteración por la diferencia, animado (fa♭ → fa♮) */
+.acc-morf{position:relative}
+.acc-morf .v2{position:absolute;left:0;top:0;width:100%;opacity:0}
+.acc-morf.ya .v1{animation:accOut 1s ease forwards}
+.acc-morf.ya .v2{animation:accIn 1s .45s ease forwards}
+.acc-morf .acc-sube{position:absolute;left:58%;top:6%;font:600 18px 'Saira SC',sans-serif;color:#7dffa8;opacity:0;pointer-events:none;text-shadow:0 0 10px rgba(125,255,168,.6)}
+.acc-morf.ya .acc-sube{animation:accSube 2.2s .2s ease forwards}
+@keyframes accOut{0%{opacity:1;filter:none}40%{opacity:1;filter:drop-shadow(0 0 8px #ffb547)}100%{opacity:0;transform:translateY(-6px)}}
+@keyframes accIn{0%{opacity:0;transform:translateY(8px);filter:drop-shadow(0 0 14px #7dffa8)}60%{opacity:1;transform:none;filter:drop-shadow(0 0 10px #7dffa8)}100%{opacity:1;filter:none}}
+@keyframes accSube{0%{opacity:0;transform:translateY(12px)}25%{opacity:1;transform:none}75%{opacity:1}100%{opacity:.85;transform:translateY(-4px)}}
