@@ -78,7 +78,7 @@
     hoja.appendChild(el('div', 'at-cab', '<b>' + B.esc(can.titulo || 'Cantiga') + '</b><span class="i">' + B.esc(M.tempo_texto || 'Andante cantabile') + '</span><span class="d">Música original</span>'));
     const sisBox = el('div', 'at-sistemas'); hoja.appendChild(sisBox);
     const capa = sv('svg', { class: 'at-capa', viewBox: '0 0 ' + W + ' ' + H, width: W, height: H });
-    capa.innerHTML = '<defs><filter id="grafito" filterUnits="userSpaceOnUse" x="-40" y="-40" width="1400" height="1800"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4" result="r"/>' +
+    capa.innerHTML = '<defs><filter id="grafito" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4" result="r"/>' +
       '<feDisplacementMap in="SourceGraphic" in2="r" scale="1.6" xChannelSelector="R" yChannelSelector="G"/></filter></defs>';
     hoja.appendChild(capa);
     const gMarcas = sv('g', { class: 'at-marcas' }, capa), gVivo = sv('g', { class: 'at-vivo' }, capa);
@@ -115,6 +115,9 @@
       const g = sv('g', { class: 'at-trazo', filter: 'url(#grafito)' }, padre || gMarcas);
       sv('path', { d: d, fill: 'none', stroke: GRAF, 'stroke-width': (ancho || 2.4) * 1.25, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: .95 }, g);
       sv('path', { d: d, fill: 'none', stroke: '#6d6d70', 'stroke-width': (ancho || 2.4) * .45, 'stroke-linecap': 'round', opacity: .5, transform: 'translate(.7,.5)' }, g);
+      /* (4-nov) caja invisible alrededor del trazo: el filtro «grafito» se mide sobre la caja del grupo y, en una línea recta vertical
+         (ancho 0), Safari/iPad no la pintaba; con la caja, la región del filtro es pequeña (barata) y nunca de ancho 0 */
+      try { const bb = g.getBBox(), m = (ancho || 2.4) * 2 + 3; sv('rect', { x: bb.x - m, y: bb.y - m, width: bb.width + 2 * m, height: bb.height + 2 * m, fill: 'none', stroke: 'none' }, g); } catch (e) { }
       return g;
     };
     /* anima un trazo: el lápiz recorre el camino (la punta en cada punto) y el grafito aparece detrás; o = { dur, ancho, c, lapiz } */
