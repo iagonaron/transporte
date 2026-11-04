@@ -52,7 +52,7 @@
     const clave = q ? JSON.stringify(q) : null;
     if (clave === fondoAct && !o.forzar) { if (!pendiente) trasPintar(o.funde); return fondoOpc; }
     /* fundido cruzado lento (Iago, 2-nov) cuando la lámina es la misma imagen con otro encuadre o con halos (o si el plano lo pide) */
-    const fd = o.funde != null ? o.funde : (q && fondoOpc && !q.falta && !fondoOpc.falta && q.src === fondoOpc.src ? 1.2 : 0);
+    const fd = o.funde != null ? o.funde : (q && q.funde != null) ? q.funde : (q && fondoOpc && !q.falta && !fondoOpc.falta && q.src === fondoOpc.src ? 1.2 : 0);
     fondoAct = clave; fondoOpc = q;
     const nuevo = B.el('div', 'lam');
     if (!q) nuevo.classList.add('negra');
@@ -122,14 +122,16 @@
 
   /* ── montar un plano ── */
   function montaPlano(p) {
-    $('escena').classList.toggle('con-inter', false); $('escena').classList.remove('piel-epoca', 'piel-teatro');
+    /* (Iago 4-nov) si el plano va directo a otro interactivo, se deja el anterior pintado (y su piel) hasta que el nuevo lo sustituya */
+    if (!(p.inter && !B.arr(p.lineas).length)) M.limpiaInter();
     const q = M.fondo(p.negro ? null : p.img, { nombre: p.nombre, desc: p.desc, funde: p.funde });
     fondoVideo(p.fondoVid);
     if (p.amb !== undefined) B.ambiente(p.amb);
     if (p.mus === false) B.musica(null); else if (p.mus) B.musica(p.mus);
     if (vfondo && vfondoSrc) B.vida.quita(); else B.vida.pon((q && !q.falta && q.vida) || p.vida || []);
     B.capas.plano(p);
-    if (B.lamina) B.lamina.pon(p.lamina || null, ctl);   // (T2) lámina dibujada en código (partituras, armaduras, rótulos sobre la imagen)
+    const directo = p.inter && !B.arr(p.lineas).length;
+    if (B.lamina && !(directo && p.lamina === undefined)) B.lamina.pon(p.lamina || null, ctl);   // (T2) lámina dibujada en código; (4-nov) si va directo a un interactivo, se queda hasta que este pinte
     programaLams(p.laminas, p.auto || 4, ctl);
     $('efecto').className = p.efecto ? 'ef-' + p.efecto : '';
     $('fondo').className = p.fondoClase || '';   // p. ej. 'ensuena' (desenfoque y ondulación)
@@ -212,7 +214,8 @@
       function prueba() {
         if (listo || !escrito || !vozFin) return;
         listo = true; bC.disabled = false; bC.classList.add('late'); d.classList.add('lista');
-        if (AULA || l.auto) auto = setTimeout(() => fin(true), 1000 * Math.max(l.auto || 0, 1.2 + (hayVoz ? .3 : txt.length * .02)));
+        if (l.enMus != null) auto = setTimeout(() => fin(true), 0);   // (D2) frase anclada a la música: sigue sola en cuanto acaba
+        else if (AULA || l.auto) auto = setTimeout(() => fin(true), 1000 * Math.max(l.auto || 0, 1.2 + (hayVoz ? .3 : txt.length * .02)));
       }
       function toca() {   // clic en la caja: completa el texto; con todo listo, sigue
         if (!escrito) { escrito = true; n = txt.length; pintaTexto(txt, n); prueba(); return; }
@@ -275,7 +278,10 @@
       if (c) c.alMorir.push(() => res(false));
     });
   };
-  M.finInter = function () { M.barra(null); $('cartel').classList.remove('on'); $('inter').innerHTML = ''; $('inter').className = ''; $('escena').classList.remove('con-inter', 'piel-epoca', 'piel-teatro'); };
+  /* (Iago 4-nov) al acabar un interactivo, su contenido NO se vacía todavía: se queda pintado (sin poder tocarse) hasta que el
+     siguiente interactivo pinta el suyo encima, o hasta que un plano sin interactivo lo retira. Así nunca se ve el fondo «vacío». */
+  M.limpiaInter = function () { $('inter').innerHTML = ''; $('inter').className = ''; $('escena').classList.remove('con-inter', 'piel-epoca', 'piel-teatro'); };
+  M.finInter = function (limpia) { M.barra(null); $('cartel').classList.remove('on'); if (limpia) { M.limpiaInter(); return; } $('inter').classList.add('saliente'); };
 
   /* ══════════ VÍDEO ══════════ con «Cargando… %»; si falta, un marcador que dura lo previsto */
   /* al acabar un vídeo o un túnel no se quita la capa: se queda el último fotograma hasta que la lámina siguiente está pintada */
@@ -341,7 +347,10 @@
   /* ══════════ RECORRIDO ══════════ */
   function lineas(ls, c) {
     let i = 0;
-    const sig = () => { if (c.muerto) return Promise.resolve(false); if (i >= ls.length) return Promise.resolve(true); const l = ls[i++]; return M.di(l, c).then(ok => ok ? sig() : false); };
+    const sig = () => { if (c.muerto) return Promise.resolve(false); if (i >= ls.length) return Promise.resolve(true); const l = ls[i++];
+      /* (D2, T3 final) l.enMus = segundo de la música (desde B._tFinal0) en que entra la frase: la voz cae donde A dejó su hueco */
+      const tm = l.enMus != null && B._tFinal0 != null && !RAPIDO ? l.enMus - (B.ahora() - B._tFinal0) : 0;
+      return (tm > .02 ? B.espera(tm, c) : Promise.resolve(true)).then(ok => ok ? M.di(l, c) : false).then(ok => ok ? sig() : false); };
     return sig();
   }
   const TUNEL = '../s1/vid/tunel.mp4';
@@ -387,6 +396,7 @@
       if (p.mus === false) B.musica(null); else if (p.mus) B.musica(p.mus);
       if (p.amb !== undefined) B.ambiente(p.amb);
       $('marcaSub').textContent = (S.escenas[escIdx] || {}).titulo || '';
+      M.limpiaInter();
       return video(p, c);
     }
     montaPlano(p);
@@ -401,7 +411,9 @@
       caja(false); $('escena').classList.add('con-inter'); B.capas.quitaClaves();
       $('escena').classList.toggle('piel-epoca', p.inter.piel === 'epoca');   /* (3-nov) piel «época» (Santiago, 1730): panel, cartel y barra */
       if (p.ambInter !== undefined) B.ambiente(p.ambInter);   // el ambiente baja mientras suenan los instrumentos del interactivo
-      return Promise.resolve(f(p.inter, c)).then(ok2 => { M.finInter(); return ok2; });
+      const r = f(p.inter, c);
+      if (B.lamina && p.lamina === undefined && !B.arr(p.lineas).length) { const lam = $('lamina'); if (lam && lam.children.length) { lam.innerHTML = ''; B.lamina.pon(null); } }   // el interactivo ya está pintado: fuera la lámina de antes, sin hueco
+      return Promise.resolve(r).then(ok2 => { M.finInter(); return ok2; });
     });
     if (p.despues) paso = paso.then(ok => ok ? (caja(true), lineas(p.despues, c)) : false);
     return paso;
@@ -431,7 +443,7 @@
   }
   function salta(i, k) {
     if (ctl) ctl.matar();
-    M.terminado = false; M.finInter(); caja(false); B.capas.limpia(); B.vida.quita(); if (B.lamina) B.lamina.pon(null);
+    M.terminado = false; M.finInter(true); caja(false); B.capas.limpia(); B.vida.quita(); if (B.lamina) B.lamina.pon(null);
     const cv = $('video'); cv.classList.remove('on'); cv.innerHTML = ''; cv.style.opacity = ''; alPintar.length = 0; M._congelado = false; blanco(false, .1); $('cartel').classList.remove('on', 'negro'); $('cartel').innerHTML = ''; fin._visto = false;
     if (window.TR.viento) B.viento.parar();
     const p = (S.escenas[i] || {}).planos ? S.escenas[i].planos[k || 0] : null;
@@ -467,7 +479,7 @@
   /* (Iago 3-nov) salir al menú desde un interactivo opcional (ejercicio final): la sesión cuenta como vista */
   M.alMenu = function () {
     if (M._yendo) return; M._yendo = true;
-    if (ctl) ctl.matar(); M.finInter(); caja(false); B.capas.limpia();
+    if (ctl) ctl.matar(); M.finInter(true); caja(false); B.capas.limpia();
     try { B.progreso.fin(); B.progreso.plano(null); } catch (e) { }
     aMenu();
   };
@@ -506,7 +518,7 @@
     S.escenas.forEach(e => e.planos.forEach(p => {
       if (p.img) A(p.img); B.arr(p.amb).forEach(A); if (p.mus) A(p.mus);
       B.arr(p.sfx).forEach(x => r.push(x.src)); B.arr(p.lineas).concat(B.arr(p.despues)).forEach(L);
-      if (p.inter) { B.arr(p.inter.recursos).forEach(x => r.push(x)); B.arr(p.inter.preguntas).forEach(q => q.fondo && A(q.fondo)); if (p.inter.fondo) A(p.inter.fondo); }
+      if (p.inter) { if (p.inter.lineas) Object.keys(p.inter.lineas).forEach(k => L(p.inter.lineas[k])); /* (4-nov) voces de la secuencia de entrada */ if (p.inter.mp3) A(p.inter.mp3); B.arr(p.inter.recursos).forEach(x => r.push(x)); B.arr(p.inter.preguntas).forEach(q => q.fondo && A(q.fondo)); if (p.inter.fondo) A(p.inter.fondo); }
     }));
     return r.concat(B.capas.recursos(S), B.arr(S.recursos));
   }

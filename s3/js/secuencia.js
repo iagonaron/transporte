@@ -37,7 +37,7 @@
       const rv = C.createConvolver(); rv.buffer = irSala(C, 3.6); rv.normalize = true;
       src.connect(lp); lp.connect(dry); dry.connect(g); lp.connect(pre); pre.connect(rv); rv.connect(wet); wet.connect(g); g.connect(B.bus.mus);
       const d0 = DIST.dron; lp.frequency.value = d0.f; lp.Q.value = d0.q; g.gain.value = Math.pow(10, d0.db / 20); wet.gain.value = d0.hum * 1.6; dry.gain.value = 1 - d0.hum;
-      if (!RAP()) src.start(C.currentTime + .05); B.vivo(src, 'mus');
+      B.vivo(src, 'mus');   // (4-nov) arranca más abajo, tras calcular preR
     }
     /* wet ×1,6: la reverb normalizada suena más baja que la señal seca; así la mezcla percibida es la de «hum» */
     const distancia = n => { if (!lp) return; const d = DIST[n], t = C.currentTime, k = TAU; lp.frequency.setTargetAtTime(d.f, t, k); lp.Q.setTargetAtTime(d.q, t, k); g.gain.setTargetAtTime(Math.pow(10, d.db / 20), t, k); wet.gain.setTargetAtTime(d.hum * 1.6, t, k); dry.gain.setTargetAtTime(1 - d.hum, t, k); };
@@ -48,20 +48,24 @@
     const tCam = Math.max(8, Q - (cfg.antesCamerino || 6));
     const libre = Math.max(6, tCam - dDial - 1.4);
     const tDron = Math.max(durVoz(L.narr) + 1.6, libre * .58), tSala = Math.max(2.4, libre * .2), tPas = Math.max(2.2, libre - tDron - tSala);
+    /* (Iago 4-nov) planos de dron más largos: cada uno dShot s; si no caben antes de que avance la voz, los primeros van ANTES de que empiece el ensayo (preR) */
+    const dShot = cfg.dronShot || 4.4, preR = Math.max(0, cfg.planos.dron.length * dShot - tDron);
     const T = { sala: tDron, llegada: tDron + tSala, dial: tDron + tSala + 1.4, pasillo: tDron + tSala + 1.4 + dDial, cam: tCam };
-    B._secuencia = { T: T, D: D, Q: Q, tPas: tPas };
+    B._secuencia = { T: T, D: D, Q: Q, tPas: tPas, preR: preR, dShot: dShot };
+    if (src && !RAP()) src.start(C.currentTime + .05 + preR);
     const P = cfg.planos, V = cfg.vids || {};
     const pon = (img, vid) => { Mo.cambia(img, { funde: .9 }); if (vid && Mo.fondoVideo) Mo.fondoVideo(vid, true); };
-    const en = (t, fn) => B.espera(t * K, c).then(ok => { if (ok) fn(); return ok; });
+    const en0 = (t, fn) => B.espera(t * K, c).then(ok => { if (ok) fn(); return ok; });   // tiempo absoluto desde el inicio de la secuencia
+    const en = (t, fn) => en0(t + preR, fn);   // tiempo de la VOZ (empieza en preR)
     return new Promise(res => {
       let fin = false;
       const acaba = ok => { if (fin) return; fin = true; if (!ok) para(.15); res(ok); };
       c.alMorir.push(() => acaba(false));
       /* 1 · dron (y el narrador) */
       const nD = P.dron.length;
-      P.dron.forEach((img, i) => en(i * tDron / nD, () => pon(img, V.dron && V.dron[i])));
+      P.dron.forEach((img, i) => en0(i * dShot, () => pon(img, V.dron && V.dron[i])));
       B.ambiente(cfg.amb.dron);
-      en(1.2, () => Mo.di(Object.assign({ auto: .2 }, L.narr), c).then(() => { if (!fin) Mo.calla(); }));
+      en0(1.2, () => Mo.di(Object.assign({ auto: .2 }, L.narr), c).then(() => { if (!fin) Mo.calla(); }));
       /* 2 · la sala */
       en(T.sala, () => { pon(P.sala); distancia('sala'); B.ambiente(cfg.amb.sala); });
       /* 3 · Noa aparece entre bastidores (destello) y la regidora la intercepta */

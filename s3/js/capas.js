@@ -114,13 +114,20 @@
     capa.appendChild(avisoEl);
   };
   /* el dedo pulsa «Posponer» (clic suave), la notificación se pliega hacia un lado con «Pospuesto · 1 h» y desaparece (~2,5 s en total) */
-  C.pospone = function (c) {
+  /* (Iago 4-nov) o = { duda (s quieta, con un leve pulso de luz), voz (Noa en voz baja antes de pulsar: «Mamá… ahora no.»), vozEn } */
+  C.pospone = function (c, o) {
+    o = o || {};
     const a = avisoEl; if (!a || !a.querySelector('.av-posp')) return;
+    if (o.duda) a.classList.add('duda');
+    if (o.voz) B.espera(o.vozEn || 0, c).then(ok => { if (!ok || !a.isConnected || !B.buf[o.voz]) return; B.agacha(true); const h = B.suena(o.voz, { bus: B.bus.voz, grupo: 'voz' }); B.espera(B.buf[o.voz].duration, c).then(() => B.agacha(false)); });
+    B.espera(o.duda || 0, c).then(ok => { if (!ok || !a.isConnected) return; a.classList.remove('duda'); pulsa(); });
+    function pulsa() {
     a.classList.add('dedo');
     B.espera(.4, c).then(ok => { if (!ok || !a.isConnected) return; a.classList.add('pulsa'); B.sfx('../s1/sfx/sfx_ui_clic.mp3', .9); return B.espera(.45, c); })
       .then(ok => { if (!ok || !a.isConnected) return; a.classList.add('pospuesta'); return B.espera(1.05, c); })
       .then(ok => { if (!ok || !a.isConnected) return; a.classList.add('sale'); return B.espera(.6, c); })
       .then(ok => { if (ok && a.isConnected && a === avisoEl) C.aviso(null); });
+    }
   };
 
   /* ── lo llama el motor ── */

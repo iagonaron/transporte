@@ -110,7 +110,42 @@ window.TR = window.TR || {};
     };
   };
   /* voz por la pulsera o por radio: banda de teléfono (300–3400 Hz), un poco de saturación; la radio, además, con cortes y soplido */
+  /* (T3) copiado de s1/js/nucleo.js: la voz interior (pensamiento) de T1, para t3_015n */
+  /* (Iago 3-nov) voz 'interior' (la voz de la conciencia): lejana pero clara. Paso alto/bajo suaves, presencia rebajada,
+     y una reverberación propia (respuesta generada aquí, estéreo, con pre-retardo) mezclada con la señal seca */
+  let irInterior = null;
+  function irVoz() {
+    if (irInterior) return irInterior;
+    const sr = AC.sampleRate, n = Math.floor(sr * 2.4), b = AC.createBuffer(2, n, sr);
+    for (let c = 0; c < 2; c++) {
+      const d = b.getChannelData(c); let lp = 0;
+      for (let i = 0; i < n; i++) { const t = i / sr, k = .18 + .5 * (t / 2.4); lp += (Math.random() * 2 - 1 - lp) * (1 - k);   // se oscurece al apagarse
+        d[i] = lp * Math.exp(-t * 2.6) * (t < .012 ? t / .012 : 1); }
+    }
+    return (irInterior = b);
+  }
+  /* (3-nov) la cadena de la voz interior (con su reverb) se monta UNA vez, al cargar, y se reutiliza: montar el convolver al empezar
+     la frase daba un tirón en la ensoñación */
+  let cadenaInt = null;
+  B.prepVoz = function () { try { B.ac(); vozInterior(); } catch (e) { } };
+  function vozInterior() {
+    if (cadenaInt) return cadenaInt;
+    const C = B.ac();
+    const ent = cadenaInt = C.createGain();
+    const hp = C.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 170; hp.Q.value = .6;
+    const lp = C.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 6000; lp.Q.value = .5;
+    const pr = C.createBiquadFilter(); pr.type = 'peaking'; pr.frequency.value = 3200; pr.gain.value = -4.5; pr.Q.value = .9;   // presencia rebajada: suena más lejos
+    const seco = C.createGain(); seco.gain.value = .82;
+    const pre = C.createDelay(.2); pre.delayTime.value = .045;
+    const rev = C.createConvolver(); rev.buffer = irVoz(); rev.normalize = true;
+    const rlp = C.createBiquadFilter(); rlp.type = 'lowpass'; rlp.frequency.value = 4200;
+    const moj = C.createGain(); moj.gain.value = .42;
+    ent.connect(hp); hp.connect(lp); lp.connect(pr); pr.connect(seco); seco.connect(B.bus.voz);
+    pr.connect(pre); pre.connect(rev); rev.connect(rlp); rlp.connect(moj); moj.connect(B.bus.voz);
+    return ent;
+  }
   B.filtroVoz = function (tipo, dur) {
+    if (tipo === 'interior') return vozInterior();
     const C = B.ac(), t = C.currentTime;
     const hp = C.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = tipo === 'radio' ? 420 : 320; hp.Q.value = .8;
     const lp = C.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = tipo === 'radio' ? 2900 : 3400; lp.Q.value = .9;

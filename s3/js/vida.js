@@ -26,10 +26,16 @@
      'leds'    lucecitas fijas que parpadean (p: [[x,y], …]); sec: true → se encienden una tras otra y se quedan
      'humo'    bocanadas de humo que suben y se abren · 'arco' chispazo eléctrico · 'lluvia' lluvia en diagonal
      'apaga'   una luz que se va apagando (dur s) · 'globo' meridianos girando · 'traza' destello que recorre una onda pintada
+     'brillos' (T3, Iago 4-nov: «que toda lucecita tintinee, cada una con su ritmo») halos sobre las luces REALES de la lámina:
+               p: [[x, y, r, color], …] (fracciones; r = radio del halo en px del lienzo de 960, opcional; color opcional).
+               Cada luz respira y titila con su propio ritmo aleatorio, a veces baja un instante (bombilla) y, de vez en cuando,
+               suelta un destello en cruz (chispa = destellos por luz y segundo; 0 = ninguno). a = intensidad (.34), tint = cuánto titila (1)
    ══════════════════════════════════════════════════════════════════════ */
 'use strict';
 (function (B) {
   const V = B.vida = {};
+  /* (T3, aula lenta) se dibuja en coordenadas de 960×540 pero el lienzo real es de 640×360 (RES): 2,25 veces menos píxeles que rasterizar y subir */
+  const RES = 2 / 3;
   let cv = null, cx = null, cv2 = null, cx2 = null, W = 960, H = 540, capas = [], raf = null, ult = 0, t0 = 0;
   /* las pantallas se pintan en un segundo lienzo SIN fusión «screen» (si no, no se ven sobre un holograma claro ni pueden tapar la aguja pintada) */
   const NORMAL = { aguja: 1, atril: 1, notas: 1, barrido: 1 };
@@ -39,6 +45,7 @@
     atril: { n: 4, color: '#bff6ff', tam: 1, vel: 1 }, leds: { n: 0, color: '#63e6ff', tam: 1.6, vel: 1 },
     humo: { n: 14, color: '#c8ccd4', tam: 1, vel: 1 }, arco: { n: 1, color: '#bfe6ff', tam: 1, vel: 1 },
     lluvia: { n: 140, color: '#cfe0ff', tam: 1, vel: 1 }, globo: { n: 1, color: '#9fe4ff', tam: 1, vel: 1 }, traza: { n: 1, color: '#bff6ff', tam: 1, vel: 1 }, apaga: { n: 1, color: '#58c8ff', tam: 1, vel: 1, dur: 8 },
+    brillos: { n: 0, color: '#ffd9a0', tam: 14, vel: 1, a: .42, tint: 1, chispa: .07, esc: 1.5 },
     polvo: { n: 26, color: '#ffe8c0', tam: 1.6, vel: .25 },
     chispas: { n: 18, color: '#ffb35a', tam: 1.5, vel: 1 },
     luces: { n: 22, color: '#bfe6ff', tam: 1.7, vel: 1 },
@@ -55,9 +62,9 @@
   function asegura() {
     if (cv && cv.isConnected) return;
     cv = B.$('#vida'); if (!cv) return;
-    cv.width = W; cv.height = H; cx = cv.getContext('2d');
+    cv.width = W * RES; cv.height = H * RES; cx = cv.getContext('2d'); cx.setTransform(RES, 0, 0, RES, 0, 0);
     cv2 = B.$('#vidaN'); if (!cv2) { cv2 = document.createElement('canvas'); cv2.id = 'vidaN'; cv2.setAttribute('aria-hidden', 'true'); cv.parentNode.insertBefore(cv2, cv.nextSibling); }
-    cv2.width = W; cv2.height = H; cx2 = cv2.getContext('2d');
+    cv2.width = W * RES; cv2.height = H * RES; cx2 = cv2.getContext('2d'); cx2.setTransform(RES, 0, 0, RES, 0, 0);
   }
   function zona(z) { z = z || [0, 0, 1, 1]; return { x: z[0] * W, y: z[1] * H, w: z[2] * W, h: z[3] * H }; }
   function nueva(c, z, inicio) {
@@ -79,6 +86,9 @@
       if (c.tipo === 'notas') c.ps.forEach((p, i) => { p.x = c.z.x + c.z.w * (i + .5) / c.n; p.l = Math.floor(Math.random() * 9); p.tx = p.x; p.tl = p.l; p.prox = 1 + Math.random() * 3; });
       if (c.tipo === 'humo') c.ps.forEach(p => { p.vida = Math.random() * 120; p.max = 120 + Math.random() * 80; });
       if (c.tipo === 'lluvia') c.ps.forEach(p => { p.l = 8 + Math.random() * 14; p.v = 9 + Math.random() * 6; });
+      if (c.tipo === 'brillos') c.ls = B.arr(c.p).map(q => ({ x: q[0] * W, y: q[1] * H, r: (q[2] || c.tam) * c.esc, col: q[3] || c.color,
+        fa: .25 + Math.random() * .8, fb: 2 + Math.random() * 5, f1: Math.random() * 6.28, f2: Math.random() * 6.28, baja: 2 + Math.random() * 10, g: -1 }));
+      if (c.tipo === 'leds') c.fr = B.arr(c.p).map(() => .7 + Math.random() * .6);   // (T3) cada led con su ritmo
       return c;
     });
     cx.clearRect(0, 0, W, H); cx2.clearRect(0, 0, W, H);
@@ -110,16 +120,13 @@
         const k = (t * .55 * c.vel) % 1, R = Math.max(z.w, z.h) * .5;
         cx.strokeStyle = hex(c.color, .55 * (1 - k)); cx.lineWidth = 3 + 5 * (1 - k);
         cx.beginPath(); cx.arc(z.x + z.w / 2, z.y + z.h / 2, R * (.1 + k), 0, 6.283); cx.stroke();
-        const g = cx.createRadialGradient(z.x + z.w / 2, z.y + z.h / 2, 0, z.x + z.w / 2, z.y + z.h / 2, R * .5);
-        g.addColorStop(0, hex(c.color, .22 + .12 * Math.sin(t * 3))); g.addColorStop(1, hex(c.color, 0));
-        cx.fillStyle = g; cx.fillRect(z.x, z.y, z.w, z.h);
+        brillo(z.x + z.w / 2, z.y + z.h / 2, R * .5, c.color, .22 + .12 * Math.sin(t * 3));
         return;
       }
       if (c.tipo === 'parpadeo') {
         const fl = .55 + .25 * Math.sin(t * 7.3) + .2 * Math.sin(t * 17.1) - (Math.sin(t * 1.3) > .96 ? .5 : 0);
-        const g = cx.createRadialGradient(z.x + z.w / 2, z.y + z.h / 2, 0, z.x + z.w / 2, z.y + z.h / 2, Math.max(z.w, z.h) * .62);
-        g.addColorStop(0, hex(c.color, .2 * fl)); g.addColorStop(1, hex(c.color, 0));
-        cx.fillStyle = g; cx.fillRect(z.x - z.w * .2, z.y - z.h * .2, z.w * 1.4, z.h * 1.4);
+        const Rr = Math.max(z.w, z.h) * .62;   // (T3) el resplandor, del sprite cacheado (antes, un degradado nuevo en cada fotograma)
+        cx.globalAlpha = Math.max(0, Math.min(1, .2 * fl)); cx.drawImage(halo(c.color, 1), z.x + z.w / 2 - Rr, z.y + z.h / 2 - Rr, Rr * 2, Rr * 2); cx.globalAlpha = 1;
         cx.globalAlpha = .25 * fl; cx.fillStyle = c.color; const yl = z.y + ((t * 40) % z.h); cx.fillRect(z.x, yl, z.w, 1.2); cx.globalAlpha = 1;   // línea de barrido
         return;
       }
@@ -144,10 +151,7 @@
         return;
       }
       if (c.tipo === 'respira') {
-        const a = .08 + .07 * Math.sin(t * .8 * c.vel);
-        const g = cx.createRadialGradient(z.x + z.w / 2, z.y + z.h / 2, 0, z.x + z.w / 2, z.y + z.h / 2, Math.max(z.w, z.h) * .6);
-        g.addColorStop(0, hex(c.color, a)); g.addColorStop(1, hex(c.color, 0));
-        cx.fillStyle = g; cx.fillRect(z.x - z.w * .1, z.y - z.h * .1, z.w * 1.2, z.h * 1.2);
+        brillo(z.x + z.w / 2, z.y + z.h / 2, Math.max(z.w, z.h) * .6, c.color, .08 + .07 * Math.sin(t * .8 * c.vel));
         return;
       }
       if (c.tipo === 'anillos') {
@@ -197,7 +201,7 @@
     const x = (1 - v) * ((1 - u) * q[0] + u * q[2]) + v * ((1 - u) * q[6] + u * q[4]), y = (1 - v) * ((1 - u) * q[1] + u * q[3]) + v * ((1 - u) * q[7] + u * q[5]);
     return [x * W, y * H];
   };
-  function brillo(x, y, r, col, a) { const g = cx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, hex(col, a)); g.addColorStop(1, hex(col, 0)); cx.fillStyle = g; cx.fillRect(x - r, y - r, r * 2, r * 2); }
+  function brillo(x, y, r, col, a) { const k = cx.globalAlpha; cx.globalAlpha = Math.max(0, Math.min(1, a)) * k; cx.drawImage(halo(col, 1), x - r, y - r, r * 2, r * 2); cx.globalAlpha = k; }   // (T3) sprite cacheado
   function pantalla(c, z, t, tl) {
     if (c.tipo === 'aguja') {
       const A = .9 * Math.exp(-tl * .45 * c.vel), ang = A * Math.sin(tl * 5.2 * c.vel) + .25 * A * Math.sin(tl * 13), L = z.h, ok = A < .06;
@@ -257,10 +261,25 @@
         const x = pt[0] * W, y = pt[1] * H, col = pt[2] || c.color;
         let a;
         if (c.sec) { const ti = tl - (c.tes ? c.tes[i] : (c.ini || .5) + i * (c.paso || 1.2)); a = ti < 0 ? .05 : Math.min(1, ti * 3) * (.8 + .2 * Math.sin(t * 3 + i)); }
-        else a = .25 + .75 * Math.pow(Math.max(0, Math.sin(t * (c.f || 2.2) * c.vel + i * 2.1 + (pt[3] || 0))), 2);
+        else a = .25 + .75 * Math.pow(Math.max(0, Math.sin(t * (c.f || 2.2) * c.vel * (c.fr ? c.fr[i] : 1) + i * 2.1 + (pt[3] || 0))), 2);
         brillo(x, y, c.tam * 6, col, .45 * a); cx.globalAlpha = a; cx.fillStyle = col; cx.beginPath(); cx.arc(x, y, c.tam, 0, 6.283); cx.fill(); cx.globalAlpha = 1;
       });
       return true;
+    }
+    if (c.tipo === 'brillos') {
+      const dt = 1 / 30;
+      c.ls.forEach(l => {
+        let k = .72 + c.tint * (.2 * Math.sin(6.283 * l.fa * t * c.vel + l.f1) + .08 * Math.sin(6.283 * l.fb * t + l.f2));
+        if (tl > l.baja) { if (tl < l.baja + .09) k *= .55; else l.baja = tl + 3 + Math.random() * 11; }   // un parpadeo breve, a su aire
+        const R = l.r * 2.6; cx.globalAlpha = Math.max(0, Math.min(1, c.a * .55 * k)); cx.drawImage(halo(l.col), l.x - R, l.y - R, R * 2, R * 2);   // la luz que se derrama alrededor
+        cx.globalAlpha = Math.max(0, Math.min(1, c.a * k)); cx.drawImage(halo(l.col), l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
+        if (l.g < 0 && c.chispa && Math.random() < c.chispa * dt) l.g = 0;
+        if (l.g >= 0) {
+          l.g += dt / .75; if (l.g >= 1) l.g = -1;
+          else { const e = Math.sin(Math.PI * l.g), L = l.r * (1.6 + 1.6 * e); cx.globalAlpha = .7 * e; cx.drawImage(estrella(l.col), l.x - L, l.y - L, L * 2, L * 2); }
+        }
+      });
+      cx.globalAlpha = 1; return true;
     }
     if (c.tipo === 'humo') {
       c.ps.forEach((p, i) => {
@@ -313,6 +332,24 @@
       return true;
     }
     return false;
+  }
+  /* sprites cacheados por color (más barato que crear degradados en cada fotograma: el aula es lenta) */
+  const SPR = {};
+  function halo(col, lineal) {
+    const k = (lineal ? 'l' : 'h') + col; if (SPR[k]) return SPR[k];
+    const s = document.createElement('canvas'); s.width = s.height = 64; const g2 = s.getContext('2d'), g = g2.createRadialGradient(32, 32, 0, 32, 32, 32);
+    if (lineal) { g.addColorStop(0, hex(col, 1)); g.addColorStop(1, hex(col, 0)); }
+    else { g.addColorStop(0, hex(col, 1)); g.addColorStop(.12, hex(col, .85)); g.addColorStop(.25, hex(col, .5)); g.addColorStop(.55, hex(col, .14)); g.addColorStop(1, hex(col, 0)); }
+    g2.fillStyle = g; g2.fillRect(0, 0, 64, 64); return (SPR[k] = s);
+  }
+  function estrella(col) {
+    const k = 'e' + col; if (SPR[k]) return SPR[k];
+    const s = document.createElement('canvas'); s.width = s.height = 128; const g2 = s.getContext('2d');
+    [0, 1].forEach(v => { const g = v ? g2.createLinearGradient(0, 0, 0, 128) : g2.createLinearGradient(0, 0, 128, 0);
+      g.addColorStop(0, hex('#ffffff', 0)); g.addColorStop(.5, hex('#ffffff', .95)); g.addColorStop(1, hex('#ffffff', 0)); g2.fillStyle = g;
+      if (v) g2.fillRect(63, 0, 2, 128); else g2.fillRect(0, 63, 128, 2); });
+    const h = g2.createRadialGradient(64, 64, 0, 64, 64, 18); h.addColorStop(0, hex('#ffffff', .9)); h.addColorStop(.4, hex(col, .5)); h.addColorStop(1, hex(col, 0));
+    g2.fillStyle = h; g2.fillRect(46, 46, 36, 36); return (SPR[k] = s);
   }
   function hex(h, a) {
     const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(h);

@@ -116,7 +116,7 @@
       /* comienzo de nota: voz guía */
       for (let i = ultOnset + 1; i < N && ns[i].t <= bpos + 1e-6; i++) {
         ultOnset = i; o.v.marca(ns[i].i, est[i].hit ? 'n-ok' : 'n-act');
-        if (o.guia && o.guia()) V().nota('oboe', o.objetivo(ns[i]), C.currentTime + .01, Math.max(.15, ns[i].beats * spb * .92), .3);
+        if (o.guia && o.guia()) T3.coro(o.objetivo(ns[i]), C.currentTime + .01, Math.max(.15, ns[i].beats * spb * .95), .3);   // (4-nov) coro «ooh», sin estirar
         if (o.alEstado) o.alEstado(ns[i], 'empieza');
       }
       /* las que se han pasado sin tocar */
@@ -191,7 +191,9 @@
   I.claves = function (cfg, c) {
     /* (Iago 4-nov) en el atril: la A4 con las marcas a lápiz del alumno (T3.marcas), sin clave fantasma */
     const p = B.$('#inter'); T3.prepAtril(p, 'i-mental i-claves');
-    const can = T3.cancion(), rg = cfg.compases || [0, 3], notas = trozo(can, rg[0], rg[1]);
+    /* (Iago 4-nov) TODA la página seguida: los 8 compases de los 4 pentagramas, nota a nota; el cursor va de pentagrama en pentagrama */
+    const can = T3.cancion(), rg = cfg.compases || [0, 8], notas = trozo(can, rg[0], rg[1]);
+    const NAYUDA = cfg.ayudaNombres != null ? cfg.ayudaNombres : notas.filter(n => n.c < 2).length;   // nombres a lápiz bajo las notas: solo en el 1.er pentagrama
     const hoja = T3.hoja(p, { can: can, marcas: 'alumno' });
     const cab = el('div', 'at-panel izq'); p.appendChild(cab);
     cab.appendChild(el('div', 'mt-lado', '<small>Lo que está impreso</small><b>Clave de sol · Re M</b>'));
@@ -201,7 +203,9 @@
     const der = el('div', 'at-panel der'); p.appendChild(der);
     const msg = el('div', 'at-msg'); der.appendChild(msg);
     const tw = el('div', 'mt-tw'); p.appendChild(tw);
-    let k = Math.min(cfg.ejemplo || 0, notas.length), fallos = 0, listo = false, sigue = null;
+    let k = Math.min(cfg.ejemplo || 0, notas.length), fallos = 0, listo = false, sigue = null, aciertos = 0;
+    const cuenta = el('div', 'cl-cuenta'); cab.appendChild(cuenta);
+    const pintaCuenta = () => { cuenta.innerHTML = 'Aciertos a la primera: <b>' + aciertos + '</b> · nota <b>' + Math.min(k + 1, notas.length) + '</b> de ' + notas.length; };
     const objetivo = n => { const t = T3.enTenor(n); return t.midi; };
     const pintaProg = () => { prog.innerHTML = notas.map((n, i) => '<i class="' + (i < k ? 'ya' : i === k ? 'act' : '') + '"></i>').join(''); };
     /* la del ejemplo (la primera), resuelta */
@@ -209,15 +213,18 @@
     const di = (t, cls) => { msg.className = 'at-msg on' + (cls ? ' ' + cls : ''); msg.innerHTML = t; };
     function marcaAct() {
       pintaProg();
-      if (k >= notas.length) return;
-      v.marca(notas[k].i, 'n-act'); v.etiqueta(notas[k].i, '?', 'act');
+      pintaCuenta();
+      if (k >= notas.length) { v.apaga(); return; }
+      v.marca(notas[k].i, 'n-act'); v.etiqueta(notas[k].i, '?', 'act'); v.cursor(notas[k].t + .001);
     }
     function toca(m, porTecla) {
       if (k >= notas.length) { T3.piano(m, 0, .4, .3); return; }
       const n = notas[k], mo = objetivo(n), t = T3.enTenor(n);
       if ((((mo - m) % 12) + 12) % 12 === 0) {
         T3.piano(mo, 0, .6, .5); V().ui('ok');
-        v.marca(n.i, fallos >= 2 ? 'n-ayuda' : 'n-ok'); v.etiqueta(n.i, '<s>' + T3.nombre(n.l, n.a) + '</s><b>' + T3.NOM[t.l] + '</b>', 'ok');
+        if (!fallos) aciertos++;
+        v.marca(n.i, fallos >= 2 ? 'n-ayuda' : 'n-ok');
+        if (k < NAYUDA) v.etiqueta(n.i, '<s>' + T3.nombre(n.l, n.a) + '</s><b>' + T3.NOM[t.l] + '</b>', 'ok'); else v.etiqueta(n.i, '', 'vacia');
         if (!porTecla && m !== mo) di('¡Sí, <b>' + T3.NOM[t.l] + '</b>! Recuerda: suena <b>una 8.ª más arriba</b> de lo que lees en clave de do: <b>' + nomOct(mo, 0) + '</b>.', 'ok');
         else di('¡Sí! <b>' + T3.nombre(n.l, n.a) + '</b> en clave de sol se lee <b>' + T3.NOM[t.l] + '</b> en clave de do en 4.ª.', 'ok');
         k++; fallos = 0; marcaAct();
@@ -229,14 +236,14 @@
       else { di('Está en <b>' + T3.lugar(T3.pos(n)) + '</b>: en clave de do en 4.ª ahí va el <b>' + T3.NOM[t.l].toLowerCase() + '</b>. Tócalo.', 'mal'); tec.marca(mo, 'pista', 1400); }
     }
     function termina() {
-      di('¡Eso es! Cada nota, <b>una 2.ª más abajo</b>: ya estás tocando en <b>Do M</b>, sin escribir nada.', 'ok');
+      di('¡Página entera! <b>' + aciertos + ' de ' + notas.length + '</b> a la primera. Cada nota, <b>una 2.ª más abajo</b>: ya estás tocando en <b>Do M</b>, sin escribir nada.', 'ok');
       const C = B.ac(); let t = C.currentTime + .5; notas.forEach(n => { T3.piano(objetivo(n), t, n.beats * .55, .4); t += n.beats * .6; });
-      if (!listo) { listo = true; M().barraTexto('¡Lectura por claves completa! Pulsa <b>Continuar</b>.'); M().esperaSigue(c).then(ok => sigue && sigue(ok)); }
+      if (!listo) { listo = true; M().barraTexto('¡Lectura por claves completa: <b>' + aciertos + ' de ' + notas.length + '</b> a la primera! Pulsa <b>Continuar</b>.'); M().esperaSigue(c).then(ok => sigue && sigue(ok)); }
     }
     const tec = T3.teclado(tw, { desde: 60, hasta: 83, base: 72, alTocar: toca });
     c.alMorir.push(() => tec.fuera());
     marcaAct(); di('Lee la nota iluminada en <b>clave de do en 4.ª</b> y tócala.');
-    B._mental = { toca: m => toca(m, false), objetivo: () => k < notas.length ? objetivo(notas[k]) : null, estado: () => ({ k: k, total: notas.length }) };
+    B._mental = { toca: m => toca(m, false), objetivo: () => k < notas.length ? objetivo(notas[k]) : null, estado: () => ({ k: k, total: notas.length, aciertos: aciertos }) };
     return M().cartel(cfg.cartel, { botones: [], aulaSolo: false }).then(() => new Promise(res => {
       sigue = res; c.alMorir.push(() => res(false)); if (cfg.cartelCorto) M().barraTexto(cfg.cartelCorto);
     }));
@@ -370,6 +377,8 @@
     const rot = el('div', 'rc-rot', cfg.rotulo || 'Do M'); p.appendChild(rot);
     const bSig = btn('Continuar ▶', 'prim rc-sig', () => acaba(true)); p.appendChild(bSig);
     requestAnimationFrame(() => requestAnimationFrame(() => rot.classList.add('on')));
+    /* (Iago 4-nov) el rótulo solo al empezar (3,5 s) y se desvanece: no tapa la cara de la cantante */
+    B.espera(RAP() ? .1 : (cfg.rotuloDura || 3.5), c).then(ok => ok && rot.classList.remove('on'));
     const can = T3.cancion(), C = B.ac();
     let h = null, fin = false, res = null, dur;
     const INTRO = 2, spbMp3 = 60 / (can.tempo || 80);
@@ -377,6 +386,15 @@
       h = B.suena(cfg.mp3, { bus: B.bus.sfx, vol: 1, grupo: 'sfx' }); if (V().suelta) V().suelta(h); dur = B.buf[cfg.mp3].duration;
       const c1 = cfg.c1 != null ? cfg.c1 : INTRO * can.num * spbMp3;   // segundo en que empieza el c. 1 en el mp3 (A: 4,80 s)
       B.arr(cfg.imgs).forEach(x => B.espera(RAP() ? .05 : (x.t != null ? x.t : c1 + x.c * can.num * spbMp3), c).then(ok => ok && !fin && Mo.cambia(x.img)));
+      /* (Iago 4-nov) la voz interior de Noa (t3_015n) sobre la canción, que baja unos 8 dB (ducking suave) y vuelve a subir */
+      const IN = cfg.interior;
+      if (IN && !RAP()) B.espera(IN.t, c).then(ok => {   // (en ?rapido=1 no: se solaparía con las frases siguientes)
+        if (!ok || fin) return;
+        const gg = h.gan.gain, t = C.currentTime, base = gg.value; gg.cancelScheduledValues(t); gg.setValueAtTime(base, t); gg.setTargetAtTime(base * Math.pow(10, (IN.duck || -8) / 20), t, .35);
+        bSig.style.visibility = 'hidden';
+        if (IN.img) Mo.cambia(IN.img);
+        Mo.di(Object.assign({ auto: .2 }, IN.linea), c).then(ok2 => { if (!fin) Mo.calla(); bSig.style.visibility = ''; if (!fin && h) { const t2 = C.currentTime; gg.cancelScheduledValues(t2); gg.setValueAtTime(gg.value, t2); gg.setTargetAtTime(base, t2, .6); } });
+      });
     } else {
       /* sin el mp3: piano (acordes de melodia.json) + la melodía en Do M con la voz guía (oboe), a negra = 76 */
       const spb = 60 / 76, t0 = C.currentTime + .3, acc = acompana(can, 0);
@@ -599,5 +617,14 @@
       resolver = r; c.alMorir.push(() => r(false));
       M().cartel(cfg.cartel, { botones: [bOtra, bSig, bFin], boton: 'Practicar: 3 melodías', extra: [bSeguir], aulaSolo: false }).then(() => { if (!hecho) monta(); });
     });
+  };
+  /* ════════ esperaGolpe: el negro final dura hasta el GOLPE de la música (s desde que arrancó en p12c, B._tFinal0); entonces el motor
+     pone «Continuará…». Si la música del final aún no está (o no hay golpe), el negro de siempre (sinGolpe s). ════════ */
+  I.esperaGolpe = function (cfg, c) {
+    B.$('#escena').classList.remove('con-inter'); B.$('#inter').className = '';
+    const hay = cfg.golpe != null && B._tFinal0 != null && B.buf['mus/t3_mus_final.mp3'];
+    const t = hay ? cfg.golpe - (B.ahora() - B._tFinal0) - (cfg.adelanto || 0) : (cfg.sinGolpe || 1.4);
+    if (hay) document.body.classList.add('golpe-final');
+    return B.espera(RAP() ? .2 : Math.max(cfg.minimo || .3, t), c);
   };
 })(window.TR);

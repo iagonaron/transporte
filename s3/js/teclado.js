@@ -16,7 +16,33 @@
   const vivos = [];
   const GAN = 1.35;   // (medido 3-nov) las muestras de A (Salamander) quedan 2,6 dB por debajo de las de T1: así suenan igual que el piano de T1
   const listaPiano = () => (B.PIANO || []).filter(x => B.buf[x[0]]);
-  T3.pianoRutas = () => (B.PIANO || []).map(x => x[0]);
+  /* (Iago 4-nov) VOZ GUÍA = coro «ooh» (mus/coro/, FluidR3 GM, MIT): cada nota con SU muestra, sin estirar ni reafinar; se corta a la
+     duración de la nota con un release de ~120 ms; si pasa de ~2,8 s, se encadena otra copia con fundido cruzado de 0,3 s */
+  const CORO_N = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+  const coroRuta = m => 'mus/coro/' + CORO_N[((m % 12) + 12) % 12] + (Math.floor(m / 12) - 1) + '.mp3';
+  T3.coroRutas = () => Object.keys(B.RECURSOS || {}).filter(r => /^mus\/coro\/.+\.mp3$/.test(r));
+  T3.pianoRutas = () => (B.PIANO || []).map(x => x[0]).concat(T3.coroRutas());   // (las del coro se precargan con las del piano)
+  const GAN_CORO = 1.25;   // las muestras van 6 dB por debajo del piano: así queda como la voz guía de antes
+  T3.coro = function (midi, t, dur, vol) {
+    const C = B.ac(), r = coroRuta(midi), buf = B.buf[r];
+    t = t || C.currentTime; dur = Math.max(.1, dur || .5); vol = vol == null ? .3 : vol;
+    if (!buf) { if (B.viento) B.viento.nota('oboe', midi, t, dur, vol); return; }   // sin muestra: la de antes
+    const v = vol * GAN_CORO, MAX = 2.8;
+    const una = (t0, d, entra) => {
+      const s = C.createBufferSource(), g = C.createGain(); s.buffer = buf;
+      if (entra) { g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(v, t0 + .3); } else g.gain.setValueAtTime(v, t0);
+      g.gain.setValueAtTime(v, t0 + Math.max(entra ? .3 : 0, d)); g.gain.linearRampToValueAtTime(0, t0 + d + .12);
+      s.connect(g); g.connect(B.bus.inst); s.start(t0); s.stop(t0 + d + .15);
+      vivos.push(s); s.onended = () => { const i = vivos.indexOf(s); if (i >= 0) vivos.splice(i, 1); };
+    };
+    let t0 = t, resta = dur, primera = true;
+    while (resta > 0) {
+      const d = resta > MAX ? MAX : resta;
+      una(t0, resta > MAX ? d + .18 : d, !primera);   // la siguiente copia entra 0,3 s antes de que se apague esta
+      primera = false; resta -= d - (resta > MAX ? .3 : 0); t0 += d - .3;
+      if (resta <= .3) break;
+    }
+  };
   T3.piano = function (midi, t, dur, vol) {
     const C = B.ac(); t = t || C.currentTime; dur = dur || .6; vol = vol == null ? .45 : vol;
     const l = listaPiano();

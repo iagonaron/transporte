@@ -15,7 +15,7 @@
 'use strict';
 (function (B) {
   const T3 = B.t3 = B.t3 || {}, el = B.el, NS = 'http://www.w3.org/2000/svg';
-  const GRAF = '#3b3b3d';
+  const GRAF = '#2c2c2f';   // (4-nov) grafito algo más oscuro y grueso: que se vea en el proyector
   const sv = (tag, at, padre) => { const n = document.createElementNS(NS, tag); Object.keys(at || {}).forEach(k => n.setAttribute(k, at[k])); if (padre) padre.appendChild(n); return n; };
   const RAP = () => B.param('rapido') === '1';
   const DEF = { hoja: { x: .372, y: .045, w: .256, h: .635 }, lapiz: { x: .468, y: .686, w: .135, rot: -2.5 }, lapizEnImagen: false };
@@ -33,7 +33,7 @@
   T3.borraMarcas = () => { T3.marcas = null; try { localStorage.removeItem(KM); } catch (e) { } };
 
   /* ── sonido de lápiz sobre papel: ruido filtrado cuyo volumen sigue a la velocidad del trazo ── */
-  T3.sonLapiz = function () {
+  T3.sonLapizSint = function () {
     const C = B.ac(), r = B.ruido(), bp = C.createBiquadFilter(), hp = C.createBiquadFilter(), g = C.createGain();
     bp.type = 'bandpass'; bp.frequency.value = 3600; bp.Q.value = .7; hp.type = 'highpass'; hp.frequency.value = 1400;
     g.gain.value = 0; r.connect(bp); bp.connect(hp); hp.connect(g); g.connect(B.bus.sfx); r.start(); B.vivo(r, 'sfx');
@@ -42,6 +42,14 @@
       vel(v) { if (!vivo) return; const t = C.currentTime, obj = Math.min(.11, v * .0016) * (.75 + Math.random() * .5); g.gain.setTargetAtTime(obj, t, .015); bp.frequency.setTargetAtTime(3000 + Math.random() * 1600, t, .02); },
       para() { if (!vivo) return; vivo = false; const t = C.currentTime; g.gain.setTargetAtTime(0, t, .03); try { r.stop(t + .25); } catch (e) { } }
     };
+  };
+
+  /* (4-nov) sonido de lápiz real (Splice): 'tacha' = trazo firme de grafito (~1 s) · 'escribe' = trazo de escritura (~1,8 s); si falta el fichero, el ruido sintético de siempre */
+  T3.sonLapiz = function (tipo) {
+    const ruta = 'sfx/sfx_t3_lapiz_' + (tipo || 'tacha') + '.mp3';
+    if (!B.buf[ruta]) return T3.sonLapizSint();
+    const h = B.sfx(ruta, .9); let vivo = true;
+    return { vel() { }, para() { if (!vivo) return; vivo = false; if (h) h.parar(.06); } };
   };
 
   /* ── el lápiz (SVG): tumbado (repisa) o escribiendo (punta abajo a la izquierda) ── */
@@ -105,7 +113,7 @@
     api.camino = camino;
     api.trazoEl = function (d, ancho, padre) {
       const g = sv('g', { class: 'at-trazo', filter: 'url(#grafito)' }, padre || gMarcas);
-      sv('path', { d: d, fill: 'none', stroke: GRAF, 'stroke-width': ancho || 2.4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: .82 }, g);
+      sv('path', { d: d, fill: 'none', stroke: GRAF, 'stroke-width': (ancho || 2.4) * 1.25, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: .95 }, g);
       sv('path', { d: d, fill: 'none', stroke: '#6d6d70', 'stroke-width': (ancho || 2.4) * .45, 'stroke-linecap': 'round', opacity: .5, transform: 'translate(.7,.5)' }, g);
       return g;
     };
@@ -115,7 +123,7 @@
       const g = api.trazoEl(d, o.ancho), ps = B.$$('path', g), L = ps[0].getTotalLength(), dur = RAP() ? .05 : (o.dur || .8);
       if (!o.anima) return Promise.resolve(g);
       ps.forEach(p => { p.style.strokeDasharray = L + ' ' + L; p.style.strokeDashoffset = L; });
-      const son = o.sonido === false ? null : T3.sonLapiz(), lp = api.lapiz;
+      const son = o.sonido === false ? null : T3.sonLapiz(o.son), lp = api.lapiz;
       return new Promise(res => {
         const t0 = performance.now(); let ult = null;
         const paso = () => {
@@ -134,7 +142,9 @@
     /* ── las marcas: d de cada una, a partir de las cajas del sistema S (y, si las hay, de los trazos del alumno) ── */
     const deCaja = (bx, uv) => uv.map(p => [bx.x + p[0] * bx.w, bx.y + p[1] * bx.h]);
     api.dMarca = function (tipo, S, mAlu) {
-      const k = api.cajas(S);
+      const k = api.cajas(S), si = api.sistemas.indexOf(S);
+      /* (Iago 4-nov) el alumno tacha cada pentagrama: armS / solS = sus trazos por sistema; arm / sol (uno solo) se copia a todos */
+      if (mAlu && (mAlu.armS || mAlu.solS)) mAlu = Object.assign({}, mAlu, { arm: mAlu.armS ? (mAlu.armS[si] || mAlu.armS[0]) : mAlu.arm, sol: mAlu.solS ? (mAlu.solS[si] || mAlu.solS[0]) : mAlu.sol });
       if (tipo === 'arm' && k.arm) { if (mAlu && mAlu.arm) return camino(deCaja(k.arm, mAlu.arm)); const b = k.arm; return camino([[b.x - 5, b.y + b.h * .86], [b.x + b.w * .5, b.y + b.h * .5 + 2], [b.x + b.w + 5, b.y + b.h * .1]]); }
       if (tipo === 'sol' && k.sol) { if (mAlu && mAlu.sol) return camino(deCaja(k.sol, mAlu.sol)); const b = k.sol; return camino([[b.x - 4, b.y + b.h * .88], [b.x + b.w * .45, b.y + b.h * .52], [b.x + b.w + 5, b.y + b.h * .14]]); }
       if (tipo === 'do') return api.dClaveDo(S, mAlu && mAlu.do != null ? mAlu.do : 1);
@@ -153,7 +163,7 @@
       const an = !!o.anima, c = o.c;
       if (tipo === 'do') {
         const ds = api.dClaveDo(S, o.linea == null ? 1 : o.linea);
-        return api.traza(ds[0], { anima: an, dur: .3, ancho: 3.4, c: c }).then(() => api.traza(ds[1], { anima: an, dur: .25, ancho: 1.7, c: c })).then(() => api.traza(ds[2], { anima: an, dur: .55, ancho: 2.2, c: c }));
+        return api.traza(ds[0], { anima: an, dur: .3, ancho: 3.4, c: c, son: 'escribe' }).then(() => api.traza(ds[1], { anima: an, dur: .25, ancho: 1.7, c: c, son: 'escribe' })).then(() => api.traza(ds[2], { anima: an, dur: .55, ancho: 2.2, c: c, son: 'escribe' }));
       }
       if (tipo === 'arm' || tipo === 'sol') return api.traza(api.dMarca(tipo, S, o.alu), { anima: an, dur: o.dur || .8, ancho: 2.6, c: c });
       if (tipo === 'texto') {   // «Do M» a lápiz encima de la armadura tachada
@@ -163,7 +173,7 @@
         if (!an || RAP()) return Promise.resolve();
         const bb = tx.getBBox(), id = 'clip' + Math.round(Math.random() * 1e9), cp = sv('clipPath', { id: id }, capa), rc = sv('rect', { x: bb.x - 2, y: bb.y - 4, width: 0, height: bb.height + 8 }, cp);
         g.setAttribute('clip-path', 'url(#' + id + ')');
-        const son = T3.sonLapiz(), lp = api.lapiz, dur = .7;
+        const son = T3.sonLapiz('escribe'), lp = api.lapiz, dur = .7;
         return new Promise(res => { const t0 = performance.now(); const paso = () => { if (c && c.muerto) { son.para(); return res(); } const f = Math.min(1, (performance.now() - t0) / (dur * 1000));
           rc.setAttribute('width', (bb.width + 4) * f); if (lp) lp.pon(bb.x + bb.width * f, bb.y + bb.height * (.55 + .3 * Math.sin(f * 40))); son.vel(30 + 20 * Math.random());
           if (f < 1) requestAnimationFrame(paso); else { son.para(); g.removeAttribute('clip-path'); res(); } }; requestAnimationFrame(paso); });
@@ -182,7 +192,7 @@
       }
       if (tipo === 'dibujo') {
         const pts = S.geo.notas.map(gn => { let y = 0; try { y = gn.sn.getYs()[0]; } catch (e) { y = S.geo.yTop; } const q = api.loc(S, gn.x, y); return [q.x, q.y - 15]; });
-        return api.traza(camino(pts), { anima: an, dur: o.dur || 1.3, ancho: 1.8, c: c });
+        return api.traza(camino(pts), { anima: an, dur: o.dur || 1.3, ancho: 1.8, c: c, son: 'escribe' });
       }
       return Promise.resolve();
     };
