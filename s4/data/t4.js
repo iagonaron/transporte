@@ -213,7 +213,7 @@
           lineas: [
             { id: 't4_001', quien: 'XOAN', pj: null, imgs: [{ t: .45, img: IMG.xoanLlama }], texto: 'Iria, ¿dónde te habías metido?', espera: .2 },
             { id: 't4_002', quien: 'NOA', img: IMG.noaGira, pj: null, texto: 'Me confundes. Me llamo Noa.', espera: .3 },
-            { id: 't4_003', quien: 'XOAN', img: IMG.xoanPerdona, pj: null, texto: 'Perdona… te confundí con…', espera: .2 },
+            { id: 't4_003', quien: 'XOAN', img: IMG.xoanPerdona, pj: null, texto: 'Ah, perdona. Pensaba que eras…', espera: .2 },
             { id: 't4_004', quien: 'NOA', img: IMG.noaSospecha, pj: null, texto: '…Iria se llama mi madre. Espera un momento… ¿Cómo te llamas tú?', espera: .5 },
             { id: 't4_005', quien: 'XOAN', img: IMG.xoanSonrie, pj: null, texto: 'Xoán.', espera: 1.2 },
             { id: 't4_006', quien: 'NARRADOR', img: IMG.dos, imgs: [{ t: 0, img: IMG.dos, vid: 'vid/reencuentro.mp4', vidUnaVez: true }], mus: MUS.tema,
