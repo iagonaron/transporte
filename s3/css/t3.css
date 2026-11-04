@@ -409,3 +409,7 @@ body.golpe-final #cartel .continuara{transition:opacity .18s ease-out}
 /* (4-nov, «vida» de T3) el lienzo de la vida, con mezcla NORMAL: con «screen» el compositor tenía que fundir toda la pantalla en cada
    fotograma y en el aula (Chrome 94, equipo modesto) bajaba de 30 fps; los halos ya llevan su propia transparencia */
 #vida{mix-blend-mode:normal}
+
+/* (Iago 4-nov) planos de dron: corte directo, sin fundidos ni zoom de la lámina */
+#fondo.corte .lam,#fondo.corte .lam *{animation:none!important;transition:none!important}
+#fondo.corte .vfondo{transition:none!important}
