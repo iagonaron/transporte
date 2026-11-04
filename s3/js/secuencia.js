@@ -66,7 +66,13 @@
       c.alMorir.push(() => acaba(false));
       /* 1 · dron (y el narrador) */
       const nD = P.dron.length;
-      P.dron.forEach((img, i) => en0(i * dShot, () => { ponCorte(img, V.dron && V.dron[i]); if (Mo.preparaVideo && V.dron) Mo.preparaVideo(V.dron[i + 1] || V.llegada); }));   /* (4-nov) el siguiente vídeo, ya cebado */
+      /* (Iago 4-nov 22:37, iPad) UN SOLO vídeo con los cortes ya hechos (vid/dron_montaje.mp4): un único decodificador, sin esperas entre planos.
+         Si a la hora de empezar aún no ha bajado, solo las láminas con corte directo (nada de vídeos a medias que se atascan). */
+      let montOk = false; if (V.montaje && Mo.fondoVideo && B.hayVideo(V.montaje)) B.precargaVideo(V.montaje).then(u => { montOk = !!u; });
+      P.dron.forEach((img, i) => en0(i * dShot, () => {
+        if (V.montaje) { if (i === 0) { ponCorte(img, null); if (montOk) Mo.fondoVideo(V.montaje, true); if (Mo.preparaVideo && V.llegada) Mo.preparaVideo(V.llegada); }
+          else if (!montOk || !Mo.hayFondoVideo || !Mo.hayFondoVideo()) ponCorte(img, null); return; }
+        ponCorte(img, V.dron && V.dron[i]); if (Mo.preparaVideo && V.dron) Mo.preparaVideo(V.dron[i + 1] || V.llegada); }));
       B.ambiente(cfg.amb.dron);
       en0(1.2, () => Mo.di(Object.assign({ auto: .2 }, L.narr), c).then(() => { if (!fin) Mo.calla(); }));
       /* 2 · la sala */

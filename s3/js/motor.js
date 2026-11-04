@@ -111,16 +111,16 @@
   const VLISTO = {};
   M.preparaVideo = function (src) {
     if (!src || VLISTO[src] || src === vfondoSrc || !B.hayVideo(src)) return;
-    const ks = Object.keys(VLISTO); if (ks.length >= 2) { const k = ks[0], o = VLISTO[k]; delete VLISTO[k]; if (o.v) { try { o.v.pause(); } catch (e) { } o.v.remove(); } }
+    const ks = Object.keys(VLISTO); if (ks.length >= 1) {   /* (4-nov 22:37) iPad: como mucho UN vídeo cebado a la vez */ const k = ks[0], o = VLISTO[k]; delete VLISTO[k]; const vv = o.v || o.el; if (vv) { try { vv.pause(); } catch (e) { } vv.remove(); } }
     const o = VLISTO[src] = { v: null };
     B.precargaVideo(src).then(url => {
       if (!url || VLISTO[src] !== o) return;
       const v = B.el('video', 'vfondo vcebo'); v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = url;
       v.style.cssText = 'opacity:0;pointer-events:none';
-      document.body.appendChild(v);
-      const pr = v.play(); const para = () => { try { v.pause(); v.currentTime = 0; } catch (e) { } };
+      document.body.appendChild(v); o.el = v;
+      /* se arranca un instante (para que decodifique) y se para en el fotograma 0; solo entonces queda disponible */
+      const pr = v.play(); const para = () => { if (VLISTO[src] !== o) return; try { v.pause(); v.currentTime = 0; } catch (e) { } o.v = v; };
       if (pr && pr.then) pr.then(para).catch(para); else para();
-      o.v = v;
     });
   };
   function fondoVideo(src, unaVez) {
@@ -420,7 +420,7 @@
     }
     montaPlano(p);
     const ls = B.arr(p.lineas);
-    vidsDe(p).concat(vidsDe(sigPlano(p) || {})).slice(0, 2).forEach(M.preparaVideo);   // los de este plano y, si cabe, los del siguiente
+    vidsDe(p).concat(vidsDe(sigPlano(p) || {})).slice(0, 1).forEach(M.preparaVideo);   // los de este plano y, si cabe, los del siguiente
     B.arr(p.imgs).concat(ls.concat(B.arr(p.despues)).reduce((a, l) => a.concat(l.img ? [{ img: l.img }] : [], B.arr(l.imgs)), [])).forEach(x => M.predecod(x.img));
     let paso = ls.length ? (p.antes ? (caja(false), B.espera(RAPIDO ? .1 : p.antes, c).then(ok => ok ? (caja(true), lineas(ls, c)) : false)) : (caja(true), lineas(ls, c)))
       : (caja(false), B.espera(RAPIDO ? .3 : (p.auto || 0), c));
@@ -473,6 +473,7 @@
     escena(i, k || 0);
   }
   M.salta = salta;
+  M.hayFondoVideo = () => !!vfondo;
   M.fondoVideo = fondoVideo;   // (T3) la secuencia cinemática pone sus vídeos de dron
   M.escena = escena;
   M.actual = () => escIdx;
