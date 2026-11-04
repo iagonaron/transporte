@@ -81,6 +81,9 @@
       { src: T1('lab_registro'), vida: [{ tipo: 'parpadeo', zona: [.36, .14, .6, .52], color: '#9fe4ff' }, { tipo: 'traza', zona: [.40, .62, .52, .025], periodo: .17 }] }),
     labNoa: O(I2('lab_noa_brazos', 'Noa a la izquierda, brazos cruzados, desafiante, mirando a Amaro', { ocultaPj: ['NOA'], vida: POLVO('#cfe8ff') }),
       { src: T1('lab_centro'), vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 3 }].concat(POLVO('#cfe8ff')) }),
+    /* (Iago 4-nov) t2_013 con OTRO gesto (no repetir lab_noa_brazos): mientras no exista la lámina, laboratorio vacío + pose */
+    labNoaPadre: O(I2('lab_noa_padre', 'Noa, seria y tierna, apela a su padre: mira de reojo la foto de Xoán en la pared del laboratorio, una mano sobre el cuaderno; nada de brazos cruzados ni de encogerse de hombros', { ocultaPj: ['NOA'], vida: POLVO('#cfe8ff') }),
+      { src: T1('lab_centro'), vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 3 }].concat(POLVO('#cfe8ff')) }),
     labDos: O(I2('lab_dos', 'Plano a dos: Noa a la izquierda, Amaro a la derecha, el Transportador entre ellas', { ocultaPj: ['NOA', 'AMARO'], vida: [{ tipo: 'anillos', zona: [.38, .05, .3, .6], n: 3 }].concat(POLVO('#cfe8ff')) }),
       { src: T1('lab_centro'), vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 3 }].concat(POLVO('#cfe8ff')) }),
     labCuaderno: I2('lab_cuaderno', 'Noa saca a escondidas el cuaderno de su padre; Amaro de espaldas en la consola', { ocultaPj: ['NOA', 'AMARO'], vida: POLVO('#cfe8ff') }),
@@ -270,7 +273,7 @@
               texto: 'He revisado el registro línea por línea… y he encontrado esto. Un módulo que no aparece en ningún plano. ¿Lo pusiste tú?', claves: { claves: ['Un módulo que no está en los planos'], ens: [.58], pos: 'izq' } },
             { id: 't2_011', quien: 'NOA', img: IMG.labNoa, pj: { q: 'NOA', pose: 'traviesa' }, texto: '¿Eso? Ni idea. No lo había visto en mi vida.', espera: .6 },
             { id: 't2_012', quien: 'AMARO', img: IMG.labDos, pj: { q: 'AMARO', pose: 'alarma' }, texto: 'Ya, claro. Ayer viajaste cuarenta mil años atrás. ¿Sabes lo peligroso que es eso?', claves: { claves: ['−40 000 años'], ens: [.35], pos: 'arriba' } },
-            { id: 't2_013', quien: 'NOA', img: IMG.labNoa, pj: { q: 'NOA', pose: 'neutra' }, texto: 'Por eso hoy no iremos tan atrás. Solo un poco. Mi padre no se habría rendido a la primera, ¿verdad?' },
+            { id: 't2_013', quien: 'NOA', img: IMG.labNoaPadre, pj: { q: 'NOA', pose: 'neutra' }, texto: 'Por eso hoy no iremos tan atrás. Solo un poco. Mi padre no se habría rendido a la primera, ¿verdad?' },
             { id: 't2_014', quien: 'AMARO', img: IMG.labDos, pj: { q: 'AMARO', pose: 'tableta' }, texto: 'Tu padre… Está bien. Unos siglos. Ni uno más.', espera: .5 }
           ] },
         /* mientras Amaro se gira a la consola, Noa abre a escondidas el cuaderno de su padre y teclea el destino en su pulsera */
