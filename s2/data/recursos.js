@@ -241,6 +241,7 @@ TR.RECURSOS = {
 "img/t2/lab_cuaderno.webp": 211620,
 "img/t2/lab_dos.webp": 361662,
 "img/t2/lab_noa_brazos.webp": 176990,
+"img/t2/lab_noa_padre.webp": 271330,
 "img/t2/lab_noa_sonrisa.webp": 195108,
 "img/t2/lab_noche_noa.webp": 144510,
 "img/t2/lab_registro_modulo.webp": 281700,
