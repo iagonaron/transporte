@@ -227,9 +227,8 @@
             { id: 't4_007', quien: 'NARRADOR', imgs: [{ en: .25, img: IMG.risas }, { en: .45, img: IMG.estuches }, { en: .6, img: IMG.xoanSerio }, { en: .85, img: FD(IMG.terrazaNoche, 1.4) }],
               claves: { claves: ['Horas después'], ts: [.2], pos: 'arriba' },
               texto: 'Pasaron la tarde en una terraza. Hablaron de todo: de música, de la ciudad, de la infancia de Noa, de su madre… y de por qué Noa estaba allí. Xoán tardó en creérselo. Pero al final se lo creyó.', espera: 1.4 }
-          ] },
-        /* (GUION) se intuye, sin decirlo, que Noa le cuenta que su madre está enferma: Xoán serio, escuchando, sin palabras */
-        { id: 'p2b', nombre: 'Xoán escucha', img: FD(IMG.xoanSerio, 1.2), amb: [AMB.terrazaBaja, AMB.gaviotasBaja], mus: MUS.terrazaBaja, pj: null, auto: 3.4 }
+          ] }
+        /* (Iago 4-nov 21:54) fuera el plano suelto «Xoán escucha» (p2b): sobraba; Xoán serio ya sale dentro de t4_007 */
       ] },
       /* 3 · Tocar en la calle, bajo los soportales */
       { id: 'e3', titulo: 'Bajo los soportales', planos: [
