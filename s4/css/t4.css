@@ -147,3 +147,13 @@
 .tdif-c b.sos{color:#ffd59a}.tdif-c b.bem{color:#9ff0ff}.tdif-c b{color:var(--ambar);font-weight:600}
 .tdif-c svg{vertical-align:middle}
 .tdif-acc{font:600 30px var(--f-ui);color:var(--ambar)}
+
+/* (Iago 4-nov 22:00) letrero fugaz «Las notas afectadas son…» sobre la montaña */
+.mt-afect{position:absolute;left:50%;top:16%;transform:translateX(-50%);z-index:20;pointer-events:none;padding:14px 26px 12px;border:2px solid var(--cian);border-radius:6px;
+  background:rgba(8,16,30,.88);text-align:center;color:#eaf6ff;font-family:'Saira SC',sans-serif;animation:mtAf 4.2s ease forwards;box-shadow:0 0 22px rgba(99,230,255,.35)}
+.mt-afect.desc{border-color:#ffb547;box-shadow:0 0 22px rgba(255,181,71,.35)}
+.mt-afect small{display:block;font-size:15px;letter-spacing:.08em;opacity:.8}
+.mt-afect b{display:block;font-size:34px;letter-spacing:.06em;color:var(--cian);margin:2px 0}
+.mt-afect.desc b{color:#ffb547}
+.mt-afect i{display:block;font-style:normal;font-size:14px;opacity:.75}
+@keyframes mtAf{0%{opacity:0;transform:translateX(-50%) translateY(10px) scale(.96)}10%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}82%{opacity:1}100%{opacity:0}}
