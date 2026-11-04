@@ -36,7 +36,9 @@
         const t = B.ahora() - t0, k = Math.min(1, t / dur);
         if (vid) {
           const e = k < .12 ? 0 : k > .86 ? 1 : (1 - Math.cos(Math.PI * (k - .12) / .74)) / 2;
-          bAnio.textContent = fmt(deU(u(de) + (u(a) - u(de)) * e));
+          /* (T3, Iago 4-nov) o.misterio: el año de destino no se dice — los dígitos giran sin pararse y acaban en «????» */
+        if (o.misterio) { if (k > .82) { bAnio.textContent = '????'; cont.classList.add('misterio'); } else if (!dibuja._u || B.ahora() - dibuja._u > .055) { dibuja._u = B.ahora(); bAnio.textContent = String(1000 + Math.floor(Math.random() * 9000)); } }
+        else bAnio.textContent = fmt(deU(u(de) + (u(a) - u(de)) * e));
           const ent = Math.min(1, t / .6), sal = k > .88 ? (k - .88) / .12 : 0;
           fl.style.opacity = Math.max(.75 * (1 - ent), .85 * sal).toFixed(3);
           if (k >= 1) { vivo = false; try { vid.pause(); } catch (x) { } B.espera(.15, c).then(ok => res(ok)); return; }
@@ -66,7 +68,9 @@
         cx.fillStyle = g; cx.fillRect(0, 0, W, H);
         /* contador de años: logarítmico respecto al presente, con un poco de inercia al final */
         const e = k < .12 ? 0 : k > .86 ? 1 : (1 - Math.cos(Math.PI * (k - .12) / .74)) / 2;
-        bAnio.textContent = fmt(deU(u(de) + (u(a) - u(de)) * e));
+        /* (T3, Iago 4-nov) o.misterio: el año de destino no se dice — los dígitos giran sin pararse y acaban en «????» */
+        if (o.misterio) { if (k > .82) { bAnio.textContent = '????'; cont.classList.add('misterio'); } else if (!dibuja._u || B.ahora() - dibuja._u > .055) { dibuja._u = B.ahora(); bAnio.textContent = String(1000 + Math.floor(Math.random() * 9000)); } }
+        else bAnio.textContent = fmt(deU(u(de) + (u(a) - u(de)) * e));
         /* destello de llegada */
         if (k > .9) { cx.fillStyle = 'rgba(255,255,255,' + ((k - .9) / .1 * .9).toFixed(3) + ')'; cx.fillRect(0, 0, W, H); }
         if (k >= 1) { vivo = false; B.espera(.15, c).then(ok => res(ok)); return; }

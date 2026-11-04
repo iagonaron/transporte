@@ -107,7 +107,18 @@
     if (!o) return;
     avisoEl = B.el('div', 'tr-aviso' + (o.tipo ? ' ' + o.tipo : ''));
     avisoEl.innerHTML = '<i></i><b>' + B.esc(o.de || '') + '</b>' + (o.txt ? '<span>' + B.esc(o.txt) + '</span>' : '');
+    /* (T3, Iago 4-nov) notificación con botones (Responder · Posponer): C.pospone() hace que el dedo de Noa la aparte */
+    if (o.botones) avisoEl.insertAdjacentHTML('beforeend', '<div class="av-bot"><em class="av-resp">Responder</em><em class="av-posp"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 9v4.5l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 4l3-2M19 4l-3-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Posponer</em></div><u class="av-dedo"></u><strong class="av-pospuesto">Pospuesto · 1 h</strong>');
     capa.appendChild(avisoEl);
+  };
+  /* el dedo pulsa «Posponer» (clic suave), la notificación se pliega hacia un lado con «Pospuesto · 1 h» y desaparece (~2,5 s en total) */
+  C.pospone = function (c) {
+    const a = avisoEl; if (!a || !a.querySelector('.av-posp')) return;
+    a.classList.add('dedo');
+    B.espera(.4, c).then(ok => { if (!ok || !a.isConnected) return; a.classList.add('pulsa'); B.sfx('../s1/sfx/sfx_ui_clic.mp3', .9); return B.espera(.45, c); })
+      .then(ok => { if (!ok || !a.isConnected) return; a.classList.add('pospuesta'); return B.espera(1.05, c); })
+      .then(ok => { if (!ok || !a.isConnected) return; a.classList.add('sale'); return B.espera(.6, c); })
+      .then(ok => { if (ok && a.isConnected && a === avisoEl) C.aviso(null); });
   };
 
   /* ── lo llama el motor ── */
