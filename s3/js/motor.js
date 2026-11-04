@@ -122,7 +122,7 @@
 
   /* ── montar un plano ── */
   function montaPlano(p) {
-    $('escena').classList.toggle('con-inter', false); $('escena').classList.remove('piel-epoca');
+    $('escena').classList.toggle('con-inter', false); $('escena').classList.remove('piel-epoca', 'piel-teatro');
     const q = M.fondo(p.negro ? null : p.img, { nombre: p.nombre, desc: p.desc, funde: p.funde });
     fondoVideo(p.fondoVid);
     if (p.amb !== undefined) B.ambiente(p.amb);
@@ -275,7 +275,7 @@
       if (c) c.alMorir.push(() => res(false));
     });
   };
-  M.finInter = function () { M.barra(null); $('cartel').classList.remove('on'); $('inter').innerHTML = ''; $('inter').className = ''; $('escena').classList.remove('con-inter', 'piel-epoca'); };
+  M.finInter = function () { M.barra(null); $('cartel').classList.remove('on'); $('inter').innerHTML = ''; $('inter').className = ''; $('escena').classList.remove('con-inter', 'piel-epoca', 'piel-teatro'); };
 
   /* ══════════ VÍDEO ══════════ con «Cargando… %»; si falta, un marcador que dura lo previsto */
   /* al acabar un vídeo o un túnel no se quita la capa: se queda el último fotograma hasta que la lámina siguiente está pintada */

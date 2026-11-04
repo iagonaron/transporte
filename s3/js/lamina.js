@@ -137,4 +137,28 @@
       x[1].items.forEach((t, i) => { const it = el('div', 'bal-it', t); col.appendChild(it); const e = (x[1].ens || [])[i] || (i + 1); B.espera(e > 1 ? e : e * dur, c).then(ok => ok && it.classList.add('on')); });
     });
   };
+  /* (T3, Iago 4-nov) el atril del pianista: la A4 sobre el atril de la imagen de fondo y el lápiz de la repisa.
+     Las anotaciones van a su tiempo con la voz (sucesos «al» de la frase en data/t3.js): TR.lamina.anota(que, c), en cola. */
+  L.atril = function (box, s, c) {
+    const h = B.t3.hoja(box, { can: B.t3.cancion(), marcas: null });
+    const lp = B.t3.lapices(box, h, { interactivo: false });
+    L._atril = { h: h, lp: lp, box: box, cola: Promise.resolve() };
+  };
+  L.anota = function (que, c) {
+    const A = L._atril; if (!A || !A.box.isConnected) return Promise.resolve();
+    const h = A.h, n = h.sistemas.length, an = { anima: true, c: c };
+    const todos = (tipo, o) => { let p = h.dibuja(tipo, 0, Object.assign({}, an, o)); for (let i = 1; i < n; i++) { const j = i; p = p.then(() => h.dibuja(tipo, j, Object.assign({}, an, o, { dur: .3 }))); } return p; };
+    const hazlo = () => {
+      if (c && c.muerto) return;
+      if (que === 'texto') return h.dibuja('texto', 0, an);
+      if (que === 'arm') return todos('arm', { dur: .8 });
+      if (que === 'sol') return todos('sol', { dur: .7 });
+      if (que === 'do') { let p = h.dibuja('do', 0, an); for (let i = 1; i < n; i++) { const j = i; p = p.then(() => h.dibuja('do', j, { anima: false })); } return p; }
+      if (que === 'lee') return h.dibuja('lee', 0, an).then(() => h.dibuja('lee', 1, an));
+      if (que === 'nombres') return h.dibuja('nombres', 0, an).then(() => h.dibuja('nombres', 1, an));
+      if (que === 'dibujo') return h.dibuja('dibujo', 0, { anima: true, c: c, dur: .7 }).then(() => h.dibuja('dibujo', 1, { anima: true, c: c, dur: .7 }));
+    };
+    A.cola = A.cola.then(hazlo, hazlo);
+    return A.cola;
+  };
 })(window.TR);

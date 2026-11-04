@@ -16,10 +16,10 @@
   const btn = (txt, cls, fn) => { const b = el('button', cls || '', txt); b.type = 'button'; if (fn) b.addEventListener('click', ev => { ev.stopPropagation(); fn(b); }); return b; };
 
   const INST = [
-    { n: 'Clarinete', af: 'en Si♭', su: 'Si♭ · una 2.ª M más grave' },
-    { n: 'Trompa', af: 'en Fa', su: 'Fa · una 5.ª J más grave' },
-    { n: 'Saxofón alto', af: 'en Mi♭', su: 'Mi♭ · una 6.ª M más grave' },
-    { n: 'Oboe', af: 'en Do', su: 'Do · lo mismo que lee' }
+    { n: 'Clarinete', af: 'en Si♭', su: 'Una 2.ª mayor más grave' },
+    { n: 'Trompa', af: 'en Fa', su: 'Una 5.ª justa más grave' },
+    { n: 'Saxofón alto', af: 'en Mi♭', su: 'Una 6.ª mayor más grave' },
+    { n: 'Oboe', af: 'en Do', su: 'Suena lo mismo' }
   ];
   const TEST = [
     { q: 'Transportas por escrito una melodía de <b>Sol M</b> una <b>2.ª M descendente</b>. ¿Tonalidad nueva y armadura?',
@@ -97,6 +97,19 @@
     let cuerpo = el('div', 'rp-cuerpo'); con.appendChild(cuerpo);
     /* cada prueba en un cuerpo NUEVO (los oyentes de las fichas no se acumulan de una prueba a otra) */
     const limpia = cls => { const n = el('div', 'rp-cuerpo ' + cls); con.replaceChild(n, cuerpo); cuerpo = n; };
+    /* (Iago 4-nov) transición de la consola entre preguntas y entre pruebas: barrido/glitch cian (~0,4 s), el contenido nuevo
+       entra deslizándose y suena un «bip-swoosh» suave (sfx/sfx_t3_transicion.mp3; si falta, el clic de interfaz). Con
+       prefers-reduced-motion, solo un fundido corto (CSS). La primera prueba entra sin transición. */
+    const SFX_TR = 'sfx/sfx_t3_transicion.mp3';
+    let primera = true;
+    const transicion = (nodo, grande) => {
+      if (primera) { primera = false; return; }
+      if (B.buf[SFX_TR]) B.sfx(SFX_TR, grande ? .55 : .42); else V().ui('clic');
+      con.classList.remove('rp-glitch', 'rp-glitch-g'); void con.offsetWidth; con.classList.add(grande ? 'rp-glitch-g' : 'rp-glitch');
+      setTimeout(() => con.classList.remove('rp-glitch', 'rp-glitch-g'), 700);
+      const entra = nodo || cuerpo; entra.classList.remove('rp-entra'); void entra.offsetWidth; entra.classList.add('rp-entra');
+    };
+    B._repaso_tr = transicion;
     const nota = el('div', 'rp-nota'); con.appendChild(nota);
     const pinta = () => {
       const v = Math.round(hechos / TOTAL * 100);
@@ -111,7 +124,7 @@
 
     /* ══ 1 · instrumentos ══ */
     function unir() {
-      limpia('f-unir');
+      limpia('f-unir'); transicion(null, true);
       const tabla = el('div', 'rp-tabla'); cuerpo.appendChild(tabla);
       tabla.appendChild(el('div', 'rp-th', 'Instrumento')); tabla.appendChild(el('div', 'rp-th', 'Afinación')); tabla.appendChild(el('div', 'rp-th', 'Cuando lee <b>Do</b>, suena…'));
       INST.forEach((x, i) => {
@@ -134,7 +147,7 @@
           V().ui('mal'); h.classList.add('mal'); setTimeout(() => h.classList.remove('mal'), 520); f.classList.add('vuelve'); setTimeout(() => f.classList.remove('vuelve'), 420);
           const k = f.dataset.k.slice(0, 2), ins = INST[+h.dataset.k.slice(2)];
           if (k !== h.dataset.k.slice(0, 2)) dice('Esa ficha va en la otra columna.', 'mal');
-          else dice(k === 'af' ? 'No es esa. Piensa: ¿en qué afinación está el <b>' + ins.n.toLowerCase() + '</b>?' : 'Cuando lee Do, suena la nota de su afinación: ¿cuál es la del <b>' + ins.n.toLowerCase() + '</b>?', 'mal');
+          else dice(k === 'af' ? 'No es esa. Piensa: ¿en qué afinación está el <b>' + ins.n.toLowerCase() + '</b>?' : 'Piensa en la afinación del <b>' + ins.n.toLowerCase() + '</b>: ¿a qué distancia de Do queda, y hacia dónde?', 'mal');
         }
       });
       dice('');
@@ -142,12 +155,13 @@
     }
     /* ══ 2 · transporte escrito: cuatro preguntas ══ */
     function test() {
-      limpia('f-test');
+      limpia('f-test'); transicion(null, true);
       let k = 0;
       const caja = el('div', 'rp-preg'); cuerpo.appendChild(caja);
       function monta() {
         const q = TEST[k], orden = baraja(q.ops.map((t, i) => i));
         caja.innerHTML = '<small>Pregunta ' + (k + 1) + ' de ' + TEST.length + '</small><p>' + q.q + '</p>';
+        if (k > 0) transicion(caja, false);
         const ops = el('div', 'rp-ops'); caja.appendChild(ops);
         let resuelta = false;
         orden.forEach(i => {
@@ -166,7 +180,7 @@
     }
     /* ══ 3 · ventajas y desventajas del transporte escrito ══ */
     function ventajas() {
-      limpia('f-vd');
+      limpia('f-vd'); transicion(null, true);
       cuerpo.appendChild(el('div', 'rp-sub', 'Transporte <b>escrito</b>: ¿ventaja o desventaja?'));
       const cols = el('div', 'rp-cols'); cuerpo.appendChild(cols);
       const hv = el('div', 'rp-hueco col v', '<b class="rp-ct">Ventajas</b>'); hv.dataset.k = 'v';
@@ -191,7 +205,7 @@
     /* ══ final: 100 % ══ */
     function final() {
       fin = true; accion = null; fase = 3; pinta();
-      limpia('f-fin');
+      limpia('f-fin'); transicion(null, true);
       const f = el('div', 'rp-final', '<small>Calibración de Noa</small><b>100 %</b><span>Transporte escrito e instrumentos transpositores: todo en su sitio.</span>');
       cuerpo.appendChild(f); con.classList.add('completa'); nota.className = 'rp-nota'; nota.innerHTML = '';
       B.sfx('../s1/sfx/sfx_anillo_encaja.mp3', .8); B.espera(.25, c).then(ok => ok && B.sfx('../s1/sfx/sfx_destello.mp3', .5));

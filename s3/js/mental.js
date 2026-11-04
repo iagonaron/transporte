@@ -77,18 +77,30 @@
     const est = ns.map(() => ({ hit: false, pasa: false, mal: 0 }));
     let bpos = -cuenta, ult = B.ahora(), vivo = true, congelado = false, raf = 0, ultPulso = -cuenta - 1, ultOnset = -1;
     const spb = 1 / bps;
-    function pulsoAudio(p) {   // claqueta de entrada y acompañamiento
-      if (p < 0) { tic(p === -cuenta); return; }
-      const comp = Math.floor(p / cuenta), pu = p - comp * cuenta, a = o.acorde ? o.acorde(comp, pu) : null;
+    /* (Iago 4-nov) METRÓNOMO: un compás de entrada siempre (con la cuenta visible, o.alPulso) y, a tempo (no en el lento, que
+       espera), el clic sigue mientras se toca si está encendido (o.metro()). El acompañamiento se apaga con un fundido en el último compás. */
+    const ultComp = Math.ceil(total / cuenta) - 1;
+    function pulsoAudio(p) {
+      if (p < 0) { tic(p === -cuenta); if (o.alPulso) o.alPulso(p + cuenta, true); return; }
+      const comp = Math.floor(p / cuenta), pu = p - comp * cuenta;
+      if (!o.espera) { if (o.metro && o.metro()) tic(pu === 0); if (o.alPulso) o.alPulso(pu, false); }
+      const a = o.acorde ? o.acorde(comp, pu) : null;
       if (!a) return;
       const t = C.currentTime + .005;
+      if (comp >= ultComp) { if (pu === 0) { T3.piano(a.bajo, t, spb * cuenta * 1.5, .19); T3.acorde(a.notas, t + spb, spb * cuenta * 1.1, .12); } return; }   // último compás: se deja sonar y se apaga
       if (pu === 0) T3.piano(a.bajo, t, spb * cuenta * .9, .22);   // vals: el bajo en la 1.ª parte, el acorde en la 2.ª y la 3.ª
       else T3.acorde(a.notas, t, spb * .8, .16);
     }
+    /* clic de claves (madera): golpe resonante muy corto; el primer tiempo, más agudo y más fuerte */
     function tic(fuerte) {
-      try { const t = C.currentTime + .005, os = C.createOscillator(), g = C.createGain(); os.type = 'triangle'; os.frequency.value = fuerte ? 1760 : 1320;
-        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(fuerte ? .12 : .08, t + .003); g.gain.exponentialRampToValueAtTime(.0005, t + .07);
-        os.connect(g); g.connect(B.bus.ui); os.start(t); os.stop(t + .09); } catch (e) { }
+      try {
+        const t = C.currentTime + .005, f = fuerte ? 2650 : 2050, os = C.createOscillator(), g = C.createGain(), bp = C.createBiquadFilter();
+        os.type = 'sine'; os.frequency.setValueAtTime(f * 1.04, t); os.frequency.exponentialRampToValueAtTime(f, t + .02);
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(fuerte ? .34 : .22, t + .0015); g.gain.exponentialRampToValueAtTime(.0004, t + (fuerte ? .085 : .06));
+        os.connect(g); g.connect(B.bus.ui); os.start(t); os.stop(t + .1);
+        const r = B.ruido(), rg = C.createGain(); bp.type = 'bandpass'; bp.frequency.value = f * 1.6; bp.Q.value = 3;
+        rg.gain.setValueAtTime(fuerte ? .22 : .14, t); rg.gain.exponentialRampToValueAtTime(.0004, t + .018); r.connect(bp); bp.connect(rg); rg.connect(B.bus.ui); r.start(t); r.stop(t + .03);
+      } catch (e) { }
     }
     const ventana = i => { const n = ns[i], prev = ns[i - 1], e = Math.min(.35, prev ? prev.beats * .45 : .35); return [n.t - e, n.t + n.beats]; };
     function bucle() {
@@ -177,21 +189,24 @@
 
   /* ════════ claves: leer en clave de do en 4.ª ════════ */
   I.claves = function (cfg, c) {
-    const p = B.$('#inter'); p.innerHTML = ''; p.className = 'on i-mental i-claves';
+    /* (Iago 4-nov) en el atril: la A4 con las marcas a lápiz del alumno (T3.marcas), sin clave fantasma */
+    const p = B.$('#inter'); T3.prepAtril(p, 'i-mental i-claves');
     const can = T3.cancion(), rg = cfg.compases || [0, 3], notas = trozo(can, rg[0], rg[1]);
-    const cab = el('div', 'mt-cab'); p.appendChild(cab);
-    cab.appendChild(el('div', 'mt-lado', '<small>Lo que está escrito</small><b>Clave de sol · Re M</b>'));
+    const hoja = T3.hoja(p, { can: can, marcas: 'alumno' });
+    const cab = el('div', 'at-panel izq'); p.appendChild(cab);
+    cab.appendChild(el('div', 'mt-lado', '<small>Lo que está impreso</small><b>Clave de sol · Re M</b>'));
+    cab.appendChild(el('div', 'mt-lado', '<small>Lo que lees, con tus marcas</small><b class="cian">Clave de do en 4.ª · Do M</b><small>y suena una 8.ª más arriba</small>'));
     const prog = el('div', 'mt-prog'); cab.appendChild(prog);
-    cab.appendChild(el('div', 'mt-lado der', '<small>Lo que lees</small><b class="cian">Clave de do en 4.ª · Do M · +8.ª</b>'));
-    const v = vista(p, notas, { fifths: can.fifths, num: can.num, den: can.den, porSistema: 4, porPagina: 4, fantasma: true, etiquetas: true, ancho: 860, alto: 120, y: 22 });
-    const msg = el('div', 'mt-msg'); p.appendChild(msg);
+    const v = T3.vistaAtril(hoja, notas);
+    const der = el('div', 'at-panel der'); p.appendChild(der);
+    const msg = el('div', 'at-msg'); der.appendChild(msg);
     const tw = el('div', 'mt-tw'); p.appendChild(tw);
     let k = Math.min(cfg.ejemplo || 0, notas.length), fallos = 0, listo = false, sigue = null;
     const objetivo = n => { const t = T3.enTenor(n); return t.midi; };
     const pintaProg = () => { prog.innerHTML = notas.map((n, i) => '<i class="' + (i < k ? 'ya' : i === k ? 'act' : '') + '"></i>').join(''); };
     /* la del ejemplo (la primera), resuelta */
     for (let i = 0; i < k; i++) { const t = T3.enTenor(notas[i]); v.marca(notas[i].i, 'n-ok'); v.etiqueta(notas[i].i, '<s>' + T3.nombre(notas[i].l, notas[i].a) + '</s><b>' + T3.NOM[t.l] + '</b>', 'ok'); }
-    const di = (t, cls) => { msg.className = 'mt-msg on' + (cls ? ' ' + cls : ''); msg.innerHTML = t; };
+    const di = (t, cls) => { msg.className = 'at-msg on' + (cls ? ' ' + cls : ''); msg.innerHTML = t; };
     function marcaAct() {
       pintaProg();
       if (k >= notas.length) return;
@@ -227,8 +242,45 @@
     }));
   };
 
+  /* ════════ metrónomo visual: un punto que late y la cuenta de entrada «1 · 2 · 3»; botón para silenciarlo (encendido) ════════ */
+  function metronomo(host, num) {
+    const w = el('div', 'mt-metro'); host.appendChild(w);
+    const pt = el('i', 'mt-punto'); w.appendChild(pt);
+    const cu = el('div', 'mt-cuenta'); w.appendChild(cu);
+    let on = true;
+    const b = btn('', 'mt-guia mt-bmetro', () => { on = !on; pinta(); }, 'Metrónomo');
+    const pinta = () => { b.innerHTML = '<i></i>Metrónomo · ' + (on ? 'sí' : 'no'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); };
+    pinta();
+    let nn = num || 3; const num_ = () => nn;
+    const cuenta = (n, k) => { cu.innerHTML = []
+      .concat(Array.apply(null, Array(n)).map((_, i) => '<span class="' + (i < k ? 'ya' : '') + (i === k - 1 ? ' act' : '') + '">' + (i + 1) + '</span>')).join('<em>·</em>'); };
+    return {
+      el: w, boton: b, on: () => on,
+      pulso(pu, entrada) {
+        pt.classList.remove('late', 'fuerte'); void pt.offsetWidth; pt.classList.add('late'); if (pu === 0 || (entrada && pu === 1)) pt.classList.add('fuerte');
+        if (entrada) { w.classList.add('entrada'); cuenta(num_(), pu); if (pu >= num_()) setTimeout(() => w.classList.remove('entrada'), 380); }
+        else w.classList.remove('entrada');
+      },
+      reinicia() { w.classList.remove('entrada'); cu.innerHTML = ''; },
+      num(n) { nn = n || 3; }
+    };
+  }
+
   /* ════════ panel común del tiempo real (mental y mentalFinal) ════════ */
-  function panelReal(p, titIzq, titDer) {
+  function panelReal(p, titIzq, titDer, hoja) {
+    if (hoja) {   // (atril) paneles a los lados de la A4; la capa de «Empezar» y el resultado, encima de la hoja
+      const cab = el('div', 'at-panel izq'); p.appendChild(cab);
+      const izq = el('div', 'mt-lado', titIzq); cab.appendChild(izq);
+      const der = el('div', 'mt-lado', titDer); cab.appendChild(der);
+      const chips = el('div', 'mt-chips'); cab.appendChild(chips);
+      const pd = el('div', 'at-panel der'); p.appendChild(pd);
+      const msg = el('div', 'at-msg'); pd.appendChild(msg);
+      const tw = el('div', 'mt-tw'); p.appendChild(tw);
+      const capa = el('div', 'mt-capa'); p.appendChild(capa); const r = hoja.rect();
+      capa.style.cssText = 'left:' + r.x + 'px;top:' + r.y + 'px;width:' + r.w + 'px;height:' + r.h + 'px;transform:none';
+      return { cab: cab, izq: izq, der: der, chips: chips, zona: null, msg: msg, tw: tw, capa: capa,
+        di(t, cls) { msg.className = 'at-msg on' + (cls ? ' ' + cls : ''); msg.innerHTML = t; } };
+    }
     const cab = el('div', 'mt-cab'); p.appendChild(cab);
     const izq = el('div', 'mt-lado', titIzq); cab.appendChild(izq);
     const chips = el('div', 'mt-chips'); cab.appendChild(chips);
@@ -243,9 +295,12 @@
 
   /* ════════ mental: tiempo real con la canción ════════ */
   I.mental = function (cfg, c) {
-    const p = B.$('#inter'); p.innerHTML = ''; p.className = 'on i-mental i-real';
-    const can = T3.cancion(), TEMPOS = cfg.tempos || [{ nombre: 'Lento', bpm: 50, compases: [0, 8], espera: true, guia: true }, { nombre: 'Medio', bpm: 66, compases: [0, 16] }, { nombre: 'De concierto', bpm: 80, compases: [0, 16] }];
-    const P = panelReal(p, '<small>Partitura original</small><b>Re M · 2♯</b>', '<small>Tú tocas · una 2.ª M ↓</small><b class="cian">Do M · sin alteraciones</b>');
+    /* (Iago 4-nov) en el atril, con las marcas del alumno; solo los 8 primeros compases (lo que cabe en la hoja): ahí acaba */
+    const p = B.$('#inter'); T3.prepAtril(p, 'i-mental i-real');
+    const can = T3.cancion(), TEMPOS = (cfg.tempos || [{ nombre: 'Lento', bpm: 50, espera: true, guia: true }, { nombre: 'Medio', bpm: 66 }, { nombre: 'De concierto', bpm: 80 }]).map(x => Object.assign({}, x, { compases: [0, 8] }));
+    const hoja = T3.hoja(p, { can: can, marcas: 'alumno' });
+    const P = panelReal(p, '<small>Partitura impresa</small><b>Re M · 2♯</b>', '<small>Tú tocas · una 2.ª M ↓</small><b class="cian">Do M · sin alteraciones</b>', hoja);
+    const MT = metronomo(P.cab, can.num);
     let k = 0, ej = null, v = null, tec = null, guia = true, listo = false, sigue = null;
     const res = TEMPOS.map(() => null);
     const bGuia = btn('', 'mt-guia', () => { guia = !guia; pintaGuia(); }, 'Voz guía: canta la nota que tienes que tocar');
@@ -255,11 +310,11 @@
     function chips() {
       P.chips.innerHTML = '';
       TEMPOS.forEach((x, i) => { const d = el('div', 'mt-chip' + (i === k ? ' act' : '') + (res[i] ? ' ya' : ''), '<b>' + x.nombre + '</b><small>negra = ' + x.bpm + (res[i] ? ' · ' + res[i].ok + '/' + res[i].total : '') + '</small>'); P.chips.appendChild(d); });
-      P.chips.appendChild(bGuia);
+      P.chips.appendChild(bGuia); P.chips.appendChild(MT.boton);
     }
     function monta(i) {
-      const tp = TEMPOS[i], rg = tp.compases || [0, 16], ns = trozo(can, rg[0], rg[1]);
-      P.zona.innerHTML = ''; v = vista(P.zona, ns, { fifths: can.fifths, num: can.num, den: can.den, porSistema: 4, porPagina: 8 });
+      const tp = TEMPOS[i], rg = tp.compases || [0, 8], ns = trozo(can, rg[0], rg[1]);
+      v = T3.vistaAtril(hoja, ns); MT.reinicia();
       return ns;
     }
     function empieza(i) {
@@ -277,6 +332,7 @@
       const tp = TEMPOS[k]; let ok = 0;
       M().barraTexto(cfg.cartelCorto || '');
       ej = ejecutor({ notas: ns, objetivo: n => n.midi - 2, bpm: tp.bpm, espera: !!tp.espera, guia: () => guia, num: can.num, acorde: acompana(can, rg[0]), v: v, c: c,
+        metro: MT.on, alPulso: MT.pulso,
         alEstado: (n, e, x) => {
           if (e === 'ok') { ok++; P.di('<b>' + nomM(n.midi - 2, 0) + '</b> ✓ · aciertos: <b>' + ok + '</b>', 'ok'); }
           else if (e === 'mal') P.di('Esa era <b>' + nomM(x.m, 0) + '</b>; aquí va <b>' + nomM(x.mo, 0) + '</b> (lo escrito, ' + T3.nombre(n.l, n.a) + ', una 2.ª M más grave). ¡Sigue!', 'mal');
@@ -284,7 +340,7 @@
         },
         alFin: r => { res[k] = r; ej = null; chips(); fin(r); } });
       B._mental.ej = ej;
-      P.di('Escucha la entrada (un compás) y… <b>¡toca!</b>');
+      P.di('Escucha el compás de entrada (<b>1 · 2 · 3</b>) y… <b>¡toca!</b>');
     }
     function fin(r) {
       const pc = Math.round(r.ok / Math.max(1, r.total) * 100);
@@ -354,6 +410,7 @@
   I.mentalFinal = function (cfg, c) {
     const p = B.$('#inter'); p.innerHTML = ''; p.className = 'on i-mental i-real i-final';
     const P = panelReal(p, '', '');
+    const MT = metronomo(P.zona.parentNode, 3); MT.el.classList.add('en-final');
     let k = 0, ej = null, v = null, guia = false, sigue = null, ex = null, listo = false;
     const notasF = [];
     const bGuia = btn('', 'mt-guia', () => { guia = !guia; pintaGuia(); }, 'Voz guía: canta la nota que tienes que tocar');
@@ -364,7 +421,7 @@
     function chips() {
       P.chips.innerHTML = '';
       NIV.forEach((x, i) => { const d = el('div', 'mt-chip' + (i === k ? ' act' : '') + (notasF[i] != null ? ' ya' : ''), '<b>' + (i + 1) + '</b><small>' + (notasF[i] != null ? Math.round(notasF[i] * 100) + ' %' : x.espera ? 'te espera' : 'a tempo') + '</small>'); P.chips.appendChild(d); });
-      P.chips.appendChild(bGuia);
+      P.chips.appendChild(bGuia); P.chips.appendChild(MT.boton);
     }
     function monta() {
       if (ej) ej.para(); bSig.style.display = 'none';
@@ -385,7 +442,8 @@
     function arranca(ns, semis) {
       P.capa.className = 'mt-capa'; P.capa.innerHTML = '';
       const nv = NIV[k]; let ok = 0;
-      ej = ejecutor({ notas: ns, objetivo: n => n.midi + semis, bpm: nv.bpm, espera: nv.espera, guia: () => guia, num: ex.compas.den === 8 ? 3 : ex.compas.num, acorde: null, v: v, c: c,
+      MT.num(ex.compas.den === 8 ? 3 : ex.compas.num); MT.reinicia();
+      ej = ejecutor({ notas: ns, objetivo: n => n.midi + semis, bpm: nv.bpm, espera: nv.espera, guia: () => guia, num: ex.compas.den === 8 ? 3 : ex.compas.num, acorde: null, v: v, c: c, metro: MT.on, alPulso: MT.pulso,
         alEstado: (n, e, x) => {
           if (e === 'ok') { ok++; P.di('<b>' + nomM(n.midi + semis, ex.destino.fifths) + '</b> ✓', 'ok'); }
           else if (e === 'mal') P.di('Esa era <b>' + nomM(x.m, ex.destino.fifths) + '</b>; aquí va <b>' + nomM(x.mo, ex.destino.fifths) + '</b>. ¡Sigue!', 'mal');
