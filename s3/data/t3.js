@@ -118,7 +118,7 @@
     pasilloCantante: I3('pasillo_cantante', 'Pasillo de bastidores: la cantante, con un ramo de flores, se acerca agradecida a Noa (Noa a la izquierda, de tres cuartos); la cantante mira hacia ella', { ocultaPj: ['NOA'], vida: POLVO() }),
     pasilloNoa: I3('pasillo_noa', 'Noa, primer plano, sonrisa tímida al decir su nombre; pasillo de bastidores con luz de trabajo; mira hacia la derecha', { ocultaPj: ['NOA'], vida: POLVO() }),
     pasilloRegidora: I3('pasillo_regidora', 'La regidora al fondo del pasillo, contrariada, señala a Noa con la carpeta; mira hacia la izquierda', { vida: POLVO() }),
-    escabulle: I3('pasillo_escabulle', 'Noa se escabulle por el pasillo hacia una puerta de servicio, mira atrás con media sonrisa; su pulsera se ilumina en cian', { ocultaPj: ['NOA'], vida: [{ tipo: 'parpadeo', zona: [.3, .45, .15, .15], color: '#9fe4ff' }] }),
+    escabulle: I3('pasillo_escabulle', 'Noa se escabulle por el pasillo hacia una puerta de servicio, mira atrás con media sonrisa; su pulsera se ilumina en cian', { ocultaPj: ['NOA'], vida: [{ tipo: 'parpadeo', zona: [.5, .43, .1, .1], color: '#9fe4ff' }] }),
     escenario: I3('escenario_vacio', 'El escenario del Rosalía vacío tras el recital: el piano de cola cerrado con la partitura en el atril, un solo foco encendido; CENTRO LIMPIO para las láminas', { vida: FOCO(.3, .2, .4, .5).concat(POLVO('#ffe2b8')) }),
     /* ── 5 · vuelta y bronca (laboratorio) ── */
     amaroSeria: O(I3('lab_amaro_seria', 'Amaro a la derecha, seria y fría, con la pantalla del registro abierta a su lado; mira a Noa (hacia la izquierda); laboratorio de noche', { ocultaPj: ['AMARO'], vida: LAB }),
