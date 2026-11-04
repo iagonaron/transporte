@@ -441,6 +441,7 @@
     escena(i, k || 0);
   }
   M.salta = salta;
+  M.fondoVideo = fondoVideo;   // (T3) la secuencia cinemática pone sus vídeos de dron
   M.escena = escena;
   M.actual = () => escIdx;
   function pintaPuntos() {

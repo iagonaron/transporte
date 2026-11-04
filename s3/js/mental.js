@@ -29,7 +29,7 @@
       for (let s0 = p * porP; s0 < Math.min(ncomp, (p + 1) * porP); s0 += porS) {
         const w = el('div', 'mt-sis'), h = el('div', 'mt-pe'); w.appendChild(h); caja.appendChild(w);
         const comps = []; for (let k = s0; k < Math.min(ncomp, s0 + porS); k++) comps.push(notas.filter(n => n.c === k));
-        const geo = T3.pinta(h, comps, { fifths: op.fifths, num: op.num, den: op.den, ancho: op.ancho || 1050, alto: op.alto || 115, y: op.y == null ? 12 : op.y, sinCompas: s0 > 0, final: s0 + porS >= ncomp, margen: op.fantasma ? 48 : null, ancho1: s0 > 0 ? 60 + Math.max(2, Math.abs(op.fifths || 0)) * 11 : null });
+        const geo = T3.pinta(h, comps, { fifths: op.fifths, num: op.num, den: op.den, ancho: op.ancho || 1050, alto: op.alto || 115, y: op.y == null ? 12 : op.y, sinCompas: s0 > 0, final: s0 + porS >= ncomp, margen: op.margen != null ? op.margen : (op.fantasma ? 48 : null), ancho1: s0 > 0 ? 60 + Math.max(2, Math.abs(op.fifths || 0)) * 11 : null });
         if (op.fantasma) { const h2 = el('div', 'mt-fan'); w.appendChild(h2); T3.fantasma(h2, geo, { tachaArm: op.fifths, armTxt: op.armTxt || 'Do M' }); }
         const cur = el('i', 'mt-cursor'); w.appendChild(cur);
         cur.style.top = ((geo.yTop - 22) / geo.H * 100) + '%'; cur.style.height = ((geo.yBot - geo.yTop + 44) / geo.H * 100) + '%';
@@ -65,7 +65,7 @@
       m.s.cur.style.left = (x / m.s.geo.W * 100) + '%'; m.s.cur.style.opacity = '1';
     }
     pagina(0);
-    return { pagina: pagina, marca: marca, cursor: cursor, etiqueta: etiqueta, apaga: () => sist.forEach(S => { S.cur.style.opacity = '0'; }), el: caja };
+    return { pagina: pagina, marca: marca, cursor: cursor, etiqueta: etiqueta, apaga: () => sist.forEach(S => { S.cur.style.opacity = '0'; }), el: caja, sistemas: () => sist };
   }
 
   /* ══════════ EJECUTOR en tiempo real ══════════
@@ -401,47 +401,163 @@
     }
   };
 
-  /* ════════ mentalFinal: ejercicio final opcional con el generador ════════ */
-  const NIV = [{ n: 1, bpm: 60, espera: true, verDestino: true, nombre: 'Melodía 1 · el cursor te espera' }, { n: 2, bpm: 56, espera: false, verDestino: false, nombre: 'Melodía 2 · a tempo' }, { n: 3, bpm: 60, espera: false, verDestino: false, nombre: 'Melodía 3 · a tempo' }];
+  /* ════════ mentalFinal: ejercicio final opcional con el generador (estética de consola) ════════
+     (Iago 4-nov) GUIADO en cada melodía, antes de tocar: 1 · ventana «¿A qué tonalidad transportas?» · 2 · «¿Qué armadura tiene?»
+     · 3 · tachar con un trazo de luz la armadura original · 4 · tachar la clave de sol y elegir la clave que ayuda (2.ª M ↓ → do en 4.ª;
+     2.ª M ↑ → do en 3.ª; en las dos se toca una 8.ª más arriba de lo que se lee) · 5 · compás de entrada, metrónomo y a tocar.
+     Para que el método por claves valga siempre, el generador se limita a 2.ªs mayores (↑ y ↓). Las marcas se quedan al repetir. */
+  const NIV = [{ n: 1, bpm: 60, espera: true, nombre: 'Melodía 1 · el cursor te espera' }, { n: 2, bpm: 56, espera: false, nombre: 'Melodía 2 · a tempo' }, { n: 3, bpm: 60, espera: false, nombre: 'Melodía 3 · a tempo' }];
   function genera(n) {
-    for (let i = 0; i < 60; i++) { const ex = B.escrito.generar(n); if (ex && !ex.notas.some(x => x.dur === '16')) return ex; }
+    for (let i = 0; i < 400; i++) { const ex = B.escrito.generar(n); if (ex && ex.transp.semis === 2 && ex.transp.dgrado === 1 && !ex.notas.some(x => x.dur === '16')) return ex; }
+    for (let i = 0; i < 400; i++) { const ex = B.escrito.generar(1); if (ex && ex.transp.semis === 2) return ex; }
     return B.escrito.generar(1);
+  }
+  const NOMBRE_T = ['Do', 'Re♭', 'Re', 'Mi♭', 'Mi', 'Fa', 'Fa♯', 'Sol', 'La♭', 'La', 'Si♭', 'Si'];
+  const CLAVES = { do4: 'Clave de do en 4.ª', do3: 'Clave de do en 3.ª', do1: 'Clave de do en 1.ª', fa4: 'Clave de fa en 4.ª' };
+  const baraja = a => { const r = a.slice(); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = r[i]; r[i] = r[j]; r[j] = t; } return r; };
+  /* sonido del trazo de luz: un zumbido suave que sigue a la velocidad */
+  function sonLuz() {
+    const C = B.ac(), o = C.createOscillator(), o2 = C.createOscillator(), g = C.createGain(), f = C.createBiquadFilter();
+    o.type = 'sine'; o2.type = 'triangle'; o.frequency.value = 880; o2.frequency.value = 1320; f.type = 'lowpass'; f.frequency.value = 3000; g.gain.value = 0;
+    o.connect(f); o2.connect(f); f.connect(g); g.connect(B.bus.sfx); o.start(); o2.start();
+    let vivo = true;
+    return { vel(v) { if (!vivo) return; const t = C.currentTime, x = Math.min(1, v / 40); g.gain.setTargetAtTime(.018 + .05 * x, t, .02); o.frequency.setTargetAtTime(760 + 600 * x, t, .03); o2.frequency.setTargetAtTime(1200 + 700 * x, t, .03); },
+      para() { if (!vivo) return; vivo = false; const t = C.currentTime; g.gain.setTargetAtTime(0, t, .04); o.stop(t + .3); o2.stop(t + .3); } };
   }
   I.mentalFinal = function (cfg, c) {
     const p = B.$('#inter'); p.innerHTML = ''; p.className = 'on i-mental i-real i-final';
     const P = panelReal(p, '', '');
-    const MT = metronomo(P.zona.parentNode, 3); MT.el.classList.add('en-final');
-    let k = 0, ej = null, v = null, guia = false, sigue = null, ex = null, listo = false;
+    /* fila bajo la partitura: los pasos guiados y el metrónomo */
+    const fila = el('div', 'mf-fila'); p.insertBefore(fila, P.msg);
+    const MT = metronomo(fila, 3); MT.el.classList.add('en-final');
+    let k = 0, ej = null, v = null, guia = false, ex = null, listo = false, fase = 0, ns = null, semis = 0, capaLuz = null, dib = null, sonL = null, popAct = null;
     const notasF = [];
     const bGuia = btn('', 'mt-guia', () => { guia = !guia; pintaGuia(); }, 'Voz guía: canta la nota que tienes que tocar');
     const pintaGuia = () => { bGuia.innerHTML = '<i></i>Voz guía · ' + (guia ? 'sí' : 'no'); bGuia.classList.toggle('on', guia); bGuia.setAttribute('aria-pressed', guia ? 'true' : 'false'); };
     const bSig = btn('Siguiente melodía ▶', 'prim', () => { k++; monta(); });
+    const bOtra = btn('↻ Repetir esta melodía', '', () => listoParaTocar(true));
     const bFin = btn('Terminar', 'disc', () => acaba(true), 'Terminar el ejercicio y seguir con la historia');
-    bSig.style.display = 'none';
+    bSig.style.display = 'none'; bOtra.style.display = 'none';
+    const pasosEl = el('div', 'mf-pasos'); fila.insertBefore(pasosEl, MT.el);
+    const PASOS = ['Tonalidad', 'Armadura', 'Tacha la armadura', 'Clave', 'A tocar'];
+    const pintaPasos = () => { const f = Math.floor(fase); pasosEl.innerHTML = PASOS.map((t, i) => '<span class="' + (i < f ? 'ya' : i === f ? 'act' : '') + '"><i>' + (i + 1) + '</i>' + t + '</span>').join(''); };
     function chips() {
       P.chips.innerHTML = '';
       NIV.forEach((x, i) => { const d = el('div', 'mt-chip' + (i === k ? ' act' : '') + (notasF[i] != null ? ' ya' : ''), '<b>' + (i + 1) + '</b><small>' + (notasF[i] != null ? Math.round(notasF[i] * 100) + ' %' : x.espera ? 'te espera' : 'a tempo') + '</small>'); P.chips.appendChild(d); });
       P.chips.appendChild(bGuia); P.chips.appendChild(MT.boton);
     }
+    /* ── ventana emergente de la consola, centrada sobre el teclado (la partitura queda a la vista) ── */
+    function pop(titulo, ops, okIdx, pista, alAcertar) {
+      cierraPop();
+      const w = el('div', 'mf-pop'); const caja = el('div', 'mf-caja'); w.appendChild(caja);
+      caja.appendChild(el('b', 'mf-tit', titulo));
+      const fila = el('div', 'mf-ops'); caja.appendChild(fila);
+      const nota = el('p', 'mf-pista'); caja.appendChild(nota);
+      let resuelto = false;
+      baraja(ops.map((t, i) => i)).forEach(i => {
+        const b = btn(ops[i], 'mf-op', () => {
+          if (resuelto || b.classList.contains('mal')) return;
+          if (i === okIdx) { resuelto = true; b.classList.add('ok'); V().ui('ok'); setTimeout(() => { cierraPop(); alAcertar(); }, RAP() ? 50 : 750); }
+          else { b.classList.add('mal'); V().ui('mal'); nota.innerHTML = pista; nota.classList.add('on'); }
+        });
+        b.dataset.i = i; fila.appendChild(b);
+      });
+      p.appendChild(w); popAct = { w: w, ok: okIdx };
+      requestAnimationFrame(() => requestAnimationFrame(() => w.classList.add('on')));
+    }
+    function cierraPop() { if (popAct) { const w = popAct.w; w.classList.remove('on'); setTimeout(() => w.remove(), 250); popAct = null; } }
+    /* ── la capa de luz sobre el pentagrama (unidades del viewBox de VexFlow) ── */
+    const S0 = () => v.sistemas()[0];
+    function prepCapa() {
+      const S = S0(), pe = S.geo.svg.parentNode; pe.style.position = 'relative';
+      capaLuz = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); capaLuz.setAttribute('class', 'mf-luz'); capaLuz.setAttribute('viewBox', '0 0 ' + S.geo.W + ' ' + S.geo.H);
+      pe.appendChild(capaLuz);
+      capaLuz.addEventListener('pointerdown', ev => { if (fase !== 2 && fase !== 3.1) return; ev.preventDefault(); try { capaLuz.setPointerCapture(ev.pointerId); } catch (e) { } const q = aVb(ev); dib = { pts: [q], el: linea([q]) }; sonL = sonLuz(); });
+      capaLuz.addEventListener('pointermove', ev => { if (!dib) return; const q = aVb(ev), u = dib.pts[dib.pts.length - 1], d = Math.hypot(q.x - u.x, q.y - u.y); if (d < 1) return; dib.pts.push(q); dib.el.setAttribute('points', dib.pts.map(z => z.x.toFixed(1) + ',' + z.y.toFixed(1)).join(' ')); if (sonL) sonL.vel(d * 3); });
+      const suelta = () => { if (!dib) return; const d = dib; dib = null; if (sonL) { sonL.para(); sonL = null; } valida(d); };
+      capaLuz.addEventListener('pointerup', suelta); capaLuz.addEventListener('pointercancel', () => { if (dib) dib.el.remove(); dib = null; if (sonL) { sonL.para(); sonL = null; } });
+    }
+    function aVb(ev) { const pt = capaLuz.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY; const m = capaLuz.getScreenCTM(); const q = pt.matrixTransform(m.inverse()); return { x: q.x, y: q.y }; }
+    function linea(pts) { const l = document.createElementNS('http://www.w3.org/2000/svg', 'polyline'); l.setAttribute('class', 'mf-trazo'); l.setAttribute('points', pts.map(z => z.x + ',' + z.y).join(' ')); capaLuz.appendChild(l); return l; }
+    const caja = sel => { const g = S0().geo.svg.querySelector(sel); if (!g) return null; const b = g.getBBox(); return b.width ? b : null; };
+    function valida(d) {
+      const esArm = fase === 2, b = caja(esArm ? '.vf-keysignature' : '.vf-clef');
+      if (d.pts.length < 3 || !b) { d.el.remove(); return; }
+      const bb = { x: b.x - 4, y: b.y - (esArm ? 7 : 3), w: b.width + 8, h: b.height + (esArm ? 14 : 6) };
+      const ms = [];
+      for (let i = 1; i < d.pts.length; i++) { const a = d.pts[i - 1], z = d.pts[i], n = Math.max(1, Math.ceil(Math.hypot(z.x - a.x, z.y - a.y))); for (let j = 0; j <= n; j++) { const q = { x: a.x + (z.x - a.x) * j / n, y: a.y + (z.y - a.y) * j / n }; if (q.x >= bb.x && q.x <= bb.x + bb.w && q.y >= bb.y && q.y <= bb.y + bb.h) ms.push(q); } }
+      const sx = ms.length ? Math.max.apply(null, ms.map(q => q.x)) - Math.min.apply(null, ms.map(q => q.x)) : 0, sy = ms.length ? Math.max.apply(null, ms.map(q => q.y)) - Math.min.apply(null, ms.map(q => q.y)) : 0;
+      const ok = esArm ? sx >= b.width * .6 : (sy >= b.height * .4 || sx >= b.width * .6);
+      if (!ok) { V().ui('mal'); d.el.classList.add('borra'); setTimeout(() => d.el.remove(), 600);
+        P.di(ms.length ? 'Casi: alarga el trazo para que cruce ' + (esArm ? 'toda la armadura' : 'la clave de lado a lado') + '.' : 'Ese trazo no toca ' + (esArm ? 'la <b>armadura</b>: va justo después de la clave de sol' : 'la <b>clave de sol</b>, al principio del pentagrama') + '.', 'mal'); return; }
+      V().ui('ok'); d.el.classList.add('fija');
+      if (esArm) { rotulo(); fase = 3; pintaPasos(); P.di('Ahora <b>tacha la clave de sol</b> con otro trazo.'); fase = 3.1; }
+      else { fase = 3.2; pasoClave(); }
+    }
+    /* la tonalidad y armadura nuevas, escritas en luz encima de la armadura tachada */
+    function rotulo() {
+      const b = caja('.vf-keysignature') || caja('.vf-clef'), t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      t.setAttribute('x', b.x + b.width / 2 + (caja('.vf-keysignature') ? 0 : 30)); t.setAttribute('y', S0().geo.yTop - 24); t.setAttribute('text-anchor', 'middle'); t.setAttribute('class', 'mf-rot');
+      t.textContent = ex.destino.name + ' M' + (ex.destino.fifths ? ' · ' + T3.armTxt(ex.destino.fifths) : ''); capaLuz.appendChild(t);
+    }
+    /* la clave que ayuda, dibujada en luz a la izquierda de la de sol tachada (VexFlow: tenor = do en 4.ª, alto = do en 3.ª) */
+    function dibujaClave(tipo) {
+      const S = S0(), VF = Vex.Flow, tmp = el('div'); tmp.style.cssText = 'position:absolute;left:-9999px;top:0'; document.body.appendChild(tmp);
+      const r = new VF.Renderer(tmp, VF.Renderer.Backends.SVG); r.resize(S.geo.W, S.geo.H); const ctx = r.getContext(); ctx.setFillStyle('#63e6ff'); ctx.setStrokeStyle('#63e6ff');
+      const st = new VF.Stave(S.geo.staves[0].getX() - 50, S.geo.staves[0].getY(), 60); st.addClef(tipo);
+      st.setConfigForLines([0, 1, 2, 3, 4].map(() => ({ visible: false }))); st.setBegBarType(VF.Barline.type.NONE); st.setEndBarType(VF.Barline.type.NONE);
+      st.setContext(ctx).draw();
+      const cl = tmp.querySelector('.vf-clef'), g = document.createElementNS('http://www.w3.org/2000/svg', 'g'); g.setAttribute('class', 'mf-clave');
+      if (cl) g.appendChild(cl); capaLuz.appendChild(g); tmp.remove();
+    }
+    function pasoClave() {
+      const baja = ex.transp.dir < 0, okK = baja ? 'do4' : 'do3', ks = ['do4', 'do3', 'do1', 'fa4'];
+      pop('¿Qué clave te ayuda a leerla ' + ex.transp.corto + '?', ks.map(x => CLAVES[x]), ks.indexOf(okK),
+        'Piensa dónde cae el do: con la <b>clave de do en 4.ª</b>, cada nota se lee una 2.ª más abajo; con la <b>de do en 3.ª</b>, una 2.ª más arriba. En las dos se toca una 8.ª más arriba de lo que se lee.',
+        () => { dibujaClave(baja ? 'tenor' : 'alto'); P.di('<b>' + CLAVES[okK] + '</b>: lee cada nota en esa clave y tócala <b>una 8.ª más arriba</b>. Así sale ' + ex.transp.lbl.toLowerCase() + '.', 'ok'); listoParaTocar(false); });
+    }
+    /* ── cada melodía: los pasos guiados y luego a tocar ── */
     function monta() {
-      if (ej) ej.para(); bSig.style.display = 'none';
-      const nv = NIV[k]; ex = genera(nv.n); guia = false; pintaGuia(); chips();
-      const ns = ex.notas.map((x, i) => { const n = T3.nota(x.step.toLowerCase(), x.alter, x.octave, x.dur, x.compas); n.i = i; return n; });
+      if (ej) ej.para(); bSig.style.display = 'none'; bOtra.style.display = 'none'; cierraPop();
+      const nv = NIV[k]; ex = genera(nv.n); guia = false; pintaGuia(); chips(); fase = 0; pintaPasos();
+      ns = ex.notas.map((x, i) => { const n = T3.nota(x.step.toLowerCase(), x.alter, x.octave, x.dur, x.compas); n.i = i; return n; });
       let t = 0; ns.forEach(n => { n.t = t; t += n.beats; });
-      const semis = ex.transp.dir * ex.transp.semis;
+      semis = ex.transp.dir * ex.transp.semis;
       P.izq.innerHTML = '<small>Melodía ' + (k + 1) + ' de 3 · original</small><b>' + ex.key.name + ' M · ' + T3.armTxt(ex.key.fifths) + '</b>';
-      const dest = ex.destino.name + ' M · ' + T3.armTxt(ex.destino.fifths);
-      P.der.innerHTML = '<small>Tú tocas · ' + ex.transp.corto + '</small><span class="mt-fila"><b class="cian" id="mfDest">' + (nv.verDestino ? dest : '¿…?') + '</b></span>';
-      if (!nv.verDestino) { const bp = btn('Pista', 'mt-pista', () => { const d = B.$('#mfDest'); if (d) d.textContent = dest; bp.remove(); }, 'Ver la tonalidad nueva'); const fi = B.$('.mt-fila', P.der); fi.insertBefore(bp, fi.firstChild); }
-      P.zona.innerHTML = ''; v = vista(P.zona, ns, { fifths: ex.key.fifths, num: ex.compas.num, den: ex.compas.den, porSistema: 4, porPagina: 4, ancho: 1050, alto: 125, y: 16 });
+      P.der.innerHTML = '<small>Tú tocas · ' + ex.transp.corto + '</small><span class="mt-fila"><b class="cian" id="mfDest">¿…?</b></span>';
+      P.zona.innerHTML = ''; v = vista(P.zona, ns, { fifths: ex.key.fifths, num: ex.compas.num, den: ex.compas.den, porSistema: 4, porPagina: 4, ancho: 1050, alto: 125, y: 16, margen: 56 });
+      prepCapa();
+      P.capa.innerHTML = ''; P.capa.className = 'mt-capa';
+      M().barraTexto('Antes de tocar, prepara la partitura: tonalidad, armadura, tachar y clave.');
+      /* 1 · la tonalidad nueva */
+      const tn = ex.destino.name, otras = [];
+      [ex.transp.dir * -2, 1 * ex.transp.dir, 0, 4 * ex.transp.dir, -1].forEach(d => { const pc = ((ex.key.step === 'C' ? 0 : { D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[ex.key.step]) + (ex.key.alter || 0) + d + 24) % 12; const nm = NOMBRE_T[pc]; if (nm !== tn && otras.indexOf(nm) < 0 && otras.length < 3) otras.push(nm); });
+      const ops1 = [tn].concat(otras).map(x => x + ' M');
+      P.di('Esta melodía está en <b>' + ex.key.name + ' M</b> y la tocas <b>' + ex.transp.lbl.toLowerCase() + '</b>.');
+      pop('¿A qué tonalidad transportas?', ops1, 0, 'La tónica también se mueve <b>' + ex.transp.lbl.toLowerCase() + '</b>: de <b>' + ex.key.name + '</b>, un tono más ' + (ex.transp.dir > 0 ? 'arriba' : 'abajo') + '.', () => {
+        B.$('#mfDest').textContent = tn + ' M'; fase = 1; pintaPasos();
+        /* 2 · su armadura */
+        const f = ex.destino.fifths, cands = [f]; [f + 2 * ex.transp.dir, f - 2 * ex.transp.dir, ex.key.fifths, f + 1].forEach(x => { if (Math.abs(x) <= 6 && cands.indexOf(x) < 0 && cands.length < 4) cands.push(x); });
+        const txt = x => x === 0 ? 'Sin alteraciones' : T3.armTxt(x);
+        pop('¿Qué armadura tiene ' + tn + ' M?', cands.map(txt), 0, 'Una 2.ª mayor ' + (ex.transp.dir > 0 ? '↑ suma dos sostenidos (o quita dos bemoles)' : '↓ suma dos bemoles (o quita dos sostenidos)') + ': de ' + T3.armTxt(ex.key.fifths) + ', cuenta dos.', () => {
+          B.$('#mfDest').textContent = tn + ' M · ' + T3.armTxt(f); fase = 2; pintaPasos();
+          /* 3 · tachar la armadura (si la hay) */
+          if (!ex.key.fifths) { rotulo(); P.di(ex.key.name + ' M no lleva armadura: nada que tachar. Ahora <b>tacha la clave de sol</b> con un trazo.'); fase = 3.1; pintaPasos(); return; }
+          P.di('Tacha la <b>armadura original</b>: haz un trazo encima, con el ratón o con el dedo.');
+        });
+      });
+    }
+    function listoParaTocar(repite) {
+      fase = 4; pintaPasos(); bOtra.style.display = 'none'; bSig.style.display = 'none';
       P.capa.innerHTML = ''; P.capa.className = 'mt-capa on';
-      const b = btn('▶ Empezar · ' + nv.nombre, 'prim mt-empieza', () => arranca(ns, semis)); P.capa.appendChild(b); setTimeout(() => { if (b.isConnected) b.focus(); }, 60);
-      P.di('Piensa primero la <b>tonalidad nueva</b>; después, cada nota <b>' + ex.transp.lbl.toLowerCase() + '</b>.');
+      const nv = NIV[k], b = btn('▶ ' + (repite ? 'Otra vez · ' : 'Empezar · ') + nv.nombre, 'prim mt-empieza', () => arranca()); P.capa.appendChild(b);
+      setTimeout(() => { if (b.isConnected) b.focus(); }, 60);
       M().barraTexto(cfg.cartelCorto || '');
     }
-    function arranca(ns, semis) {
+    function arranca() {
       P.capa.className = 'mt-capa'; P.capa.innerHTML = '';
       const nv = NIV[k]; let ok = 0;
+      ns.forEach(n => v.marca(n.i, null));
       MT.num(ex.compas.den === 8 ? 3 : ex.compas.num); MT.reinicia();
       ej = ejecutor({ notas: ns, objetivo: n => n.midi + semis, bpm: nv.bpm, espera: nv.espera, guia: () => guia, num: ex.compas.den === 8 ? 3 : ex.compas.num, acorde: null, v: v, c: c, metro: MT.on, alPulso: MT.pulso,
         alEstado: (n, e, x) => {
@@ -449,29 +565,39 @@
           else if (e === 'mal') P.di('Esa era <b>' + nomM(x.m, ex.destino.fifths) + '</b>; aquí va <b>' + nomM(x.mo, ex.destino.fifths) + '</b>. ¡Sigue!', 'mal');
           else if (e === 'pasa') P.di('Se te ha pasado una: <b>sigue</b>.', 'pasa');
         },
-        alFin: r => { ej = null; notasF[k] = r.ok / Math.max(1, r.total); chips(); finMel(r); } });
+        alFin: r => { ej = null; notasF[k] = Math.max(notasF[k] || 0, r.ok / Math.max(1, r.total)); chips(); finMel(r); } });
       B._mental.ej = ej;
+      P.di('Compás de entrada (<b>1 · 2 · 3</b>) y… <b>¡toca!</b>');
     }
     function finMel(r) {
-      P.capa.className = 'mt-capa on res'; P.capa.innerHTML = '<div class="mt-res"><small>Melodía ' + (k + 1) + '</small><b>' + Math.round(notasF[k] * 100) + ' %</b><span>' + r.ok + ' de ' + r.total + ' notas</span></div>';
-      if (k < NIV.length - 1) { bSig.style.display = ''; M().barraTexto('Melodía ' + (k + 1) + ': <b>' + Math.round(notasF[k] * 100) + ' %</b>. Pulsa <b>Siguiente melodía</b>.'); setTimeout(() => bSig.focus(), 60); }
+      P.capa.className = 'mt-capa on res'; P.capa.innerHTML = '<div class="mt-res"><small>Melodía ' + (k + 1) + '</small><b>' + Math.round(r.ok / Math.max(1, r.total) * 100) + ' %</b><span>' + r.ok + ' de ' + r.total + ' notas</span></div>';
+      bOtra.style.display = '';
+      if (k < NIV.length - 1) { bSig.style.display = ''; M().barraTexto('Melodía ' + (k + 1) + ': <b>' + Math.round(notasF[k] * 100) + ' %</b>. Pulsa <b>Siguiente melodía</b> (o repítela).'); setTimeout(() => bSig.focus(), 60); }
       else {
         const media = notasF.reduce((a, b) => a + b, 0) / notasF.length, nota = Math.round(media * 100) / 10;
         B.notaFinal = nota; try { B.guarda('tr_t3_nota', { nota: nota, cuando: Date.now() }); } catch (e) { }
         bFin.style.display = 'none';
-        if (!listo) { listo = true; M().barraTexto('Tus tres melodías: ' + notasF.map(x => Math.round(x * 100) + ' %').join(' · ') + '. <b>Nota: ' + String(nota).replace('.', ',') + '</b>'); M().esperaSigue(c).then(ok => acaba(ok)); }
+        M().barraTexto('Tus tres melodías: ' + notasF.map(x => Math.round(x * 100) + ' %').join(' · ') + '. <b>Nota: ' + String(nota).replace('.', ',') + '</b>');
+        if (!listo) { listo = true; M().esperaSigue(c).then(ok => acaba(ok)); }
       }
     }
     let resolver = null, hecho = false;
-    function acaba(ok) { if (hecho) return; hecho = true; if (ej) ej.para(); B.$('#cartel').classList.remove('on'); if (resolver) resolver(ok); }
+    function acaba(ok) { if (hecho) return; hecho = true; if (ej) ej.para(); cierraPop(); B.$('#cartel').classList.remove('on'); if (resolver) resolver(ok); }
     const tw = P.tw, tec = T3.teclado(tw, { desde: 57, hasta: 83, base: 60, alTocar: (m, porTecla) => { if (ej) { const r = ej.tecla(m, porTecla); if (!r.ok) tec.marca(m, 'mal', 300); } else T3.piano(m, 0, .4, .3); } });
-    c.alMorir.push(() => { tec.fuera(); if (ej) ej.para(); });
-    B._mental = { toca: m => ej ? ej.tecla(m, false) : null, objetivo: () => ej ? ej.objetivo() : null, estado: () => ({ k: k, notas: notasF, ej: ej ? ej.estado() : null }), empieza: () => { const b = B.$('.mt-empieza', p); if (b) b.click(); } };
+    c.alMorir.push(() => { tec.fuera(); if (ej) ej.para(); if (sonL) sonL.para(); });
+    B._mental = { toca: m => ej ? ej.tecla(m, false) : null, objetivo: () => ej ? ej.objetivo() : null, estado: () => ({ k: k, notas: notasF, ej: ej ? ej.estado() : null, fase: fase }), empieza: () => { const b = B.$('.mt-empieza', p); if (b) b.click(); } };
+    /* (pruebas) la opción correcta de la ventana abierta y un trazo bueno (px de pantalla) */
+    B._final = {
+      fase: () => fase, ex: () => ex, pop: () => !!popAct,
+      opcion: bien => { if (!popAct) return null; const b = B.$$('.mf-op', popAct.w).filter(x => bien ? +x.dataset.i === popAct.ok : +x.dataset.i !== popAct.ok && !x.classList.contains('mal'))[0]; if (!b) return null; const r = b.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; },
+      trazo: () => { const b = caja(fase === 2 ? '.vf-keysignature' : '.vf-clef'); if (!b) return null; const m = capaLuz.getScreenCTM(), P2 = (x, y) => { const pt = capaLuz.createSVGPoint(); pt.x = x; pt.y = y; const q = pt.matrixTransform(m); return { x: q.x, y: q.y }; };
+        return [P2(b.x - 5, b.y + b.height * .85), P2(b.x + b.width / 2, b.y + b.height / 2), P2(b.x + b.width + 5, b.y + b.height * .15)]; }
+    };
     /* (Iago 3-nov) OPCIONAL: «Practicar» o seguir con la historia; durante, «Terminar» siempre a mano */
     const bSeguir = btn('Seguir sin practicar ▶', '', () => { B.$('#cartel').classList.remove('on'); B.$('#cartel').innerHTML = ''; acaba(true); });
     return new Promise(r => {
       resolver = r; c.alMorir.push(() => r(false));
-      M().cartel(cfg.cartel, { botones: [bSig, bFin], boton: 'Practicar: 3 melodías', extra: [bSeguir], aulaSolo: false }).then(() => { if (!hecho) monta(); });
+      M().cartel(cfg.cartel, { botones: [bOtra, bSig, bFin], boton: 'Practicar: 3 melodías', extra: [bSeguir], aulaSolo: false }).then(() => { if (!hecho) monta(); });
     });
   };
 })(window.TR);
