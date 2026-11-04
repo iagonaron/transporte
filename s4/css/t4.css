@@ -168,3 +168,51 @@
 @keyframes accOut{0%{opacity:1;filter:none}40%{opacity:1;filter:drop-shadow(0 0 8px #ffb547)}100%{opacity:0;transform:translateY(-6px)}}
 @keyframes accIn{0%{opacity:0;transform:translateY(8px);filter:drop-shadow(0 0 14px #7dffa8)}60%{opacity:1;transform:none;filter:drop-shadow(0 0 10px #7dffa8)}100%{opacity:1;filter:none}}
 @keyframes accSube{0%{opacity:0;transform:translateY(12px)}25%{opacity:1;transform:none}75%{opacity:1}100%{opacity:.85;transform:translateY(-4px)}}
+
+/* ══ (Iago 4-nov 22:07) transporte animado (L.transpAnim): solo transform y opacity ══ */
+.lam-transpAnim{left:50%;top:104px;transform:translateX(-50%);width:1560px;padding:22px 34px 26px;background:var(--hud),rgba(6,12,29,.95);border:1px solid rgba(99,230,255,.4)}
+.tA-cab{display:flex;align-items:center;gap:22px;font:500 26px var(--f-ui);color:var(--tenue)}
+.tA-cab b{color:var(--tinta)}
+.tA-cab .tA-fl{padding:2px 14px;font-weight:600;color:var(--cian);border:1px solid rgba(99,230,255,.5);opacity:.35;transition:opacity .6s}
+.tA-cab .tA-a{opacity:.3;transition:opacity .6s,color .6s}
+.lam-transpAnim.con-arm .tA-fl,.lam-transpAnim.con-arm .tA-a{opacity:1}
+.lam-transpAnim.en-saxo .tA-a b{color:var(--ambar)}
+.lam-transpAnim.en-saxo .tA-de{opacity:.45}
+.tA-pe{position:relative;margin-top:6px}
+.tA-capa svg{display:block}
+.tA-capa.b,.tA-capa.c,.tA-et{position:absolute;inset:0}
+.tA-et{pointer-events:none}
+.tA-fade{transition:opacity .55s ease}
+.tA-nota{transition:transform .45s cubic-bezier(.2,.9,.25,1.05),opacity .18s ease}
+.tA-fuera{transition:opacity .7s ease}
+.tA-capa.c .vf-stavenote{transition:opacity .9s ease .25s}
+.tA-verde path,.tA-verde rect{fill:#7dffa8!important;stroke:#7dffa8!important}
+.tA-nuevo path,path.tA-nuevo{fill:#63e6ff;transform-box:fill-box;transform-origin:center;animation:tANuevo 1.6s ease}
+@keyframes tANuevo{0%{opacity:0;transform:scale(2.2)}40%{opacity:1;transform:scale(1.25)}100%{transform:scale(1)}}
+.tA-rastro{fill:#63e6ff;opacity:0;animation:tARastro .7s ease-out}
+@keyframes tARastro{0%{opacity:.55}100%{opacity:0}}
+.tA-dest{opacity:0;animation:tADest 1.6s ease-out}
+@keyframes tADest{0%{opacity:0}20%{opacity:.42}100%{opacity:0}}
+.tA-rot{position:absolute;transform:translate(-50%,-100%) translateY(8px);opacity:0;white-space:nowrap;padding:6px 14px;font:600 22px var(--f-ui);border-radius:6px;background:rgba(6,12,29,.92);transition:opacity .4s,transform .4s}
+.tA-rot.on{opacity:1;transform:translate(-50%,-100%)}
+.tA-rot.ambar{color:#ffb547;border:1px solid rgba(255,181,71,.7)}
+.tA-rot.cian{color:#9ff0ff;border:1px solid rgba(99,230,255,.8)}
+.tA-rot.verde{color:#7dffa8;border:1px solid rgba(125,255,168,.8)}
+.tA-rot b{color:#fff}
+
+/* ══ notas afectadas (pulsando) ══ */
+.af-g{align-items:flex-start}
+#escena #inter .af-g button.nota{min-width:78px;height:58px;min-height:58px}
+.p0-af{justify-content:center;padding:10px 18px!important}
+.mt-p3 .af-g>small{display:block;margin-bottom:8px;font:500 21px var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--cian)}
+#escena #inter .mt-p3 button.nota{min-width:72px}
+.mt-p3-pie{display:flex;align-items:center;gap:16px;margin-top:8px}
+.mt-res3{font:400 23px/1.3 var(--f-texto)}.mt-res3 .ok{color:#7dffa8}.mt-res3 .mal{color:#ff8a7a}.mt-res3 b{color:#fff}
+
+/* ══ notas «?» (alteración copiada del original, sin decidir) y su selector ══ */
+.esc-alu{position:relative}
+.esc-duda{font:700 30px var(--f-ui);fill:#ffb547;stroke:#1b1003;stroke-width:3px;paint-order:stroke}
+.esc-sel{position:absolute;z-index:8;transform:translate(-50%,-100%);display:flex;gap:8px;padding:10px;background:rgba(6,12,29,.97);border:2px solid var(--ambar);border-radius:8px;box-shadow:0 12px 26px rgba(0,0,0,.6)}
+#escena #inter .esc-sel button.acc{width:70px;min-width:70px;height:70px;min-height:70px;font-size:36px}
+#escena #inter .esc-sel button.esc-val{min-height:70px;font-size:24px;padding:0 18px}
+#barra .bt b.q{color:#ffb547}
