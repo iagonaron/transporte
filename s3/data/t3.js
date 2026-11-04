@@ -170,12 +170,12 @@
     noaCarpeta: I3('noa_carpeta', 'Noa, plano medio, con el pinganillo puesto y una carpeta en las manos, desconcertada; mira hacia la derecha (por donde se ha ido la regidora); luz azul de bastidores', { ocultaPj: ['NOA'], vida: BR('noa_carpeta').concat(POLVO('#cfe0ff')) }),
     pasillo: I3('pasillo_camerinos', 'Pasillo de camerinos del teatro: puertas numeradas, la del «2» entreabierta con luz cálida; Noa de espaldas camina hacia ella con la carpeta', { vida: BR('pasillo_camerinos').concat([{ tipo: 'respira', zona: [.61, .15, .07, .3], color: '#ffd9a0', vel: 1.3 }], POLVO()) }),
     /* ── 3 · el camerino 2 ── */
-    agudo: I3('cantante_agudo', 'La CANTANTE (soprano de unos 35, PELIRROJA con ondas sueltas, vestido de concierto azul noche, fular al cuello, fiel a su hoja) intenta el agudo y se lleva la mano a la garganta: la voz se le rompe; plano medio; mira al frente', { vida: BR('cantante_agudo', { a: .4, chispa: .06 }).concat(POLVO()) }),
-    panico: I3('cantante_panico', 'La cantante, primer plano, al borde del pánico, ronca; mira hacia la izquierda (a Noa y al pianista)', { vida: BR('cantante_panico', { a: .3, chispa: .05 }).concat(POLVO()) }),
-    cantanteCanta: I3('cantante_canta', 'Ensayo en el camerino: la cantante canta junto al piano vertical con la voz tomada, una mano en el fular, gesto de esfuerzo; el pianista toca mirando a las teclas (2+3); plano medio, luz cálida', { vida: BR('cantante_canta', { a: .4, chispa: .06 }).concat(POLVO()) }),
+    agudo: I3('cantante_agudo', 'La CANTANTE (soprano de unos 35, PELIRROJA con ondas sueltas, vestido de concierto azul noche, fular al cuello, fiel a su hoja) intenta el agudo y se lleva la mano a la garganta: la voz se le rompe; plano medio; mira al frente', { vida: BR('cantante_agudo', { a: .4, chispa: .06 }) }),
+    panico: I3('cantante_panico', 'La cantante, primer plano, al borde del pánico, ronca; mira hacia la izquierda (a Noa y al pianista)', { vida: BR('cantante_panico', { a: .3, chispa: .05 }) }),
+    cantanteCanta: I3('cantante_canta', 'Ensayo en el camerino: la cantante canta junto al piano vertical con la voz tomada, una mano en el fular, gesto de esfuerzo; el pianista toca mirando a las teclas (2+3); plano medio, luz cálida', { vida: BR('cantante_canta', { a: .4, chispa: .06 }).concat(MOTAS([.5, .02, .2, .3], 6)) }),
     noaCamerino: I3('noa_camerino', 'Noa en la puerta del camerino con la carpeta, plano medio, se atreve a proponer algo; mira hacia la derecha', { ocultaPj: ['NOA'], vida: BR('noa_camerino').concat(POLVO()) }),
     pianistaReloj: I3('pianista_reloj', 'El PIANISTA (hombre de unos 55, canoso, gafas, chaqueta oscura, tranquilo y con oficio) mira su reloj de pulsera sentado al piano vertical; plano medio; mira hacia la izquierda', { vida: BR('pianista_reloj').concat(POLVO()) }),
-    duda: I3('cantante_duda', 'La cantante, plano medio, incrédula, se vuelve hacia el pianista (mira a la izquierda); mano en el fular', { vida: BR('cantante_duda', { a: .32, chispa: .05 }).concat(POLVO()) }),
+    duda: I3('cantante_duda', 'La cantante, plano medio, incrédula, se vuelve hacia el pianista (mira a la izquierda); mano en el fular', { vida: BR('cantante_duda', { a: .32, chispa: .05 }) }),
     pianistaAtril: I3('pianista_atril', 'El pianista señala con calma la partitura del atril, sonríe apenas; mira a la cantante (hacia la derecha); plano medio corto; teclado 2+3 visible', { vida: BR('pianista_atril', { a: .34, chispa: .05 }).concat(POLVO()) }),
     /* (Iago 4-nov) toda la secuencia del transporte mental (pianista, lápiz, claves, tiempo real) sobre el atril del piano de cola.
        La partitura se dibuja ENCIMA de la hoja A4 de la imagen: calibración en TR.ATRIL (abajo). Mientras C no la haga, el fondo
@@ -186,14 +186,18 @@
     /* ── 4 · el recital ── */
     aviso: I3('bastidores_aviso', 'Noa entre bastidores, a contraluz, una mano en el pinganillo, mira hacia el escenario iluminado (a la derecha); detrás, el telón rojo', { ocultaPj: ['NOA'], vida: BR('bastidores_aviso', { chispa: .05 }).concat(MOTAS([.8, 0, .2, 1], 8), POLVO('#ffe2b8')) }),
     sala: I3('sala_rosalia', 'La sala REAL del Teatro Rosalía vista desde el escenario: patio de butacas lleno, palcos en herradura con molduras doradas, la lámpara central; las luces de sala bajan; fiel a las fotos reales', { vida: BR('sala_rosalia', { a: .38, chispa: .05 }) }),
-    recital: I3('recital', 'El recital desde un lateral del escenario: la cantante canta junto al piano de cola (teclas 2+3), el pianista toca mirando a las teclas; foco cálido, público en penumbra', { vida: BR('recital').concat(HAZ(.18, 0, .3, .75), MOTAS([.15, 0, .4, .6], 12)) }),
-    recitalCantante: I3('recital_cantante', 'La cantante, plano medio en el escenario, canta el agudo con gesto de alivio; foco cálido, fondo oscuro', { vida: BR('recital_cantante').concat(HAZ(.2, 0, .5, .65), MOTAS([.15, 0, .6, .6], 12)) }),
+    recital: I3('recital', 'El recital desde un lateral del escenario: la cantante canta junto al piano de cola (teclas 2+3), el pianista toca mirando a las teclas; foco cálido, público en penumbra', { vida: BR('recital').concat(HAZ(.18, 0, .3, .75), MOTAS([.55, 0, .4, .3], 12)) }),
+    recitalCantante: I3('recital_cantante', 'La cantante, plano medio en el escenario, canta el agudo con gesto de alivio; foco cálido, fondo oscuro', { vida: BR('recital_cantante').concat(HAZ(.2, 0, .5, .65), MOTAS([0, 0, .4, .6], 12)) }),
     recitalPianista: I3('recital_pianista', 'El pianista de perfil en el piano de cola, concentrado en las teclas (2+3), transportando en la cabeza; la partitura en el atril; foco cálido', { vida: BR('recital_pianista', { a: .3 }).concat(HAZ(.12, 0, .5, .65), MOTAS([.1, 0, .55, .6], 12)) }),
     publico: I3('sala_publico', 'El público del Rosalía escucha en penumbra, emocionado; caras, edades y ropas variadas (nadie se parece a Noa)', { vida: [{ tipo: 'polvo', zona: [0, 0, 1, 1], n: 18, color: '#ffe2b8' }] }),
     aplausos: I3('sala_aplausos', 'El público del Rosalía en pie, aplaudiendo; palcos llenos; caras y edades variadas (nadie se parece a Noa); la cantante y el pianista saludan en primer término, de espaldas', { vida: BR('sala_aplausos', { chispa: .06 }).concat([{ tipo: 'reflejos', zona: [.4, .88, .4, .08], n: 10, color: '#ffe0b0' }]) }),
-    pasilloCantante: I3('pasillo_cantante', 'Pasillo de bastidores: la cantante, con un ramo de flores, se acerca agradecida a Noa (Noa a la izquierda, de tres cuartos); la cantante mira hacia ella', { ocultaPj: ['NOA'], vida: BR('pasillo_cantante').concat(POLVO()) }),
+    pasilloCantante: I3('pasillo_cantante', 'Pasillo de bastidores: la cantante, con un ramo de flores, se acerca agradecida a Noa (Noa a la izquierda, de tres cuartos); la cantante mira hacia ella', { ocultaPj: ['NOA'], vida: BR('pasillo_cantante').concat(MOTAS([.42, 0, .14, .8], 8)) }),
     pasilloNoa: I3('pasillo_noa', 'Noa, primer plano, sonrisa tímida al decir su nombre; pasillo de bastidores con luz de trabajo; mira hacia la derecha', { ocultaPj: ['NOA'], vida: BR('pasillo_noa').concat(POLVO()) }),
     pasilloRegidora: I3('pasillo_regidora', 'La regidora al fondo del pasillo, contrariada, señala a Noa con la carpeta; mira hacia la izquierda', { vida: BR('pasillo_regidora').concat(POLVO()) }),
+    /* (Iago 4-nov 19:46) tras «¡La de prácticas no se llama Noa!», Noa ya está en otro lugar: sale por la puerta de artistas a la calle (Runway image) */
+    saleTeatro: I3('noa_sale_teatro', 'De noche, Noa sale por la puerta de artistas del Teatro Rosalía a una calle del casco viejo con farolas y suelo mojado; mira atrás con media sonrisa; pulsera en cian', { ocultaPj: ['NOA'],
+      vida: [{ tipo: 'brillos', p: [[.285, .115, 16, '#ffd59a'], [.2, .29, 12, '#ffd59a'], [.082, .375, 9, '#ffd59a'], [.065, .41, 7, '#ffd59a'], [.71, .07, 10, '#ffe6b8']] },
+        { tipo: 'reflejos', zona: [0, .62, .34, .36], n: 10, color: '#ffd59a' }].concat(PANT(.49, .52, .03, .05)) }),
     escabulle: I3('pasillo_escabulle', 'Noa se escabulle por el pasillo hacia una puerta de servicio, mira atrás con media sonrisa; su pulsera se ilumina en cian', { ocultaPj: ['NOA'], vida: BR('pasillo_escabulle').concat(PANT(0.545, 0.492, 0.06, 0.083)) }),
     escenario: I3('escenario_vacio', 'El escenario del Rosalía vacío tras el recital: el piano de cola cerrado con la partitura en el atril, un solo foco encendido; CENTRO LIMPIO para las láminas', { vida: BR('escenario_vacio', { a: .45 }).concat(HAZ(.13, .26, .24, .5), MOTAS([.15, .27, .2, .5], 12), POLVO('#ffe2b8')) }),
     /* ── 5 · vuelta y bronca (laboratorio) ── */
@@ -278,9 +282,8 @@
         { id: 'p2a', nombre: 'Hoy elijo yo', img: IMG.amaroDestino, amb: LABA, mus: MUS.lab, pj: null,
           lineas: [
             { id: 't3_004', quien: 'AMARO', pj: { q: 'AMARO', pose: 'tableta' }, imgs: [{ en: .42, img: IMG.holoRosalia }], sfx: [{ src: SF1('sfx_ui_clic'), t: .4 }, { src: SF1('sfx_ui_clic'), t: .7 }, { src: SF1('sfx_destello'), en: .4, vol: .5 }],
-              texto: 'Hoy elijo yo. Nada de irse tan atrás en el tiempo. Un concierto en el Teatro Rosalía, en 2026. Un sitio tranquilo. ¿Qué podría salir mal?',
+              texto: 'Hoy elijo yo. Nada de irse tan atrás en el tiempo. Un concierto en el Teatro Rosalía, en 2026. Un sitio tranquilo.',
               claves: { claves: ['Teatro Rosalía · 2026'], ens: [.45], pos: 'arriba' } },
-            { id: 't3_005', quien: 'NOA', img: IMG.noaResopla, pj: { q: 'NOA', pose: 'traviesa' }, texto: 'Eso ya lo has dicho otras veces…', espera: .5 }
           ] },
         { id: 'p2b', nombre: 'El Transportador se activa', img: IMG.maquina, amb: LABA, mus: MUS.tension, pj: null, auto: 3.4,
           sfx: [{ src: SF1('sfx_maquina_arranca'), t: .1 }, { src: SF1('sfx_anillos_giran'), t: 1.2 }] }
@@ -292,7 +295,7 @@
            más cerca (js/secuencia.js); el camerino se ancla a la quiebra del la5 (audio/t3/tiempos_t3.json: la5 31,80 s · quiebra 32,42 s) */
         { id: 'p3s', nombre: 'Entrada · A Coruña, 2026', img: IMG.dronBahia, amb: [], mus: false, pj: null, auto: .1,
           inter: { tipo: 'secuencia', mp3: CANCION.roto, dur: 33.46, la5: 31.8, quiebra: 31.56, antesCamerino: 6,
-            planos: { dron: [IMG.dronBahia, IMG.dronCiudadVieja, IMG.dronRiego, IMG.fachada], sala: IMG.salaEnsayo, llegada: IMG.llegada, regidora: IMG.regidora,
+            planos: { dron: [IMG.dronBahia, IMG.dronCiudadVieja, IMG.dronRiego, I3('dron_rosalia_f0', 'Primer fotograma del vídeo de dron hacia la fachada del Rosalía')], sala: IMG.salaEnsayo, llegada: IMG.llegada, regidora: IMG.regidora,
               pasillo: IMG.pasillo, camerino: [IMG.camerinoPiano, IMG.cantanteCanta], agudo: IMG.agudo },
             vids: { dron: ['vid/dron_bahia.mp4', 'vid/dron_ciudad_vieja.mp4', 'vid/dron_riego_de_agua.mp4', 'vid/dron_rosalia.mp4'], llegada: 'vid/llegada_bastidores.mp4' },
             amb: { dron: [{ src: [SF('sfx_t3_plaza_atardecer'), SF1('amb_ciudad2100')], vol: .3 }, AMB.mar, AMB.gaviotas], sala: [AMB.salaBaja, AMB.crujidosBajo], bastidores: [AMB.bastidores, AMB.crujidos], pasillo: [AMB.pasillo, AMB.crujidosBajo], camerino: [AMB.camerino] },
@@ -357,7 +360,7 @@
           ] },
         { id: 'p8b', nombre: 'La sala', img: IMG.sala, amb: [AMB.salaBaja, AMB.crujidosBajo], mus: false, pj: null, auto: 4.6, sfx: [{ src: SF('sfx_t3_telon'), t: .2, vol: .7 }] },
         { id: 'p8c', nombre: 'El recital · Do M', img: IMG.recital, amb: [], mus: false, pj: null, auto: .2,
-          inter: { tipo: 'recital', mp3: CANCION.do, c1: CANCION.c1, rotulo: 'Tonalidad transportada · <b>Do M</b> · una 2.ª M más grave',
+          inter: { tipo: 'recital', mp3: CANCION.do, c1: CANCION.c1, fin: 44.6,   /* (Iago 4-nov) aplausos justo al acabar el piano (último acorde ~44,5 s) */ rotulo: 'Tonalidad transportada · <b>Do M</b> · una 2.ª M más grave',
             /* (Iago 4-nov) un plano nuevo cada ~4 s; mientras Noa piensa (t3_015n), ella mirando emocionada desde bastidores */
             /* (D2) un plano cada 4–6 s, con fundido de 1 s. La voz entra a los 4,80 s (tiempos_t3.json); Noa piensa de 8,3 a ~27 s
                (plano de Noa en bastidores al empezar y al acabar su frase); el agudo (sol5) a los 31,8 s, con la cantante; voz hasta 40,5 s */
@@ -376,7 +379,7 @@
             { id: 't3_015b', quien: 'NOA', img: IMG.pasilloNoa, pj: { q: 'NOA', pose: 'emocion' }, texto: 'Noa.', espera: .4 },
             { id: 't3_015c', quien: 'REGIDORA', pj: null, img: IMG.pasilloRegidora, texto: '¡La de prácticas no se llama Noa!', espera: .2 }
           ] },
-        { id: 'p8f', nombre: 'Noa se escabulle', img: IMG.escabulle, amb: [AMB.pasillo, AMB.crujidosBajo], mus: MUS.teatroBajo, pj: null, auto: 3.4,
+        { id: 'p8f', nombre: 'Noa sale del teatro', img: IMG.saleTeatro, amb: [AMB.mar, { src: SF('sfx_t3_plaza_atardecer'), vol: .12 }], mus: MUS.teatroBajo, pj: null, auto: 3.4,
           sfx: [{ src: SF1('sfx_pasos_rapidos'), t: 0, vol: .6 }, { src: SF1('sfx_pulsera_vibra'), t: 1.6, vol: .5 }] }
       ] },
       /* 9 · Resumen del narrador */
@@ -401,7 +404,7 @@
             { id: 't3_018', quien: 'AMARO', pj: { q: 'AMARO', pose: 'helada' }, imgs: [{ en: .22, img: IMG.registro }, { en: .9, img: IMG.amaroSeria }], laminas: [{ en: .22, lamina: REG }, { en: .9, lamina: null }],
               texto: 'Noa. He encontrado esto. La coordenada del viaje que hiciste antes a Santiago no la puse yo. Y alguien borró otra.', espera: .4 },
             { id: 't3_019', quien: 'NOA', img: IMG.noaCulpa, pj: { q: 'NOA', pose: 'arrepentida' }, texto: 'Fui yo. Lo siento, Amaro. De verdad.', espera: .8 },
-            { id: 't3_020', quien: 'AMARO', img: IMG.amaroEnfadada, pj: { q: 'AMARO', pose: 'alarma' }, texto: 'Te he mandado a sitios donde podías hacerte daño. ¡Confiaba en ti!', espera: .5 },
+            { id: 't3_020', quien: 'AMARO', img: IMG.amaroEnfadada, pj: { q: 'AMARO', pose: 'alarma' }, texto: 'Te he mandado a sitios donde podías hacerte daño. Confiaba en ti.', espera: .5 },
             { id: 't3_021', quien: 'NOA', img: IMG.noaCuaderno, mus: MUS.padre, pj: { q: 'NOA', pose: 'emocion' },
               texto: 'Ya lo sé. Es que… creo que con esta máquina podría volver a ver a mi padre.', espera: .8 },
             { id: 't3_022', quien: 'AMARO', img: IMG.amaroAblanda, lamina: null, pj: { q: 'AMARO', pose: 'explica' }, texto: '…Venga. Vamos a intentarlo. Pero juntas, y sin más secretos. ¿Dónde crees que podrías encontrarlo?', espera: .4 },
