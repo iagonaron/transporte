@@ -55,19 +55,22 @@
     if (src && !RAP()) src.start(C.currentTime + .05 + preR);
     const P = cfg.planos, V = cfg.vids || {};
     const pon = (img, vid) => { Mo.cambia(img, { funde: .9 }); if (vid && Mo.fondoVideo) Mo.fondoVideo(vid, true); };
+    /* (Iago 4-nov) los planos de dron de Coruña: CORTE DIRECTO, sin fundidos ni deriva/zoom de la lámina */
+    const F = B.$('#fondo');
+    const ponCorte = (img, vid) => { F.classList.add('corte'); Mo.cambia(img, { funde: 0 }); if (vid && Mo.fondoVideo) Mo.fondoVideo(vid, true); };
     const en0 = (t, fn) => B.espera(t * K, c).then(ok => { if (ok) fn(); return ok; });   // tiempo absoluto desde el inicio de la secuencia
     const en = (t, fn) => en0(t + preR, fn);   // tiempo de la VOZ (empieza en preR)
     return new Promise(res => {
       let fin = false;
-      const acaba = ok => { if (fin) return; fin = true; if (!ok) para(.15); res(ok); };
+      const acaba = ok => { if (fin) return; fin = true; F.classList.remove('corte'); if (!ok) para(.15); res(ok); };
       c.alMorir.push(() => acaba(false));
       /* 1 · dron (y el narrador) */
       const nD = P.dron.length;
-      P.dron.forEach((img, i) => en0(i * dShot, () => pon(img, V.dron && V.dron[i])));
+      P.dron.forEach((img, i) => en0(i * dShot, () => ponCorte(img, V.dron && V.dron[i])));
       B.ambiente(cfg.amb.dron);
       en0(1.2, () => Mo.di(Object.assign({ auto: .2 }, L.narr), c).then(() => { if (!fin) Mo.calla(); }));
       /* 2 · la sala */
-      en(T.sala, () => { pon(P.sala); distancia('sala'); B.ambiente(cfg.amb.sala); });
+      en(T.sala, () => { F.classList.remove('corte'); pon(P.sala); distancia('sala'); B.ambiente(cfg.amb.sala); });
       /* 3 · Noa aparece entre bastidores (destello) y la regidora la intercepta */
       en(T.llegada, () => { pon(P.llegada, V.llegada); distancia('pasillo'); B.ambiente(cfg.amb.bastidores); B.sfx('../s1/sfx/sfx_llegada.mp3', .8); E.classList.add('destello-t3'); setTimeout(() => E.classList.remove('destello-t3'), 900); });
       en(T.dial, () => { pon(P.regidora); Mo.di(Object.assign({ auto: .15 }, L.reg), c).then(ok => ok && !fin ? Mo.di(Object.assign({ auto: .15 }, L.noa), c) : false).then(() => { if (!fin) Mo.calla(); }); });

@@ -408,11 +408,14 @@
     }
     return new Promise(r => {
       res = r;
-      B.espera(RAP() ? .4 : dur + .2, c).then(ok => acaba(ok));
+      /* (Iago 4-nov 19:45) cfg.fin: los aplausos entran justo cuando acaba el piano (elisión): el plano siguiente llega en cfg.fin y la cola del acorde se apaga sola */
+      const cola = h && cfg.fin != null && cfg.fin < dur;
+      B.espera(RAP() ? .4 : (cola ? cfg.fin : dur + .2), c).then(ok => acaba(ok, cola));
       c.alMorir.push(() => acaba(false));
     });
-    function acaba(ok) {
+    function acaba(ok, cola) {
       if (fin) return; fin = true;
+      if (h && ok && cola) { try { h.parar(3.5); } catch (e) { } T3.calla(); res(ok); return; }
       if (h && ok) try { h.parar(.6); } catch (e) { }
       if (ok) { V().parar(); T3.calla(); }
       res(ok);

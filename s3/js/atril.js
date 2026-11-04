@@ -48,7 +48,7 @@
   T3.sonLapiz = function (tipo) {
     const ruta = 'sfx/sfx_t3_lapiz_' + (tipo || 'tacha') + '.mp3';
     if (!B.buf[ruta]) return T3.sonLapizSint();
-    const h = B.sfx(ruta, .9); let vivo = true;
+    const h = B.sfx(ruta, .32); let vivo = true;   /* (Iago 4-nov 19:41: sonaba muy fuerte) */
     return { vel() { }, para() { if (!vivo) return; vivo = false; if (h) h.parar(.06); } };
   };
 
@@ -78,7 +78,7 @@
     hoja.appendChild(el('div', 'at-cab', '<b>' + B.esc(can.titulo || 'Cantiga') + '</b><span class="i">' + B.esc(M.tempo_texto || 'Andante cantabile') + '</span><span class="d">Música original</span>'));
     const sisBox = el('div', 'at-sistemas'); hoja.appendChild(sisBox);
     const capa = sv('svg', { class: 'at-capa', viewBox: '0 0 ' + W + ' ' + H, width: W, height: H });
-    capa.innerHTML = '<defs><filter id="grafito" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4" result="r"/>' +
+    capa.innerHTML = '<defs><filter id="grafito" filterUnits="userSpaceOnUse" x="-40" y="-40" width="1400" height="1800"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4" result="r"/>' +
       '<feDisplacementMap in="SourceGraphic" in2="r" scale="1.6" xChannelSelector="R" yChannelSelector="G"/></filter></defs>';
     hoja.appendChild(capa);
     const gMarcas = sv('g', { class: 'at-marcas' }, capa), gVivo = sv('g', { class: 'at-vivo' }, capa);
