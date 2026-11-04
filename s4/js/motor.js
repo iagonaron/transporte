@@ -420,7 +420,7 @@
     }
     montaPlano(p);
     const ls = B.arr(p.lineas);
-    vidsDe(p).slice(0, 2).forEach(M.preparaVideo);
+    vidsDe(p).concat(vidsDe(sigPlano(p) || {})).slice(0, 2).forEach(M.preparaVideo);   // los de este plano y, si cabe, los del siguiente
     B.arr(p.imgs).concat(ls.concat(B.arr(p.despues)).reduce((a, l) => a.concat(l.img ? [{ img: l.img }] : [], B.arr(l.imgs)), [])).forEach(x => M.predecod(x.img));
     let paso = ls.length ? (p.antes ? (caja(false), B.espera(RAPIDO ? .1 : p.antes, c).then(ok => ok ? (caja(true), lineas(ls, c)) : false)) : (caja(true), lineas(ls, c)))
       : (caja(false), B.espera(RAPIDO ? .3 : (p.auto || 0), c));
@@ -543,7 +543,8 @@
     }));
     return r.concat(B.capas.recursos(S), B.arr(S.recursos));
   }
-  function vidsDe(p) { const v = []; const I = l => B.arr(l && l.imgs).forEach(x => x.vid && v.push(x.vid)); I(p); B.arr(p.lineas).forEach(I);
+  function sigPlano(p) { if (!S) return null; const ps = []; S.escenas.forEach(e => e.planos.forEach(q => ps.push(q))); const i = ps.indexOf(p); return i >= 0 ? ps[i + 1] : null; }
+  function vidsDe(p) { const v = []; if (p.fondoVid) v.push(p.fondoVid); const I = l => B.arr(l && l.imgs).forEach(x => x.vid && v.push(x.vid)); I(p); B.arr(p.lineas).forEach(I);
     if (p.inter && p.inter.vids) Object.values(p.inter.vids).forEach(x => B.arr(x).forEach(y => v.push(y))); return v.filter(x => B.hayVideo(x)); }
   function videos() { const v = []; if (B.hayVideo(TUNEL) && S.escenas.some(e => e.planos.some(p => p.tunel))) v.push(TUNEL); S.escenas.forEach(e => e.planos.forEach(p => { if (p.video && B.hayVideo(p.video)) v.push(p.video); if (p.fondoVid && B.hayVideo(p.fondoVid)) v.push(p.fondoVid); B.arr(p.destellos).forEach(d => { if (d.video && B.hayVideo(d.video)) v.push(d.video); }); vidsDe(p).forEach(x => v.indexOf(x) < 0 && v.push(x)); })); return v; }
 
