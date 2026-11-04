@@ -248,7 +248,7 @@
         T4.viaja(m, capaG, fa, fb, c).then(ok => {
           if (!ok) return;
           /* (Iago 4-nov 22:00) letrero fugaz con las notas afectadas */
-          if (sol.n) { const L = el('div', 'mt-afect ' + sol.dir, '<small>' + (sol.n === 1 ? 'La nota afectada es' : 'Las notas afectadas son') + '</small><b>' + (sol.dir === 'asc' ? ORD_S : ORD_B).slice(0, sol.n).join(' · ') + '</b><i>' + (sol.dir === 'asc' ? 'suben un semitono' : 'bajan un semitono') + '</i>');
+          if (sol.n) { const L = el('div', 'mt-afect ' + sol.dir, '<small>' + (sol.n === 1 ? 'La nota afectada es' : 'Las notas afectadas son') + '</small><b>' + (sol.dir === 'asc' ? ORD_S : ORD_B).slice(0, sol.n).join(' · ') + '</b><i>' + (sol.dir === 'asc' ? 'si llevan alteración accidental, sube un semitono' : 'si llevan alteración accidental, baja un semitono') + '</i>');
             mapa.appendChild(L); B.viento.ui('ok'); setTimeout(() => L.remove(), 4200); }
           if (k < cfg.items.length - 1) bSig.style.display = '';
           else if (!listo) { listo = true; M().barraTexto(cfg.fin || 'Ya sabes contar las diferencias: cuántos niveles y hacia dónde.'); M().esperaSigue(c).then(o => sigue && sigue(o)); }
@@ -481,8 +481,15 @@
       const f = el('div', 'acc-fila'), a = el('div', 'acc-pe'), b = el('div', 'acc-pe');
       f.appendChild(a); f.appendChild(el('i', 'acc-fl', '<span>5.ª J ↑</span>')); f.appendChild(b); f.appendChild(el('em', 'acc-txt', x.txt));
       box.appendChild(f);
-      nota(a, 2, x.de, x.deAcc, x.deTxt || ''); nota(b, 3, x.a, x.aAcc, x.aTxt || '');
-      const e = (s.ens || [])[i]; B.espera(e == null ? .6 + i * 1.6 : (e > 1 ? e : e * dur), c).then(ok => ok && f.classList.add('on'));
+      nota(a, 2, x.de, x.deAcc, x.deTxt || '');
+      /* (Iago 4-nov 22:07) si la diferencia cambia la alteración, se ANIMA: primero se copia la del original (fa♭) y la diferencia la sube (fa♮) */
+      const cambia = x.aAcc !== x.deAcc;
+      if (cambia) { b.classList.add('acc-morf'); const b1 = el('div', 'v1'), b2 = el('div', 'v2'); b.appendChild(b1); b.appendChild(b2);
+        nota(b1, 3, x.a, x.deAcc, (x.aTxt || '').replace(/[♮♯♭]$/, '') + ({ b: '♭', '#': '♯', n: '♮' }[x.deAcc] || '') + ' ?'); nota(b2, 3, x.a, x.aAcc, x.aTxt || '');
+        b.appendChild(el('span', 'acc-sube', (x.aAcc === 'n' && x.deAcc === 'b') || (x.aAcc === '#' && x.deAcc === 'n') ? '↑ ½ tono' : '↓ ½ tono')); }
+      else nota(b, 3, x.a, x.aAcc, x.aTxt || '');
+      const e = (s.ens || [])[i]; B.espera(e == null ? .6 + i * 1.6 : (e > 1 ? e : e * dur), c).then(ok => { if (!ok) return; f.classList.add('on');
+        if (cambia) B.espera(RAP() ? .1 : 1.6, c).then(ok2 => { if (ok2) { b.classList.add('ya'); B.viento.ui('ok'); } }); });
     });
   };
   /* la tabla resumen (como la de Teoría at home PRO): { titulo, ens } */
@@ -494,7 +501,8 @@
       ['', '<b class="sos">' + flecha('asc', 28) + ' Ascendentes</b>', '<b class="bem">' + flecha('desc', 28) + ' Descendentes</b>'],
       ['Cuándo', 'más ♯ o menos ♭', 'más ♭ o menos ♯'],
       ['Notas afectadas, por orden', 'fa · do · sol · re · la · mi · si', 'si · mi · la · re · sol · do · fa'],
-      ['Las notas afectadas', 'suben un semitono<br><span class="tdif-acc">♭ → ♮ · ♮ → ♯ · ♯ → 𝄪</span>', 'bajan un semitono<br><span class="tdif-acc">♯ → ♮ · ♮ → ♭ · ♭ → 𝄫</span>'],
+      ['Sus alteraciones accidentales', 'suben un semitono<br><span class="tdif-acc">♭ → ♮ · ♮ → ♯ · ♯ → 𝄪</span>', 'bajan un semitono<br><span class="tdif-acc">♯ → ♮ · ♮ → ♭ · ♭ → 𝄫</span>'],
+      ['Las notas sin alteraciones accidentales', 'las resuelve la armadura nueva', 'las resuelve la armadura nueva'],
       ['Las demás alteraciones', 'se copian igual: <b>do♮ → sol♮</b> · <b>sol♯ → re♯</b>', 'se copian igual']
     ];
     filas.forEach((f, i) => {
