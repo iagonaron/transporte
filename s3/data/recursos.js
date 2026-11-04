@@ -460,7 +460,7 @@ TR.RECURSOS = {
 "voz/t3/t3_026.mp3": 58140,
 "voz/t3/t3_027.mp3": 36406,
 "voz/t3/t3_028.mp3": 41422,
-"voz/t3/t3_029.mp3": 39750,
+"voz/t3/t3_029.mp3": 41004,
 "voz/t3/t3_030.mp3": 76530
 };
 window.TROZOS = {"vid/dron_montaje.mp4": 2};
