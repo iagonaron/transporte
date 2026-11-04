@@ -13,8 +13,9 @@
   B.CFG = { blipConVoz: false, marcaFalta: true, voz: 'voz/t3/' };
   const PJ1 = '../s1/img/t1/pj/';
   B.PJ = {
-    NOA: { nombre: 'Noa', color: '#7fd4ff', lado: 'izq', alto: .86, dir: PJ1, _: 'neutra', poses: ['neutra', 'aburrida', 'traviesa', 'sorpresa', 'pensativa', 'emocion'],
-      mira: { neutra: 'izq', aburrida: 'izq', traviesa: 'izq', sorpresa: 'izq', pensativa: 'izq', emocion: 'izq' } },
+    NOA: { nombre: 'Noa', color: '#7fd4ff', lado: 'izq', alto: .86, dir: PJ1, _: 'neutra', poses: ['neutra', 'aburrida', 'traviesa', 'sorpresa', 'pensativa', 'emocion', 'arrepentida'],
+      rutas: { arrepentida: 'img/t3/pj/noa_arrepentida.png' },
+      mira: { neutra: 'izq', aburrida: 'izq', traviesa: 'izq', sorpresa: 'izq', pensativa: 'izq', emocion: 'izq', arrepentida: 'izq' } },
     AMARO: { nombre: 'Dra. Amaro', color: '#c9b6ff', lado: 'der', alto: .84, dir: PJ1, _: 'explica', poses: ['explica', 'tableta', 'alarma', 'helada'],
       mira: { explica: 'izq', tableta: 'der', alarma: 'der', helada: 'der' } },
     /* personajes nuevos de T3: sin pose PNG (salen en las láminas de C); el chico, sólo voz y la mano en la imagen */
@@ -154,7 +155,7 @@
      (lapizEnImagen: true si el lápiz ya está pintado en la imagen: el de la web queda invisible y solo hace de botón). */
   B.ATRIL = {
     provisional: { hoja: { x: .372, y: .045, w: .256, h: .635 }, lapiz: { x: .468, y: .686, w: .135, rot: -2.5 }, lapizEnImagen: false },
-    real: { hoja: { x: .372, y: .045, w: .256, h: .635 }, lapiz: { x: .468, y: .686, w: .135, rot: -2.5 }, lapizEnImagen: true }
+    real: { hoja: { x: .366, y: .029, w: .269, h: .650 }, lapiz: { x: .682, y: .649, w: .189, rot: 0 }, lapizEnImagen: true }   /* (4-nov) calibrado por CH1 sobre atril_piano.webp */
   };
 
   /* ── láminas en código ── */
@@ -310,7 +311,7 @@
           lineas: [
             { id: 't3_018', quien: 'AMARO', pj: { q: 'AMARO', pose: 'helada' }, imgs: [{ en: .22, img: IMG.registro }, { en: .9, img: IMG.amaroSeria }], laminas: [{ en: .22, lamina: REG }, { en: .9, lamina: null }],
               texto: 'Noa. He encontrado esto. La coordenada del viaje que hiciste antes a Santiago no la puse yo. Y alguien borró otra.', espera: .4 },
-            { id: 't3_019', quien: 'NOA', img: IMG.noaCulpa, pj: { q: 'NOA', pose: 'pensativa' }, texto: 'Fui yo. Lo siento, Amaro. De verdad.', espera: .8 },
+            { id: 't3_019', quien: 'NOA', img: IMG.noaCulpa, pj: { q: 'NOA', pose: 'arrepentida' }, texto: 'Fui yo. Lo siento, Amaro. De verdad.', espera: .8 },
             { id: 't3_020', quien: 'AMARO', img: IMG.amaroEnfadada, pj: { q: 'AMARO', pose: 'alarma' }, texto: 'Te he mandado a sitios donde podías hacerte daño. ¡Confiaba en ti!', espera: .5 },
             { id: 't3_021', quien: 'NOA', img: IMG.noaCuaderno, mus: MUS.padre, pj: { q: 'NOA', pose: 'emocion' }, imgs: [{ en: .74, img: IMG.cuadernoFechas }],
               laminas: [{ en: .74, lamina: { tipo: 'texto', txt: 'Xoán · fechas y destinos', x: .7, y: .2, rot: -3, estilo: B.existe(N('cuaderno_fechas')) || B.existe(T2('cuaderno_otra')) ? 'tinta' : 'holo' } }],
