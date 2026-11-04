@@ -5,6 +5,7 @@ Antes de subir nada: mira el último commit de `main`, lee esto, apunta abajo fe
 El index.html de siempre (el portal antiguo) no se toca: lo nuevo va en prueba.html, s1/, s2/…
 
 ## Registro (lo más reciente arriba · hora de Galicia)
+- 4-nov 22:10 · Transporte (C4) · EN CURSO · T4 v2: flashback en consola, notas afectadas (t4_013b, montaña), botón Transcribir, vídeos cebados (arrancan fluidos) en s3 y s4. Deshacer: revertir a 8a6f48f
 - 4-nov 20:19 · Transporte (C4) · EN CURSO · T4 v1 «Las diferencias» (carpeta s4 nueva) y nodo T4 en prueba.html. Deshacer: borrar s4/ y revertir prueba.html a 31a494d
 - 4-nov 19:55 · Transporte (C4) · EN CURSO · T3 parche: vídeos de dron de Coruña con corte directo sin fundidos ni reescalado; fuera «¿Qué podría salir mal?» de Amaro y la réplica de Noa; lápiz más bajo de volumen; clave de do visible en iPad (filtro grafito); sin motas sobre las caras de la cantante; aplausos al acabar el piano; Noa sale por la puerta de artistas; t3_020 de Amaro menos enfadada. Deshacer: revertir a be42cba.
 - 4-nov 17:43 · Transporte (C4) · HECHO · T3 feedback de la tarde: vida en planos, lápiz en todos los pentagramas, claves página entera, coro guía, recital con Noa, pulsera, final nuevo, María Pita 2070, teclados, láminas sin estirar. 95 ficheros de s3/ (data, js, css, voz, mus/coro, sfx, img/t3, vid). Commits d5f8d54 (EN CURSO) → d1f1100 … d5daecf (17 commits, s3/css, data, js, voz, sfx, mus, img/t3, vid, coro, gaviotas). s2 sin cambios. DESHACER: revertir a cd0c54a.
