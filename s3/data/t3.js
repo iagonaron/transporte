@@ -140,7 +140,7 @@
       { src: T2('lab_noche_noa'), vida: LAB }),
     juntas: O(I3('lab_juntas', 'Noa y Amaro, juntas ante la consola, preparan el salto; el Transportador se enciende; plano a dos (Noa a la izquierda, Amaro a la derecha)', { ocultaPj: ['NOA', 'AMARO'], vida: [{ tipo: 'anillos', zona: [.3, .05, .4, .6], n: 3 }].concat(LAB) }),
       { src: T2('lab_dos'), ocultaPj: ['NOA', 'AMARO'], vida: [{ tipo: 'anillos', zona: [.38, .05, .3, .6], n: 3 }].concat(LAB) }),
-    /* ── 6 · plaza de María Pita (2070: la fecha NO se dice en pantalla; Iago 4-nov) ── */
+    /* ── 6 · plaza de María Pita, 2070 (Iago 4-nov: moderna, reconocible) ── */
     plaza: I3('mariapita', 'Plaza de María Pita al atardecer, reconocible (el Palacio Municipal, los soportales, la estatua) pero MODERNA: alguna reforma, locales y terrazas actualizados, luminarias y mobiliario de diseño, detalles de la estética de 2100 en versión sutil (unos 30 años antes: aún sin hologramas ni drones por todas partes); gente en las terrazas con caras variadas, nadie se parece a Noa; plano general', { vida: [{ tipo: 'luces', zona: [.05, .35, .9, .35], n: 16, color: '#ffe2b0' }] }),
     noaPlaza: I3('noa_mariapita', 'Noa de tres cuartos de espaldas, en la plaza de María Pita modernizada, mira las terrazas (locales actualizados, mobiliario de diseño, sutiles toques de futuro) con emoción contenida; contraluz de atardecer; los soportales detrás', { ocultaPj: ['NOA'], vida: POLVO('#ffe2b8') }),
     mano: I3('mano_hombro', 'DETALLE: la mano de un chico joven se apoya en el hombro de Noa (su sudadera), SIN cara y sin pistas de la fecha; al fondo, desenfocada, la plaza de María Pita modernizada al atardecer', { ocultaPj: ['NOA'], vida: [] }),
@@ -334,15 +334,15 @@
             cartel: 'Antes del último viaje, si quieres, practica el transporte mental: <b>tres melodías nuevas</b>, cada una un poco más difícil. Mira el intervalo, piensa la tonalidad nueva y toca cada nota transportada en el teclado. Al final verás tu nota.',
             cartelCorto: 'Toca cada nota transportada en el teclado. <b>A S D F G H J</b> = Do Re Mi Fa Sol La Si · <b>W E T Y U</b> = las negras.' } }
       ] },
-      /* 12 · El viaje final: plaza de María Pita (2070, sin decirlo en pantalla: la edad de Xoán es la sorpresa) (cliffhanger) */
-      { id: 'e12', titulo: 'María Pita', planos: [
+      /* 12 · El viaje final: plaza de María Pita, 2070 (cliffhanger) */
+      { id: 'e12', titulo: 'María Pita, 2070', planos: [
         { id: 'p12a', nombre: 'Juntas, ante la consola', img: IMG.juntas, amb: [AMB.lab], mus: MUS.tension, pj: null, auto: 3.4,
           sfx: [{ src: SF1('sfx_maquina_arranca'), t: .1 }, { src: SF1('sfx_anillos_giran'), t: 1.2 }] },
-        { id: 'p12b', nombre: 'El último salto', tunel: { de: 2100, a: 2070, misterio: true }, dur: 5, blanco: 2.2, sfxBlanco: SF1o('sfx_flash_blanco'), amb: [], mus: MUS.tension, sfx: [{ src: SF1('sfx_salto_tiempo'), t: 0 }] },
-        { id: 'p12c', nombre: 'Plaza de María Pita', fondoVid: 'vid/mariapita.mp4', img: IMG.plaza, amb: [AMB.plaza], mus: MUS.plaza, pj: null, antes: 3.2,
+        { id: 'p12b', nombre: 'El salto a 2070', tunel: { de: 2100, a: 2070 }, dur: 5, blanco: 2.2, sfxBlanco: SF1o('sfx_flash_blanco'), amb: [], mus: MUS.tension, sfx: [{ src: SF1('sfx_salto_tiempo'), t: 0 }] },
+        { id: 'p12c', nombre: 'Plaza de María Pita, 2070', fondoVid: 'vid/mariapita.mp4', img: IMG.plaza, amb: [AMB.plaza], mus: MUS.plaza, pj: null, antes: 3.2,
           sfx: [{ src: SF1('sfx_llegada'), t: 0, vol: .7 }],
           lineas: [
-            { id: 't3_026', quien: 'NOA', img: IMG.noaPlaza, pj: { q: 'NOA', pose: 'emocion' }, texto: 'He querido venir aquí… porque aquí éramos felices.', claves: { claves: ['Plaza de María Pita'], ts: [.2], pos: 'arriba' }, espera: 1.4 }
+            { id: 't3_026', quien: 'NOA', img: IMG.noaPlaza, pj: { q: 'NOA', pose: 'emocion' }, texto: 'He querido venir aquí… porque aquí éramos felices.', claves: { claves: ['Plaza de María Pita · 2070'], ts: [.2], pos: 'arriba' }, espera: 1.4 }
           ] },
         { id: 'p12d', nombre: 'Una mano en el hombro', img: IMG.mano, amb: [AMB.plazaBaja], mus: false, pj: null, antes: 1.6,
           imgs: [{ t: 0, img: IMG.mano, vid: 'vid/mano.mp4', vidUnaVez: true }],
