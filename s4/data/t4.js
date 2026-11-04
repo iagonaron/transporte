@@ -318,7 +318,7 @@
         { id: 'p7b', nombre: 'Suena igual', img: IMG.noaEmocion, amb: SOPORTALES, mus: false, pj: null, antes: .6,
           sfx: [{ src: SFx(SF('sfx_t4_aplausos'), SF3('sfx_t3_aplausos')), t: 0, vol: .45 }],
           lineas: [
-            { id: 't4_017', quien: 'NOA', pj: null, texto: 'Papá… suena igual que cuando me la tocabas.', espera: 1 }
+            { id: 't4_017', quien: 'NOA', pj: null, texto: 'Papá… suena igual que cuando la tocabas en casa para dormirme.', espera: 1 }
           ] }
       ] },
       /* 8 · La despedida (de noche; A: mus/t4_despedida.mp3, el tema en el clarinete solo) */
@@ -328,7 +328,7 @@
           lineas: [
             { id: 't4_018', quien: 'XOAN', pj: null, texto: 'Oye… vuelve con tu madre. Te necesita. Y no hay tanto tiempo como crees.', espera: .6 },
             { id: 't4_019', quien: 'NOA', img: IMG.noaDuda, pj: null, texto: 'Si me quedo aquí, contigo…', espera: .2 },
-            { id: 't4_020', quien: 'XOAN', img: IMG.xoanSonrisa, pj: null, texto: '…tú no habrías nacido. Ya. Lo he entendido a la primera. Vete. Y cuídala.', espera: .6 },
+            { id: 't4_020', quien: 'XOAN', img: IMG.xoanSonrisa, pj: null, texto: '…acabaría habiendo dos Noas. Tienes que irte, para no crear esa paradoja temporal. Y quiero que cuides de tu madre.', espera: .6 },
             { id: 't4_021', quien: 'NOA', img: IMG.abrazo, imgs: [{ t: 0, img: IMG.abrazo, vid: 'vid/abrazo.mp4', vidUnaVez: true }], pj: null,
               sfx: [{ src: SF('sfx_t4_abrazo'), t: 0, vol: .5 }], texto: 'Gracias, papá.', espera: 2.4 },
             /* Amaro llama por la pulsera (sin id en el guion: t4_021b; ⚠ falta su voz) */
