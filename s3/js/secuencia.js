@@ -66,7 +66,7 @@
       c.alMorir.push(() => acaba(false));
       /* 1 · dron (y el narrador) */
       const nD = P.dron.length;
-      P.dron.forEach((img, i) => en0(i * dShot, () => ponCorte(img, V.dron && V.dron[i])));
+      P.dron.forEach((img, i) => en0(i * dShot, () => { ponCorte(img, V.dron && V.dron[i]); if (Mo.preparaVideo && V.dron) Mo.preparaVideo(V.dron[i + 1] || V.llegada); }));   /* (4-nov) el siguiente vídeo, ya cebado */
       B.ambiente(cfg.amb.dron);
       en0(1.2, () => Mo.di(Object.assign({ auto: .2 }, L.narr), c).then(() => { if (!fin) Mo.calla(); }));
       /* 2 · la sala */
