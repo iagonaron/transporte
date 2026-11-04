@@ -126,8 +126,8 @@
     noaCuenta: O(I4('noa_cuenta', 'PRIMER PLANO de Noa: cuenta con los dedos y responde segura («Una»), media sonrisa; mira a Xoán (hacia la derecha); soportales de noche desenfocados', { ocultaPj: ['NOA'], vida: BR('noa_cuenta') }),
       R3('noa_se_gira', { ocultaPj: ['NOA'] })),
     /* FLASHBACK (Iago 2-nov y 4-nov): el universo del videojuego del portal de Modulación; solo un guiño visual, nada musical */
-    flashMontana: I4('flash_montana', 'RECUERDO (tonos cálidos, bordes suaves): el videojuego del portal de Modulación: su viajero trepa una montaña nevada hacia la cumbre, en el mismo universo y estilo que los vídeos de Modulación (PROYECTO/runway/wow5_*.mp4); sin interfaz ni música', { vida: [{ tipo: 'polvo', zona: [0, 0, 1, .7], n: 22, color: '#ffffff', vel: .35 }].concat(BR('flash_montana', { chispa: .08 })) }),
-    flashAgua: I4('flash_agua', 'RECUERDO (tonos cálidos, bordes suaves): el mismo viajero del videojuego de Modulación se zambulle y bucea hacia el fondo de un mar azul, con rayos de luz desde la superficie; mismo universo y estilo; sin interfaz', { vida: [{ tipo: 'chispas', zona: [0, .2, 1, .8], n: 16, color: '#cff6ff', vel: .45 }].concat(HAZ(.3, 0, .4, .8, '#bff0ff'), BR('flash_agua', { chispa: .05 })) }),
+    flashMontana: I4('flash_montana_consola', 'RECUERDO (tonos cálidos, bordes suaves): el videojuego del portal de Modulación: su viajero trepa una montaña nevada hacia la cumbre, en el mismo universo y estilo que los vídeos de Modulación (PROYECTO/runway/wow5_*.mp4); sin interfaz ni música', { vida: [] }),
+    flashAgua: I4('flash_agua_consola', 'RECUERDO (tonos cálidos, bordes suaves): el mismo viajero del videojuego de Modulación se zambulle y bucea hacia el fondo de un mar azul, con rayos de luz desde la superficie; mismo universo y estilo; sin interfaz', { vida: [] }),
     accCuaderno: O(I4('cuaderno_accidental', 'DETALLE: el dedo de Xoán señala un BECUADRO a lápiz en el cuaderno de pentagramas (notación correcta, clave de sol, dos sostenidos), bajo la luz de la farola; CENTRO LIMPIO (la web dibuja la explicación encima)', { vida: BR('cuaderno_accidental', { a: .22, chispa: 0 }).concat(POLVO()) }),
       R3('mariapita', { luz: .5 })),
     /* fondo de los interactivos, del resumen y del ejercicio final */
@@ -255,15 +255,19 @@
             { id: 't4_011', quien: 'XOAN', lamina: ARM, pj: null, texto: 'Mi parte está en re mayor: dos sostenidos. La tuya tiene que estar en la mayor: tres sostenidos. ¿Cuántas alteraciones cambian?', espera: .3 },
             { id: 't4_012', quien: 'NOA', img: IMG.noaCuenta, pj: null, texto: 'Una. Sale un sostenido más.', espera: .3 },
             { id: 't4_013', quien: 'XOAN', img: IMG.explica, lamina: { tipo: 'escalaDif', titulo: 'Una diferencia ascendente', de: 'Re M', a: 'La M', t: 1.3, rotulos: false }, pj: null,
-              texto: 'Eso es una diferencia. Y como hay más sostenidos, es ascendente.', espera: .8 }
+              texto: 'Eso es una diferencia. Y como hay más sostenidos, es ascendente.', espera: .4 },
+            /* (Iago 4-nov 21:58) faltaba decir qué notas quedan afectadas */
+            { id: 't4_013b', quien: 'XOAN', img: IMG.explica, pj: null, claves: { claves: ['Nota afectada: fa'], ens: [.45], pos: 'arriba' },
+              texto: 'Y una diferencia ascendente afecta a una nota: la primera del orden de los sostenidos, fa. Si fueran dos, serían fa y do; si fueran tres, fa, do y sol.', espera: .8 }
           ] },
+        /* (Iago 4-nov 21:56) el videojuego, dentro de una consola portátil en manos de Noa niña (vídeo incrustado en la pantalla de img/t4/flash_consola) */
         /* FLASHBACK: el videojuego de Modulación (C: vid/flash_montana.mp4 y vid/flash_agua.mp4, 5 s, 1080p; si faltan, sus láminas) */
         { id: 'p4b', nombre: 'Recuerdo · la montaña', img: IMG.flashMontana, recuerdo: true, amb: [AMB.recuerdo], mus: MUS.terrazaBaja, pj: null, antes: .4,
           lineas: [
-            { id: 't4_014', quien: 'XOAN', imgs: [{ t: 0, img: IMG.flashMontana, vid: 'vid/flash_montana.mp4', vidUnaVez: true }],
+            { id: 't4_014', quien: 'XOAN', imgs: [{ t: 0, img: IMG.flashMontana, vid: 'vid/flash_montana_consola.mp4', vidUnaVez: true }],
               lamina: { tipo: 'simbolos', simbolo: '♯', t0: 5.6, cada: .7 }, pj: null,
               texto: '¿Recuerdas aquel videojuego al que jugabas de pequeña? Imagínate cuando escalabas una montaña… Eso son las diferencias ascendentes: cuanto más subes, más sostenidos.', espera: .6 },
-            { id: 't4_015', quien: 'XOAN', img: IMG.flashAgua, imgs: [{ t: 0, img: IMG.flashAgua, vid: 'vid/flash_agua.mp4', vidUnaVez: true }],
+            { id: 't4_015', quien: 'XOAN', img: IMG.flashAgua, imgs: [{ t: 0, img: IMG.flashAgua, vid: 'vid/flash_agua_consola.mp4', vidUnaVez: true }],
               lamina: { tipo: 'simbolos', simbolo: '♭', t0: 1.8, cada: .6 }, pj: null,
               texto: 'Y cuando te metías en el agua, hacia abajo… más bemoles. Las diferencias descendentes.', espera: 1 }
           ] },
