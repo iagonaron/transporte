@@ -69,16 +69,16 @@
       { src: T2('lab_noche_noa'), vida: [{ tipo: 'anillos', zona: [.3, .1, .4, .7], n: 2 }].concat(LAB) }),
     amaroCalibra: O(I3('lab_amaro_calibra', 'Amaro a la derecha junto a la consola, mira a Noa (hacia la izquierda), seria pero tranquila, una mano sobre el panel; plano medio; luz cian de la consola', { ocultaPj: ['AMARO'], vida: LAB }),
       { src: T2('lab_amaro_firme'), ocultaPj: ['AMARO'], vida: LAB }),
-    noaCansada: O(I3('lab_noa_cansada', 'Noa a la izquierda, plano medio, cansada e incrédula, mira a Amaro (hacia la derecha); el pelo todavía húmedo de Santiago, auriculares al cuello', { ocultaPj: ['NOA'], vida: LAB }),
+    noaCansada: O(I3('lab_noa_cansada', 'Noa a la izquierda, plano medio, cansada e incrédula, mira a Amaro (hacia la derecha); el pelo todavía húmedo de Santiago, auriculares al cuello; nada de brazos cruzados ni de encogerse de hombros', { ocultaPj: ['NOA'], vida: LAB }),
       { src: T2('lab_noa_sonrisa'), ocultaPj: ['NOA'], vida: LAB }),
     consola: O(I3('consola_holo', 'DETALLE sin personas: la consola holográfica del Transportador se enciende; paneles cian y ámbar flotando en los bordes, CENTRO LIMPIO (la web dibuja el repaso encima)', { vida: [{ tipo: 'parpadeo', zona: [.05, .1, .9, .7], color: '#9fe4ff' }] }),
       { src: T1('prueba_consola'), vida: [{ tipo: 'traza', zona: [.40, .48, .33, .07], periodo: .16 }, { tipo: 'parpadeo', zona: [.38, .33, .36, .25], color: '#9fe4ff' }] }),
     amaroSonrie: O(I3('lab_amaro_sonrie', 'Amaro, primer plano, sonríe a medias mirando la consola (hacia la izquierda); el reflejo cian del «100 %» en la cara', { ocultaPj: ['AMARO'], vida: LAB }),
       { src: T2('lab_amaro_firme'), ocultaPj: ['AMARO'], vida: LAB }),
-    amaroDestino: I3('lab_amaro_destino', 'Amaro teclea el destino en la consola; sobre ella flota un holograma con la fachada del Teatro Rosalía de Castro; Noa al fondo a la izquierda, brazos cruzados', { ocultaPj: ['AMARO', 'NOA'], vida: [{ tipo: 'parpadeo', zona: [.3, .1, .4, .5], color: '#9fe4ff' }].concat(LAB) }),
+    amaroDestino: I3('lab_amaro_destino', 'Amaro teclea el destino en la consola; sobre ella flota un holograma con la fachada del Teatro Rosalía de Castro; Noa al fondo a la izquierda, atenta, con las manos en la mesa; nada de brazos cruzados ni de encogerse de hombros', { ocultaPj: ['AMARO', 'NOA'], vida: [{ tipo: 'parpadeo', zona: [.3, .1, .4, .5], color: '#9fe4ff' }].concat(LAB) }),
     holoRosalia: I3('holo_rosalia', 'DETALLE: holograma cian de la fachada real del Teatro Rosalía de Castro (A Coruña) con «2026» en el panel; fondo del laboratorio desenfocado', { vida: [{ tipo: 'parpadeo', zona: [.2, .1, .6, .7], color: '#9fe4ff' }, { tipo: 'traza', zona: [.25, .82, .5, .02], periodo: .2 }] }),
-    noaResopla: O(I3('lab_noa_resopla', 'Noa, primer plano, pone los ojos en blanco y murmura para sí; luz de los anillos que empiezan a girar detrás', { ocultaPj: ['NOA'], vida: LAB }),
-      { src: T2('lab_noa_brazos'), ocultaPj: ['NOA'], vida: LAB }),
+    noaResopla: O(I3('lab_noa_resopla', 'Noa, primer plano, pone los ojos en blanco y murmura para sí; luz de los anillos que empiezan a girar detrás; nada de brazos cruzados ni de encogerse de hombros', { ocultaPj: ['NOA'], vida: LAB }),
+      { src: T1('lab_centro'), vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 3 }].concat(LAB) }   /* (Iago 4-nov) nada de lab_noa_brazos: lab vacío + la pose de Noa encima */),
     maquina: { src: T1('prueba_cerca'), vida: [{ tipo: 'anillos', zona: [.2, 0, .65, .78], n: 3 }, { tipo: 'pulso', zona: [.42, .1, .18, .3], color: '#58b8ff' }].concat(LAB) },
     /* ── 2 · Teatro Rosalía de Castro, 2026 ── */
     fachada: I3('rosalia_fachada', 'Exterior REAL del Teatro Rosalía de Castro (rúa Riego de Agua, A Coruña) al anochecer de 2026: fachada iluminada, cartel del recital, gente entrando; fiel a las fotos reales', { vida: [{ tipo: 'luces', zona: [.15, .25, .7, .4], n: 14, color: '#ffe2b0' }] }),
@@ -97,7 +97,11 @@
     pianistaReloj: I3('pianista_reloj', 'El PIANISTA (hombre de unos 55, canoso, gafas, chaqueta oscura, tranquilo y con oficio) mira su reloj de pulsera sentado al piano vertical; plano medio; mira hacia la izquierda', { vida: POLVO() }),
     duda: I3('cantante_duda', 'La cantante, plano medio, incrédula, se vuelve hacia el pianista (mira a la izquierda); mano en el fular', { vida: POLVO() }),
     pianistaAtril: I3('pianista_atril', 'El pianista señala con calma la partitura del atril, sonríe apenas; mira a la cantante (hacia la derecha); plano medio corto; teclado 2+3 visible', { vida: POLVO() }),
-    atril: I3('atril_partitura', 'DETALLE oblicuo SIN caras: la partitura en el atril del piano vertical (papel claro, CENTRO LIMPIO: la web dibuja la lámina encima); abajo, las manos del pianista apoyadas en las teclas (negras en grupos de 2 y 3)', { vida: FOCO(.2, .05, .6, .4) }),
+    /* (Iago 4-nov) toda la secuencia del transporte mental (pianista, lápiz, claves, tiempo real) sobre el atril del piano de cola.
+       La partitura se dibuja ENCIMA de la hoja A4 de la imagen: calibración en TR.ATRIL (abajo). Mientras C no la haga, el fondo
+       provisional dibujado en código (img/provisional/atril_provisional.webp, 2880×1620). */
+    atrilPiano: O(I3('atril_piano', 'Atril de un piano de cola, vista FRONTAL y centrada, luz cálida de camerino; sobre el atril una hoja A4 en blanco, recta y sin texto, ocupando el centro; un lápiz de grafito apoyado en la repisa del atril; debajo, el borde de las teclas (negras en grupos 2+3); sin manos ni personas'),
+      { src: 'img/provisional/atril_provisional.webp' }),
     manos: I3('manos_teclas', 'DETALLE: las manos del pianista tocando (teclas negras en grupos de 2 y 3, anatomía correcta), luz cálida, poca profundidad de campo', { vida: FOCO(.2, .3, .6, .4) }),
     ensayo: I3('camerino_ensayo', 'Ensayo en el camerino: el pianista toca el piano vertical, la cantante canta bajito a su lado, Noa a la izquierda mira la partitura por encima del hombro del pianista; plano general cálido', { ocultaPj: ['NOA'], vida: POLVO() }),
     /* ── 4 · el recital ── */
@@ -118,8 +122,8 @@
       { src: T2('lab_amaro_sospecha'), ocultaPj: ['AMARO'], vida: LAB }),
     registro: O(I3('registro_pantalla', 'DETALLE: la pantalla del registro del Transportador, sin texto (la web pone las líneas y la coordenada borrada); cian sobre negro', { ocultaPj: ['AMARO'], vida: [{ tipo: 'parpadeo', zona: [.1, .1, .5, .6], color: '#9fe4ff' }] }),
       { src: T2('registro_dos'), ocultaPj: ['AMARO'], vida: [{ tipo: 'parpadeo', zona: [.1, .1, .5, .6], color: '#9fe4ff' }] }),
-    noaCulpa: O(I3('lab_noa_culpa', 'Noa a la izquierda, mira al suelo, culpable; plano medio; luz azul baja', { ocultaPj: ['NOA'], vida: LAB }),
-      { src: T2('lab_noa_brazos'), ocultaPj: ['NOA'], vida: LAB }),
+    noaCulpa: O(I3('lab_noa_culpa', 'Noa a la izquierda, mira al suelo, culpable; plano medio; luz azul baja; nada de brazos cruzados ni de encogerse de hombros', { ocultaPj: ['NOA'], vida: LAB }),
+      { src: T1('lab_centro'), vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 3 }].concat(LAB) }   /* (Iago 4-nov) nada de lab_noa_brazos: lab vacío + la pose de Noa encima */),
     amaroEnfadada: O(I3('lab_amaro_enfadada', 'Amaro, plano medio, dolida y enfadada, gesto abierto con la mano; mira a la izquierda', { ocultaPj: ['AMARO'], vida: LAB }),
       { src: T2('lab_amaro_sospecha'), ocultaPj: ['AMARO'], vida: LAB }),
     noaCuaderno: O(I3('lab_noa_cuaderno', 'Noa abraza el cuaderno de su padre contra el pecho, con los ojos húmedos; mira a Amaro (hacia la derecha)', { ocultaPj: ['NOA'], vida: LAB }),
@@ -129,8 +133,8 @@
     amaroAblanda: O(I3('lab_amaro_ablanda', 'Amaro, primer plano, se ablanda: suspira y casi sonríe; mira a la izquierda', { ocultaPj: ['AMARO'], vida: LAB }),
       { src: T2('lab_dos'), ocultaPj: ['NOA', 'AMARO'], vida: LAB }),
     recuerdo: I3('recuerdo_terraza', 'RECUERDO (tonos cálidos, bordes suaves): Noa de niña (unos 8 años) con su padre Xoán adulto (fiel a su hoja, clarinete en Si♭) en una terraza de la plaza de María Pita al atardecer, sacando los instrumentos', { vida: POLVO('#ffe2b8') }),
-    noaDecidida: O(I3('lab_noa_decidida', 'Noa, primer plano, decidida y serena, mira a Amaro (hacia la derecha)', { ocultaPj: ['NOA'], vida: LAB }),
-      { src: T2('lab_noa_brazos'), ocultaPj: ['NOA'], vida: LAB }),
+    noaDecidida: O(I3('lab_noa_decidida', 'Noa, primer plano, decidida y serena, mira a Amaro (hacia la derecha); nada de brazos cruzados ni de encogerse de hombros', { ocultaPj: ['NOA'], vida: LAB }),
+      { src: T1('lab_centro'), vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 3 }].concat(LAB) }   /* (Iago 4-nov) nada de lab_noa_brazos: lab vacío + la pose de Noa encima */),
     pulsera: I3('pulsera_mensaje', 'DETALLE: la muñeca de Noa con la pulsera encendida (un mensaje entrante, la pantalla SIN texto: la web lo escribe al lado); fondo del laboratorio desenfocado', { vida: [{ tipo: 'vibra', zona: [.4, .35, .2, .25] }, { tipo: 'parpadeo', zona: [.38, .3, .25, .35], color: '#ffc48a' }] }),
     noaAparta: O(I3('lab_noa_aparta', 'Noa aparta la vista de la pulsera y baja la mano sin contestar; mira hacia la consola (a la derecha); luz azul', { ocultaPj: ['NOA'], vida: LAB }),
       { src: T2('lab_noche_noa'), vida: LAB }),
@@ -143,6 +147,13 @@
     noaHelada: I3('noa_helada', 'Noa, primer plano, helada, sin girarse; los ojos muy abiertos; luz de atardecer; la mano todavía en su hombro, al borde del encuadre', { ocultaPj: ['NOA'], vida: [] })
   };
   B._IMG = IMG;
+  /* CALIBRACIÓN del atril (fracciones del fondo 1920×1080): dónde está la hoja A4 (x, y, ancho, alto) y el lápiz de la repisa
+     (x, y = esquina superior izquierda, w = largo, rot en grados). «real» = para img/t3/atril_piano.webp: AJUSTAR cuando llegue
+     (lapizEnImagen: true si el lápiz ya está pintado en la imagen: el de la web queda invisible y solo hace de botón). */
+  B.ATRIL = {
+    provisional: { hoja: { x: .372, y: .045, w: .256, h: .635 }, lapiz: { x: .468, y: .686, w: .135, rot: -2.5 }, lapizEnImagen: false },
+    real: { hoja: { x: .372, y: .045, w: .256, h: .635 }, lapiz: { x: .468, y: .686, w: .135, rot: -2.5 }, lapizEnImagen: true }
+  };
 
   /* ── láminas en código ── */
   const REG = { tipo: 'registro', titulo: 'Registro · coordenadas',
@@ -155,7 +166,7 @@
     continuara: 'Continuará…',
     recursos: [SF1('sfx_ui_clic'), SF1('sfx_destello'), SF1('sfx_llegada'), SF1('sfx_salto_tiempo'), SF1o('sfx_flash_blanco'), SF1o('sfx_maquina_apaga'), SF1('sfx_impacto'),
       SF1('sfx_anillos_giran'), SF1('sfx_maquina_arranca'), SF1('sfx_anillo_encaja'), SF1('sfx_pulsera_vibra'), SF1('sfx_notificacion'), SF1('sfx_puerta_scifi'), SF1('sfx_pasos_rapidos'), SF1('sfx_ui_ok'), SF1('sfx_ui_error'),
-      SFo('sfx_papel'), SF('sfx_t3_voz_rota'), SF('sfx_t3_aplausos'), SF('sfx_t3_pinganillo_clic'), SF('sfx_t3_pasos_pasillo'), SF('sfx_t3_telon'), SF('sfx_t3_pulsera_notif')]
+      SFo('sfx_papel'), SF('sfx_t3_voz_rota'), SF('sfx_t3_aplausos'), SF('sfx_t3_pinganillo_clic'), SF('sfx_t3_pasos_pasillo'), SF('sfx_t3_telon'), SF('sfx_t3_pulsera_notif'), SF('sfx_t3_transicion')]
       .concat(Object.keys(IMG).map(k => B.primero(IMG[k])).filter(q => q && !q.falta).map(q => q.src))
       .concat(B.viento.MUESTRAS_RUTAS || [], B.viento.UI_RUTAS, B.t3.pianoRutas(), [CANCION.do, CANCION.roto]),
     escenas: [
@@ -184,7 +195,7 @@
         { id: 'p2a', nombre: 'Hoy elijo yo', img: IMG.amaroDestino, amb: [AMB.lab], mus: MUS.lab, pj: null,
           lineas: [
             { id: 't3_004', quien: 'AMARO', pj: { q: 'AMARO', pose: 'tableta' }, imgs: [{ en: .42, img: IMG.holoRosalia }], sfx: [{ src: SF1('sfx_ui_clic'), t: .4 }, { src: SF1('sfx_ui_clic'), t: .7 }, { src: SF1('sfx_destello'), en: .4, vol: .5 }],
-              texto: 'Hoy elijo yo. Nada de siglos. Un concierto en el Teatro Rosalía, en 2026. Un sitio tranquilo. ¿Qué podría salir mal?',
+              texto: 'Hoy elijo yo. Nada de irse tan atrás en el tiempo. Un concierto en el Teatro Rosalía, en 2026. Un sitio tranquilo. ¿Qué podría salir mal?',
               claves: { claves: ['Teatro Rosalía · 2026'], ens: [.45], pos: 'arriba' } },
             { id: 't3_005', quien: 'NOA', img: IMG.noaResopla, pj: { q: 'NOA', pose: 'traviesa' }, texto: 'Eso ya lo has dicho otras veces…', espera: .5 }
           ] },
@@ -227,28 +238,35 @@
       ] },
       /* 5 · El pianista se lo explica a Noa (láminas dibujadas en código) */
       { id: 'e5', titulo: 'En la cabeza', planos: [
-        { id: 'p5a', nombre: 'Cómo se transporta en la cabeza', img: IMG.atril, amb: [AMB.camerino], mus: false, pj: null, antes: .4,
+        /* (Iago 4-nov) el pianista lo enseña a lápiz sobre la A4 del atril; los trazos van con la voz (pausas medidas en voz/t3/t3_014*.mp3) */
+        { id: 'p5a', nombre: 'Cómo se transporta en la cabeza', img: IMG.atrilPiano, amb: [AMB.camerino], mus: false, pj: null, antes: .4,
           lineas: [
-            { id: 't3_014', quien: 'PIANISTA', lamina: ARM,
-              laminas: [{ en: .5, lamina: { tipo: 'melodias', titulo: '2 · Cada nota, el mismo intervalo más abajo', ex: null, mel: 'cancion', compases: [0, 3], paso: .5, t0: .4, inst: 'piano' } }],
-              texto: 'Primero piensas en la tonalidad nueva y en su armadura. Luego lees cada nota y tocas la que está el mismo intervalo más abajo. Lo que cuenta no es cada nota, sino el dibujo: subir, bajar, saltar.', espera: .6 },
-            { id: 't3_014b', quien: 'PIANISTA', lamina: { tipo: 'fantasma', titulo: 'Un truco · la clave de do en 4.ª', compases: [0, 3], t: 1.2, tNombres: 4.6 },
-              texto: 'Y un truco: si te ayuda, imagina que la partitura está en clave de do en cuarta. Cada nota cae justo una segunda más abajo; solo tienes que cambiar la armadura y tocarla una octava más arriba.', espera: 1 }
-          ] }
+            { id: 't3_014', quien: 'PIANISTA', lamina: { tipo: 'atril' },
+              al: [{ t: 4.1, fn: c => B.lamina.anota('texto', c) }, { t: 5.55, fn: c => B.lamina.anota('arm', c) }, { t: 8.5, fn: c => B.lamina.anota('lee', c) }],
+              texto: 'Mira. Primero piensas en la tonalidad nueva: un tono más grave, do mayor. Así que tacho la armadura: fuera los dos sostenidos. Luego lees cada nota y tocas la que está un tono más abajo.', espera: .8 },
+            { id: 't3_014b', quien: 'PIANISTA',
+              al: [{ t: 1.95, fn: c => B.lamina.anota('sol', c) }, { t: 3.3, fn: c => B.lamina.anota('do', c) }, { t: 5.25, fn: c => B.lamina.anota('nombres', c) }, { t: 12.4, fn: c => B.lamina.anota('dibujo', c) }],
+              texto: 'Y un truco, si te ayuda: tacho la clave de sol y apunto una clave de do en cuarta. Así cada nota cae justo una segunda más abajo; solo tienes que tocarla una octava más arriba. Lo que cuenta es el dibujo: subir, bajar, saltar.', espera: 1.2 }
+          ] },
+        /* (Iago 4-nov) ahora el ALUMNO coge el lápiz de la repisa y marca su partitura antes de tocar */
+        { id: 'p5b', nombre: 'Tu partitura, a lápiz', img: IMG.atrilPiano, amb: [AMB.camerino], mus: false, pj: null, auto: .3,
+          inter: { tipo: 'marcar',
+            cartel: 'Ahora tú. Coge el <b>lápiz</b> de la repisa del atril y marca tu partitura antes de tocar, como el pianista: <b>1</b> · tacha la armadura · <b>2</b> · tacha la clave de sol · <b>3</b> · escribe la clave de do en 4.ª en su línea.',
+            cartelCorto: 'Coge el lápiz de la repisa (púlsalo o arrástralo) y marca tu partitura: con el ratón o con el dedo.' } }
       ] },
       /* 6 · Interactivo 1b: leer por claves (clave de do en 4.ª, armadura de Do M, una 8.ª más arriba) */
       { id: 'e6', titulo: 'Por claves', planos: [
-        { id: 'p6', nombre: 'Leer en clave de do en 4.ª', img: IMG.atril, amb: [AMB.camerino], mus: false, pj: null, auto: .3,
+        { id: 'p6', nombre: 'Leer en clave de do en 4.ª', img: IMG.atrilPiano, amb: [AMB.camerino], mus: false, pj: null, auto: .3,
           inter: { tipo: 'claves', compases: [0, 3], ejemplo: 1,
-            cartel: 'Prueba el truco del pianista: lee cada nota iluminada como si estuviera en <b>clave de do en 4.ª</b>, con la armadura de <b>Do mayor</b> (sin alteraciones), y tócala en el teclado. Suena <b>una octava más arriba</b> de lo que lees en esa clave. La primera ya está hecha.',
+            cartel: 'Prueba el truco con tu partitura marcada: lee cada nota iluminada en <b>clave de do en 4.ª</b>, con la armadura de <b>Do mayor</b> (sin alteraciones), y tócala en el teclado. Suena <b>una octava más arriba</b> de lo que lees en esa clave. La primera ya está hecha.',
             cartelCorto: 'Lee la nota en <b>clave de do en 4.ª</b> (4.ª línea = Do) y tócala. Teclado del ordenador: <b>A S D F G H J</b> = Do Re Mi Fa Sol La Si.' } }
       ] },
       /* 7 · Interactivo 2: transporte mental en tiempo real, con el teclado (ensayo con el pianista) */
       { id: 'e7', titulo: 'Ensayo', planos: [
-        { id: 'p7', nombre: 'Transporte mental en tiempo real', img: IMG.ensayo, amb: [AMB.camerino], ambInter: [], mus: false, pj: null, auto: .3,
+        { id: 'p7', nombre: 'Transporte mental en tiempo real', img: IMG.atrilPiano, amb: [AMB.camerino], ambInter: [], mus: false, pj: null, auto: .3,
           inter: { tipo: 'mental',
-            tempos: [{ nombre: 'Lento', bpm: 50, compases: [0, 8], espera: true, guia: true }, { nombre: 'Medio', bpm: 66, compases: [0, 16], guia: false }, { nombre: 'De concierto', bpm: 80, compases: [0, 16], guia: false }],
-            cartel: 'Ensaya con el pianista. La partitura está en <b>Re mayor</b>; tú tocas cada nota <b>una 2.ª mayor más grave</b> (en <b>Do mayor</b>, sin alteraciones) antes de que pase el cursor. Tres tempos: <b>lento</b> (el cursor te espera), <b>medio</b> y <b>de concierto</b>. Los fallos no restan: sigue tocando.',
+            tempos: [{ nombre: 'Lento', bpm: 50, compases: [0, 8], espera: true, guia: true }, { nombre: 'Medio', bpm: 66, compases: [0, 8], guia: false }, { nombre: 'De concierto', bpm: 80, compases: [0, 8], guia: false }],   // (Iago 4-nov) solo los 8 compases de la hoja
+            cartel: 'Ensaya con el pianista. La partitura está en <b>Re mayor</b>; tú tocas cada nota <b>una 2.ª mayor más grave</b> (en <b>Do mayor</b>, sin alteraciones) antes de que pase el cursor. Tres tempos: <b>lento</b> (el cursor te espera), <b>medio</b> y <b>de concierto</b>. Antes de cada uno, un compás de entrada con el metrónomo (1 · 2 · 3). Los fallos no restan: sigue tocando.',
             cartelCorto: 'Toca cada nota <b>una 2.ª M más grave</b> antes de que pase el cursor. Ratón o teclado: <b>A S D F G H J</b> = Do Re Mi Fa Sol La Si.' } }
       ] },
       /* 8 · El recital: la canción, transportada; el agudo llega; el público aplaude */
@@ -292,7 +310,7 @@
         { id: 'p10c', nombre: 'La bronca', img: IMG.amaroSeria, amb: [AMB.lab], mus: MUS.bronca, pj: null, antes: 1,
           lineas: [
             { id: 't3_018', quien: 'AMARO', pj: { q: 'AMARO', pose: 'helada' }, imgs: [{ en: .22, img: IMG.registro }, { en: .9, img: IMG.amaroSeria }], laminas: [{ en: .22, lamina: REG }, { en: .9, lamina: null }],
-              texto: 'Noa. He encontrado esto. La coordenada de Santiago no la puse yo. Y alguien borró otra.', espera: .4 },
+              texto: 'Noa. He encontrado esto. La coordenada del viaje que hiciste antes a Santiago no la puse yo. Y alguien borró otra.', espera: .4 },
             { id: 't3_019', quien: 'NOA', img: IMG.noaCulpa, pj: { q: 'NOA', pose: 'pensativa' }, texto: 'Fui yo. Lo siento, Amaro. De verdad.', espera: .8 },
             { id: 't3_020', quien: 'AMARO', img: IMG.amaroEnfadada, pj: { q: 'AMARO', pose: 'alarma' }, texto: 'Te he mandado a sitios donde podías hacerte daño. ¡Confiaba en ti!', espera: .5 },
             { id: 't3_021', quien: 'NOA', img: IMG.noaCuaderno, mus: MUS.padre, pj: { q: 'NOA', pose: 'emocion' }, imgs: [{ en: .74, img: IMG.cuadernoFechas }],
