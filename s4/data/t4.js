@@ -273,7 +273,9 @@
           ] },
         { id: 'p4c', nombre: 'Los accidentales', img: IMG.accCuaderno, recuerdo: false, amb: SOPORTALES, mus: MUS.terrazaBaja, pj: null, antes: .5,
           lineas: [
-            { id: 't4_016', quien: 'XOAN', lamina: ACC, pj: null,
+            /* (Iago 22:07) la animación sobre la parte real (cc. 4–7, con sol♯, do♮ y si♭). ens en s, cuadrados con voz/t4/t4_016.mp3 (24,1 s):
+               armadura «la armadura nueva» 5,2 · cascada «Si en mi parte hay un do becuadro…» 8,2 · letrero «la nota afectada» 16,9 · fa♮ «sino fa becuadro» 20 */
+            { id: 't4_016', quien: 'XOAN', lamina: { tipo: 'transpAnim', titulo: 'La parte de Xoán, una 5.ª justa más arriba', compases: [3, 7], paso: .25, ens: { arm: 5.2, cascada: 8.2, letrero: 16.9, fa: 20 } }, pj: null,
               texto: 'Y ojo: las diferencias solo importan en las notas con alteraciones accidentales; las demás ya las resuelve la armadura nueva. Si en mi parte hay un do becuadro, en la tuya será un sol becuadro: se copia igual. Pero mira este si bemol: va a parar a fa, la nota afectada por la diferencia. Así que no será fa bemol, sino fa becuadro: la diferencia lo ha subido.', espera: 1.4 }
           ] }
       ] },
@@ -281,7 +283,7 @@
       { id: 'e5', titulo: 'La montaña', planos: [
         { id: 'p5', nombre: 'La montaña de las diferencias', img: IMG.mesa, amb: SOPI, mus: false, pj: null, auto: .3,
           inter: { tipo: 'montana',
-            cartel: '<b>La montaña de las diferencias</b>. Do mayor está al <b>nivel del mar</b>; cada sostenido sube un nivel hacia la <b>cumbre</b> y cada bemol baja uno hacia las <b>profundidades</b>. En cada pareja, coloca las dos tonalidades a su altura y di cuántas diferencias hay y si son <b>ascendentes ↑</b> o <b>descendentes ↓</b>.',
+            cartel: '<b>La montaña de las diferencias</b>. Do mayor está al <b>nivel del mar</b>; cada sostenido sube un nivel hacia la <b>cumbre</b> y cada bemol baja uno hacia las <b>profundidades</b>. En cada pareja, coloca las dos tonalidades a su altura, di cuántas diferencias hay, si son <b>ascendentes ↑</b> o <b>descendentes ↓</b> y qué <b>notas quedan afectadas</b>.',
             cartelCorto: 'Toca una tonalidad y después su altura (o arrástrala). Luego, cuántas diferencias y hacia dónde.',
             fin: 'Las diferencias son los niveles que separan las dos armaduras: <b>↑ ascendentes</b> si subes, <b>↓ descendentes</b> si bajas.',
             items: [
@@ -299,9 +301,10 @@
           inter: { tipo: 'pasarParte',
             cartel: 'Ahora tú: pasa la parte de clarinete en Si♭ de Xoán (<b>Re mayor</b>) a la parte de <b>saxo alto en Mi♭</b> de Noa: una <b>5.ª justa ascendente</b>. Primero, el <b>paso 0</b>: la tonalidad y la armadura nuevas. Después coloca cada nota con sus alteraciones (♭ ♮ ♯) y pulsa <b>Corregir</b>. Con <b>▶ Los dos a la vez</b> oyes si encajan.',
             cartelCorto: 'Cada nota, una <b>5.ª justa más arriba</b>. Los accidentales se copian igual, salvo en la nota afectada por la diferencia (fa), que sube un semitono.',
-            paso0: { titulo: 'Paso 0 · La tonalidad de tu parte', texto: 'La parte de Xoán está en <b>Re mayor</b> (2♯). Tu saxo la necesita una <b>5.ª justa más arriba</b>. ¿En qué tonalidad va tu parte y qué armadura lleva?',
-              bien: '<b>La Mayor</b>, con tres sostenidos: una diferencia ascendente.' },
+            paso0: { titulo: 'Paso 0 · La tonalidad de tu parte', texto: 'La parte de Xoán está en <b>Re mayor</b> (2♯). Tu saxo la necesita una <b>5.ª justa más arriba</b>. ¿En qué tonalidad va tu parte, qué armadura lleva, cuántas diferencias hay, hacia dónde y qué nota queda afectada?',
+              bien: '<b>La Mayor</b>, con tres sostenidos: una diferencia ascendente, y la nota afectada es <b>fa</b>.' },
             pistas: { ton: 'Sube la tónica una 5.ª justa: de re, cinco notas hacia arriba.', arm: 'La mayor lleva tres sostenidos: fa, do y sol.',
+              dif: 'De 2♯ a 3♯ hay un sostenido más: 1 diferencia ascendente.', afect: 'Una diferencia ascendente afecta a la primera nota del orden de los sostenidos: fa.',
               notas: 'Las notas en rojo no están una 5.ª justa más arriba (cuatro notas por encima en el nombre).',
               acc: 'Revisa los accidentales: el sol♯ pasa a re♯, el do♮ a sol♮ y el si♭ a fa♮ (fa es la nota afectada por la diferencia).' },
             bien: '¡Perfecto! Tu parte de saxo en <b>La M</b> suena igual que la de clarinete de Xoán.', sigueAlAcertar: 1.8 } }
@@ -384,11 +387,12 @@
         { id: 'p12', nombre: 'Ejercicio final (opcional)', img: IMG.mesa, amb: SOPI, pj: null, auto: .3,
           inter: { tipo: 'difFinal', opcional: true,
             niveles: [
-              { keys: ['Do', 'Sol', 'Fa', 'Re'], tr: [0, 4, 7], comp: ['2/4', '3/4'], sin: ['16', 'qd'], maxF: 3, dif: 2 },
-              { keys: null, tr: [0, 1, 3, 4, 5, 7, 8, 9, 10], comp: ['2/4', '3/4', '6/8'], sin: ['16'], maxF: 4 },
-              { keys: null, tr: [0, 1, 3, 4, 5, 7, 8, 9, 10], comp: ['2/4', '3/4', '6/8'], sin: ['16'], maxF: 4, acc: 2 }
+              /* (Iago 22:10) las tres con alteraciones accidentales; afect: al menos una cae en una nota afectada y tiene que cambiar */
+              { keys: ['Do', 'Sol', 'Fa', 'Re'], tr: [0, 4, 7], comp: ['2/4', '3/4'], sin: ['16', 'qd'], maxF: 3, dif: 2, acc: 2, afect: true },
+              { keys: null, tr: [0, 1, 3, 4, 5, 7, 8, 9, 10], comp: ['2/4', '3/4', '6/8'], sin: ['16'], maxF: 4, acc: 2, afect: true },
+              { keys: null, tr: [0, 1, 3, 4, 5, 7, 8, 9, 10], comp: ['2/4', '3/4', '6/8'], sin: ['16'], maxF: 4, acc: 3, afect: true }
             ],
-            cartel: 'Si quieres, practica el <b>transporte por diferencias</b>: <b>tres melodías</b>, cada una más difícil (la tercera, con <b>alteraciones accidentales</b>). En cada una, el <b>paso 0</b> (tonalidad nueva, armadura y diferencias) vale la mitad de la nota; las notas, la otra mitad. Al final verás tu nota.',
+            cartel: 'Si quieres, practica el <b>transporte por diferencias</b>: <b>tres melodías</b>, cada una más difícil y todas con <b>alteraciones accidentales</b>. En cada una, el <b>paso 0</b> (tonalidad nueva, armadura, diferencias y notas afectadas) vale la mitad de la nota; las notas, la otra mitad. Con <b>✎ Transcribir</b> se escriben solas y tú decides las de <b>?</b>. Al final verás tu nota.',
             cartelCorto: 'Coloca cada nota transportada, con sus alteraciones. Después, <b>Corregir</b> (una sola vez).' } }
       ] }
     ]

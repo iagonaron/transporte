@@ -372,9 +372,10 @@ TR.RECURSOS = {
 "img/t4/cuaderno_mesa.webp": 382002,
 "img/t4/cuaderno_xoan.webp": 250754,
 "img/t4/cuaderno_xoan_base.webp": 416422,
+"img/t4/cuaderno_xoan_notas.webp": 419324,
 "img/t4/despedida_abrazo.webp": 379780,
 "img/t4/despedida_noa.webp": 277016,
-"img/t4/despedida_plaza.webp": 441400,
+"img/t4/despedida_plaza.webp": 463978,
 "img/t4/despedida_pulsera.webp": 260252,
 "img/t4/despedida_xoan.webp": 275332,
 "img/t4/despedida_xoan_sonrie.webp": 261192,
@@ -490,7 +491,7 @@ TR.RECURSOS = {
 "vid/abrazo.mp4": 1790633,
 "vid/flash_agua_consola.mp4": 1711824,
 "vid/flash_montana_consola.mp4": 1536375,
-"vid/reencuentro.mp4": 2797262,
+"vid/reencuentro.mp4": 2637336,
 "vid/tocan.mp4": 4040839,
 "voz/t4/t4_001.mp3": 36406,
 "voz/t4/t4_002.mp3": 41422,
@@ -508,11 +509,11 @@ TR.RECURSOS = {
 "voz/t4/t4_013b.mp3": 201500,
 "voz/t4/t4_014.mp3": 176422,
 "voz/t4/t4_015.mp3": 104533,
-"voz/t4/t4_016.mp3": 300138,
-"voz/t4/t4_017.mp3": 53124,
+"voz/t4/t4_016.mp3": 385820,
+"voz/t4/t4_017.mp3": 67753,
 "voz/t4/t4_018.mp3": 103697,
 "voz/t4/t4_019.mp3": 38496,
-"voz/t4/t4_020.mp3": 94920,
+"voz/t4/t4_020.mp3": 135044,
 "voz/t4/t4_021.mp3": 26375,
 "voz/t4/t4_021b.mp3": 28883,
 "voz/t4/t4_022.mp3": 16762,
@@ -522,8 +523,8 @@ TR.RECURSOS = {
 "voz/t4/t4_026.mp3": 23867,
 "voz/t4/t4_027.mp3": 103697,
 "voz/t4/t4_028.mp3": 219890,
-"voz/t4/t4_029.mp3": 210277,
-"voz/t4/t4_030.mp3": 288853
+"voz/t4/t4_029.mp3": 280076,
+"voz/t4/t4_030.mp3": 263358
 };
 window.TROZOS = {};
 TR.PIANO = [];
