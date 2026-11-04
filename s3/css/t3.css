@@ -346,3 +346,17 @@
 #escena.piel-teatro #barra button:disabled,#escena.piel-teatro #inter.atril button:disabled{opacity:.42}
 .atril .mt-tw::before{content:'';position:absolute;left:-1000px;right:-1000px;top:-12px;bottom:-400px;z-index:-1;background:linear-gradient(180deg,#0a0a0c,#050506 30%,#030304)}
 .atril .mt-tw{z-index:1}
+/* (Iago 4-nov) la notificación de mamá con Responder · Posponer: el dedo pulsa Posponer y se pliega hacia un lado */
+.tr-aviso.mama{overflow:hidden;transition:transform .55s cubic-bezier(.5,0,.75,0),opacity .55s ease,max-height .4s ease}
+.av-bot{display:flex;gap:12px;margin-top:10px}
+.av-bot em{font:500 22px var(--f-texto);font-style:normal;color:#ffe3c2;padding:8px 16px;border-radius:8px;border:1px solid rgba(255,196,138,.45);background:rgba(255,196,138,.08);display:inline-flex;align-items:center;gap:8px;transition:background .15s,color .15s,transform .12s}
+.av-bot em svg{width:22px;height:22px}
+.tr-aviso.pulsa .av-posp{background:#ffc48a;color:#1b1003;transform:scale(.95)}
+.av-dedo{position:absolute;right:52px;bottom:-60px;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle,rgba(255,230,205,.9),rgba(255,210,170,.55) 60%,rgba(255,210,170,0) 72%);opacity:0;transition:bottom .35s ease-out,opacity .25s,transform .12s;pointer-events:none}
+.tr-aviso.dedo .av-dedo{opacity:1;bottom:8px}
+.tr-aviso.pulsa .av-dedo{transform:scale(.82)}
+.tr-aviso.pospuesta .av-dedo{opacity:0}
+.av-pospuesto{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:10px;font:600 28px var(--f-ui);letter-spacing:.06em;color:#1b1003;background:#ffc48a;opacity:0;transition:opacity .25s}
+.tr-aviso.pospuesta .av-pospuesto{opacity:1}
+.tr-aviso.sale{transform:translateX(130%) scaleY(.6);opacity:0}
+@media (prefers-reduced-motion:reduce){.tr-aviso.sale{transform:none}}
