@@ -396,3 +396,16 @@
 /* (4-nov) parche de la repisa sin lápiz: visible cuando el lápiz se ha cogido */
 .at-parche{position:absolute;z-index:5;opacity:0;pointer-events:none;transition:opacity .2s}
 .at-repisa.fuera + .at-parche{opacity:1}
+.cl-cuenta{font:400 22px var(--f-texto);color:#cfc6b8}.cl-cuenta b{color:#f7f1e6;font-weight:500}
+.at-etq.vacia{display:none}
+.i-claves .mt-prog{flex-wrap:wrap;gap:6px}.i-claves .mt-prog i{width:14px;height:14px}
+#inter.saliente{pointer-events:none}
+.tr-aviso.mama.duda{animation:avDuda 1.2s ease-in-out infinite}
+@keyframes avDuda{50%{box-shadow:0 0 34px rgba(255,196,138,.55)}}
+@media (prefers-reduced-motion:reduce){.tr-aviso.mama.duda{animation:none}}
+/* (Iago 4-nov) con la música del final, «Continuará…» entra de golpe, con el golpe musical */
+body.golpe-final #cartel .continuara{transition:opacity .18s ease-out}
+
+/* (4-nov, «vida» de T3) el lienzo de la vida, con mezcla NORMAL: con «screen» el compositor tenía que fundir toda la pantalla en cada
+   fotograma y en el aula (Chrome 94, equipo modesto) bajaba de 30 fps; los halos ya llevan su propia transparencia */
+#vida{mix-blend-mode:normal}
