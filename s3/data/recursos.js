@@ -345,8 +345,8 @@ TR.RECURSOS = {
 "voz/t3/t3_024.mp3": 14672,
 "voz/t3/t3_025.mp3": 48945,
 "voz/t3/t3_026.mp3": 58140,
-"voz/t3/t3_027.mp3": 31808,
-"voz/t3/t3_028.mp3": 44347
+"voz/t3/t3_027.mp3": 36406,
+"voz/t3/t3_028.mp3": 41422
 };
 window.TROZOS = {};
 TR.PIANO = [["mus/piano/A1.mp3", 33], ["mus/piano/C2.mp3", 36], ["mus/piano/Eb2.mp3", 39], ["mus/piano/Gb2.mp3", 42], ["mus/piano/A2.mp3", 45], ["mus/piano/C3.mp3", 48], ["mus/piano/Db3.mp3", 49], ["mus/piano/D3.mp3", 50], ["mus/piano/Eb3.mp3", 51], ["mus/piano/E3.mp3", 52], ["mus/piano/F3.mp3", 53], ["mus/piano/Gb3.mp3", 54], ["mus/piano/G3.mp3", 55], ["mus/piano/Ab3.mp3", 56], ["mus/piano/A3.mp3", 57], ["mus/piano/Bb3.mp3", 58], ["mus/piano/B3.mp3", 59], ["mus/piano/C4.mp3", 60], ["mus/piano/Db4.mp3", 61], ["mus/piano/D4.mp3", 62], ["mus/piano/Eb4.mp3", 63], ["mus/piano/E4.mp3", 64], ["mus/piano/F4.mp3", 65], ["mus/piano/Gb4.mp3", 66], ["mus/piano/G4.mp3", 67], ["mus/piano/Ab4.mp3", 68], ["mus/piano/A4.mp3", 69], ["mus/piano/Bb4.mp3", 70], ["mus/piano/B4.mp3", 71], ["mus/piano/C5.mp3", 72], ["mus/piano/Db5.mp3", 73], ["mus/piano/D5.mp3", 74], ["mus/piano/Eb5.mp3", 75], ["mus/piano/E5.mp3", 76], ["mus/piano/F5.mp3", 77], ["mus/piano/Gb5.mp3", 78], ["mus/piano/G5.mp3", 79], ["mus/piano/Ab5.mp3", 80], ["mus/piano/A5.mp3", 81], ["mus/piano/Bb5.mp3", 82], ["mus/piano/B5.mp3", 83], ["mus/piano/C6.mp3", 84]];

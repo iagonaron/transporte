@@ -51,7 +51,7 @@
     resumen: { src: [{ src: S1 + 'mus/mus_coruna2100.mp3', vol: .16 }] },
     bronca: { src: [{ src: S1 + 'mus/mus_tension.mp3', vol: .14 }] },
     padre: { src: [{ src: S1 + 'mus/t1_tema_sint.mp3', vol: .22 }] },
-    plaza: { src: [{ src: 'mus/t3_mus_pita.mp3', vol: .5, bucle: false }, { src: S1 + 'mus/mus_cierre.mp3', vol: .3 }] }   // (A) 47 s: a los 36,7 s se queda suspendida (t3_027)
+    plaza: { src: [{ src: 'mus/t3_mus_pita.mp3', vol: .5, bucle: false }, { src: S1 + 'mus/mus_cierre.mp3', vol: .3 }] }   // (A) 47 s: a los 36,7 s se queda suspendida (t3_027: «Iria, ¿dónde te habías metido?»)
   };
   /* la canción del recital (A): el original en Re M (con el agudo roto) y la transportada a Do M; si faltan, js/mental.js la toca con el piano */
   const CANCION = { do: 'mus/t3_cancion_do.mp3', roto: 'mus/t3_cancion_re_rota.mp3', c1: 4.8 };   // (A, audio/t3/LISTA.md) 2 compases de piano: el c. 1 empieza a los 4,80 s; cada compás 2,25 s
@@ -81,18 +81,21 @@
       { src: T1('lab_centro'), vida: [{ tipo: 'anillos', zona: [.16, 0, .7, 1], n: 3 }].concat(LAB) }   /* (Iago 4-nov) nada de lab_noa_brazos: lab vacío + la pose de Noa encima */),
     maquina: { src: T1('prueba_cerca'), vida: [{ tipo: 'anillos', zona: [.2, 0, .65, .78], n: 3 }, { tipo: 'pulso', zona: [.42, .1, .18, .3], color: '#58b8ff' }].concat(LAB) },
     /* ── 2 · Teatro Rosalía de Castro, 2026 ── */
+    /* (Iago 4-nov, GUION 3b) la secuencia de entrada: dron sobre A Coruña en 2026 (la ciudad REAL; sin nada futurista) */
+    dronBahia: I3('dron_bahia', 'Vuelo de dron al atardecer sobre la ensenada del Orzán y la playa de Riazor, A Coruña 2026, fiel a la ciudad real: el paseo marítimo curvo con sus farolas y barandilla, los edificios de galerías blancas del frente marítimo, el estadio de Riazor a la izquierda y, al fondo en la punta norte, la Torre de Hércules; mar con algo de oleaje, luz cálida; sin elementos futuristas', { mueve: true }),
+    dronCiudadVieja: I3('dron_ciudad_vieja', 'Dron sobre la Avenida de la Marina, A Coruña 2026, fiel a la real: la larga fachada de galerías blancas acristaladas frente a la dársena con barcos, el Obelisco, y detrás los tejados de la Ciudad Vieja; atardecer, farolas que se encienden', { mueve: true }),
+    dronRiego: I3('dron_riego_de_agua', 'Dron que baja despacio hacia la rúa Riego de Agua, A Coruña 2026: calle peatonal estrecha del centro, edificios de galerías y soportales, gente paseando con abrigo, el Palacio Municipal de María Pita asomando al fondo; fiel a la calle real; atardecer', { mueve: true }),
+    salaEnsayo: I3('rosalia_sala', 'Interior REAL del Teatro Rosalía de Castro durante el ensayo, quince minutos antes del recital: patio de butacas aún vacío con butacas rojas, palcos en herradura con molduras blancas y doradas, la gran lámpara central a media luz, el escenario con luces de trabajo y un piano de cola; vista desde el fondo de la platea; fiel a las fotos reales', { mueve: true, vida: [{ tipo: 'luces', zona: [.1, .05, .8, .4], n: 12, color: '#ffe2b0' }] }),
+    camerinoPiano: I3('camerino_piano', 'Camerino 2 del Rosalía durante el ensayo: tocador con espejo rodeado de bombillas, botellas de agua, un termo y bebidas, un ramo de flores; un PIANO DE PARED (teclas negras en grupos de 2 y 3) donde el PIANISTA acompaña mirando a las teclas; la CANTANTE (pelirroja, ondas sueltas, fular) canta de pie junto al piano con esfuerzo; luz cálida; plano general', { vida: FOCO(.6, .1, .3, .4).concat(POLVO()) }),
     fachada: I3('rosalia_fachada', 'Exterior REAL del Teatro Rosalía de Castro (rúa Riego de Agua, A Coruña) al anochecer de 2026: fachada iluminada, cartel del recital, gente entrando; fiel a las fotos reales', { vida: [{ tipo: 'luces', zona: [.15, .25, .7, .4], n: 14, color: '#ffe2b0' }] }),
     llegada: I3('bastidores_llegada', 'Entre bastidores: telón rojo, cuerdas y contrapesos, luces de trabajo azules; Noa aparece entre anillos de luz (último fotograma del vídeo de llegada)', { ocultaPj: ['NOA'], vida: [{ tipo: 'anillos', zona: [.3, .4, .4, .4], n: 2, color: '#9fe4ff' }] }),
-    bastidores: I3('bastidores', 'Bastidores del Rosalía, plano general SIN Noa: telón rojo por detrás, varas y cuerdas, luces de trabajo azules, dos técnicos al fondo; centro algo despejado', { vida: POLVO('#cfe0ff') }),
     regidora: I3('regidora_prisa', 'La REGIDORA (mujer de unos 40, auriculares de diadema con micro, carpeta, ropa negra de técnica) llega con prisa y le pone un pinganillo a Noa; plano a dos: Noa a la izquierda, la regidora a la derecha mirando hacia ella', { ocultaPj: ['NOA'], vida: POLVO('#cfe0ff') }),
     noaCarpeta: I3('noa_carpeta', 'Noa, plano medio, con el pinganillo puesto y una carpeta en las manos, desconcertada; mira hacia la derecha (por donde se ha ido la regidora); luz azul de bastidores', { ocultaPj: ['NOA'], vida: POLVO('#cfe0ff') }),
     pasillo: I3('pasillo_camerinos', 'Pasillo de camerinos del teatro: puertas numeradas, la del «2» entreabierta con luz cálida; Noa de espaldas camina hacia ella con la carpeta', { vida: FOCO(.55, .2, .2, .5) }),
     /* ── 3 · el camerino 2 ── */
-    camerino: I3('camerino', 'Camerino 2, plano general: espejo con bombillas a la derecha, piano vertical a la izquierda (teclas negras en grupos de 2 y 3) con la partitura en el atril; la CANTANTE de pie junto al espejo y el PIANISTA sentado al piano; luz cálida', { vida: FOCO(.6, .1, .3, .4).concat(POLVO()) }),
     agudo: I3('cantante_agudo', 'La CANTANTE (soprano de unos 35, PELIRROJA con ondas sueltas, vestido de concierto azul noche, fular al cuello, fiel a su hoja) intenta el agudo y se lleva la mano a la garganta: la voz se le rompe; plano medio; mira al frente', { vida: POLVO() }),
     panico: I3('cantante_panico', 'La cantante, primer plano, al borde del pánico, ronca; mira hacia la izquierda (a Noa y al pianista)', { vida: POLVO() }),
     cantanteCanta: I3('cantante_canta', 'Ensayo en el camerino: la cantante canta junto al piano vertical con la voz tomada, una mano en el fular, gesto de esfuerzo; el pianista toca mirando a las teclas (2+3); plano medio, luz cálida', { vida: POLVO() }),
-    noaEscucha: I3('noa_escucha', 'Noa escucha desde la puerta del camerino con la carpeta, preocupada al oír a la cantante; mira hacia la derecha', { ocultaPj: ['NOA'], vida: POLVO() }),
     noaCamerino: I3('noa_camerino', 'Noa en la puerta del camerino con la carpeta, plano medio, se atreve a proponer algo; mira hacia la derecha', { ocultaPj: ['NOA'], vida: POLVO() }),
     pianistaReloj: I3('pianista_reloj', 'El PIANISTA (hombre de unos 55, canoso, gafas, chaqueta oscura, tranquilo y con oficio) mira su reloj de pulsera sentado al piano vertical; plano medio; mira hacia la izquierda', { vida: POLVO() }),
     duda: I3('cantante_duda', 'La cantante, plano medio, incrédula, se vuelve hacia el pianista (mira a la izquierda); mano en el fular', { vida: POLVO() }),
@@ -103,7 +106,6 @@
     atrilPiano: O(I3('atril_piano', 'Atril de un piano de cola, vista FRONTAL y centrada, luz cálida de camerino; sobre el atril una hoja A4 en blanco, recta y sin texto, ocupando el centro; un lápiz de grafito apoyado en la repisa del atril; debajo, el borde de las teclas (negras en grupos 2+3); sin manos ni personas'),
       { src: 'img/provisional/atril_provisional.webp' }),
     manos: I3('manos_teclas', 'DETALLE: las manos del pianista tocando (teclas negras en grupos de 2 y 3, anatomía correcta), luz cálida, poca profundidad de campo', { vida: FOCO(.2, .3, .6, .4) }),
-    ensayo: I3('camerino_ensayo', 'Ensayo en el camerino: el pianista toca el piano vertical, la cantante canta bajito a su lado, Noa a la izquierda mira la partitura por encima del hombro del pianista; plano general cálido', { ocultaPj: ['NOA'], vida: POLVO() }),
     /* ── 4 · el recital ── */
     aviso: I3('bastidores_aviso', 'Noa entre bastidores, a contraluz, una mano en el pinganillo, mira hacia el escenario iluminado (a la derecha); detrás, el telón rojo', { ocultaPj: ['NOA'], vida: POLVO('#ffe2b8') }),
     sala: I3('sala_rosalia', 'La sala REAL del Teatro Rosalía vista desde el escenario: patio de butacas lleno, palcos en herradura con molduras doradas, la lámpara central; las luces de sala bajan; fiel a las fotos reales', { vida: [{ tipo: 'luces', zona: [.05, .05, .9, .5], n: 20, color: '#ffe2b0' }] }),
@@ -144,7 +146,7 @@
     plaza: I3('mariapita', 'Plaza de María Pita al atardecer, reconocible (el Palacio Municipal, los soportales, la estatua) pero MODERNA: alguna reforma, locales y terrazas actualizados, luminarias y mobiliario de diseño, detalles de la estética de 2100 en versión sutil (unos 30 años antes: aún sin hologramas ni drones por todas partes); gente en las terrazas con caras variadas, nadie se parece a Noa; plano general', { vida: [{ tipo: 'luces', zona: [.05, .35, .9, .35], n: 16, color: '#ffe2b0' }] }),
     noaPlaza: I3('noa_mariapita', 'Noa de tres cuartos de espaldas, en la plaza de María Pita modernizada, mira las terrazas (locales actualizados, mobiliario de diseño, sutiles toques de futuro) con emoción contenida; contraluz de atardecer; los soportales detrás', { ocultaPj: ['NOA'], vida: POLVO('#ffe2b8') }),
     mano: I3('mano_hombro', 'DETALLE: la mano de un chico joven se apoya en el hombro de Noa (su sudadera), SIN cara y sin pistas de la fecha; al fondo, desenfocada, la plaza de María Pita modernizada al atardecer', { ocultaPj: ['NOA'], vida: [] }),
-    noaHelada: I3('noa_helada', 'Noa, primer plano, helada, sin girarse; los ojos muy abiertos; luz de atardecer; la mano todavía en su hombro, al borde del encuadre; detrás, desenfocadas, terrazas modernas de María Pita', { ocultaPj: ['NOA'], vida: [] })
+    noaGira: I3('noa_se_gira', 'Noa se gira, desconcertada, hacia el chico que le ha puesto la mano en el hombro; primer plano de Noa (mira hacia la derecha); del chico solo se ve el hombro y la espalda, de espaldas o fuera de foco, SIN que se le vea la cara; atardecer, terrazas modernas de María Pita desenfocadas', { ocultaPj: ['NOA'], vida: [] })
   };
   B._IMG = IMG;
   /* CALIBRACIÓN del atril (fracciones del fondo 1920×1080): dónde está la hoja A4 (x, y, ancho, alto) y el lápiz de la repisa
@@ -205,26 +207,23 @@
       /* 3 · El salto y la llegada a bastidores del Rosalía */
       { id: 'e3', titulo: 'Teatro Rosalía, 2026', planos: [
         { id: 'p3a', nombre: 'El salto', tunel: { de: 2100, a: 2026 }, dur: 5, blanco: 2.2, sfxBlanco: SF1o('sfx_flash_blanco'), amb: [], mus: MUS.tension, sfx: [{ src: SF1('sfx_salto_tiempo'), t: 0 }] },
-        { id: 'p3b', nombre: 'Llegada entre bastidores', video: 'vid/llegada_bastidores.mp4', img: IMG.llegada, desc: 'Runway 1080p (5 s): Noa aparece entre bastidores, telón rojo y luces de trabajo azules', dur: 5, auto: 4, pj: null,
-          amb: [AMB.bastidores], mus: MUS.teatroBajo, sfx: [{ src: SF1('sfx_llegada'), t: 0 }] },
-        { id: 'p3c', nombre: 'Bastidores', funde: 1, img: IMG.fachada, amb: [AMB.bastidores], mus: MUS.teatro, pj: null, antes: .5,
-          lineas: [
-            { id: 't3_006', quien: 'NARRADOR', imgs: [{ en: .56, img: IMG.bastidores }], texto: 'A Coruña, 2026. Teatro Rosalía de Castro. Faltan quince minutos para el recital.',
-              claves: { claves: ['A Coruña · 2026', 'Teatro Rosalía de Castro'], ens: [.05, .42], pos: 'arriba' }, espera: .6 },
-            { id: 't3_007', quien: 'REGIDORA', img: IMG.regidora, sfx: [{ src: SF1('sfx_pasos_rapidos'), t: 0, vol: .5 }, { src: SFx(SF('sfx_t3_pinganillo_clic'), SF1('sfx_ui_clic')), en: .25, vol: .7 }],
-              texto: '¡Por fin! Tú eres la de prácticas, ¿no? Toma la carpeta y ve al camerino dos. Quince minutos.' },
-            { id: 't3_008', quien: 'NOA', img: IMG.noaCarpeta, pj: { q: 'NOA', pose: 'sorpresa' }, texto: 'Eh… sí. Claro. Camerino dos.', espera: .5 }
-          ] },
-        { id: 'p3d', nombre: 'Pasillo de camerinos', img: IMG.pasillo, amb: [AMB.pasillo], mus: MUS.teatroBajo, pj: null, auto: 3.2,
-          sfx: [{ src: SFx(SF('sfx_t3_pasos_pasillo'), SF1('sfx_pasos_rapidos')), t: .1, vol: .7 }] }
+        /* (Iago 4-nov, GUION 3b) SECUENCIA CINEMÁTICA (~33 s): el ensayo de la cantante suena sin cortes de principio a fin, cada vez
+           más cerca (js/secuencia.js); el camerino se ancla a la quiebra del la5 (audio/t3/tiempos_t3.json: la5 31,80 s · quiebra 32,42 s) */
+        { id: 'p3s', nombre: 'Entrada · A Coruña, 2026', img: IMG.dronBahia, amb: [], mus: false, pj: null, auto: .1,
+          inter: { tipo: 'secuencia', mp3: CANCION.roto, dur: 33.46, la5: 31.8, quiebra: 31.56, antesCamerino: 6,
+            planos: { dron: [IMG.dronBahia, IMG.dronCiudadVieja, IMG.dronRiego, IMG.fachada], sala: IMG.salaEnsayo, llegada: IMG.llegada, regidora: IMG.regidora,
+              pasillo: IMG.pasillo, camerino: [IMG.camerinoPiano, IMG.cantanteCanta], agudo: IMG.agudo },
+            vids: { dron: ['vid/dron_bahia.mp4', 'vid/dron_ciudad_vieja.mp4', 'vid/dron_riego_de_agua.mp4', 'vid/dron_rosalia.mp4'], llegada: 'vid/llegada_bastidores.mp4' },
+            amb: { dron: [{ src: [SF('sfx_t3_plaza_atardecer'), SF1('amb_ciudad2100')], vol: .3 }, AMB.mar], sala: [AMB.salaBaja], bastidores: [AMB.bastidores], pasillo: [AMB.pasillo], camerino: [AMB.camerino] },
+            sfxPasos: SFx(SF('sfx_t3_pasos_pasillo'), SF1('sfx_pasos_rapidos')), sfxRota: SF('sfx_t3_voz_rota'),
+            lineas: {
+              narr: { id: 't3_006', quien: 'NARRADOR', texto: 'A Coruña, 2026. Teatro Rosalía de Castro. Faltan quince minutos para el recital.', claves: { claves: ['A Coruña · 2026', 'Teatro Rosalía de Castro'], ens: [.05, .42], pos: 'arriba' } },
+              reg: { id: 't3_007', quien: 'REGIDORA', sfx: [{ src: SF1('sfx_pasos_rapidos'), t: 0, vol: .5 }, { src: SFx(SF('sfx_t3_pinganillo_clic'), SF1('sfx_ui_clic')), en: .25, vol: .7 }],
+                texto: '¡Por fin! Tú eres la de prácticas, ¿no? Toma la carpeta y ve al camerino dos. Quince minutos.' },
+              noa: { id: 't3_008', quien: 'NOA', img: IMG.noaCarpeta, pj: { q: 'NOA', pose: 'sorpresa' }, texto: 'Eh… sí. Claro. Camerino dos.' } } } }
       ] },
       /* 4 · El camerino: la cantante, afónica, no llega al agudo */
       { id: 'e4', titulo: 'El camerino', planos: [
-        { id: 'p4a', nombre: 'Camerino 2', img: IMG.camerino, amb: [AMB.camerino], mus: false, pj: null, auto: 2.4 },
-        /* (A) la canción original en Re M con la voz tomada: el la5 (c. 13) se quiebra a los 32,4 s y el pianista para */
-        { id: 'p4b', nombre: 'Ensayo · el agudo se rompe', img: IMG.cantanteCanta, amb: [AMB.camerino], mus: false, pj: null, auto: .2,
-          inter: { tipo: 'recital', mp3: CANCION.roto, c1: CANCION.c1, rotulo: 'Tonalidad original · <b>Re M</b>', sinMp3: 'agudo', sfx: SF('sfx_t3_voz_rota'), sigue: true,
-            imgs: [{ c: 0, img: IMG.cantanteCanta }, { c: 3, img: IMG.manos }, { c: 6, img: IMG.noaEscucha }, { c: 9, img: IMG.cantanteCanta }, { t: 31.7, img: IMG.agudo }] } },
         { id: 'p4c', nombre: '¿Hay que suspender?', img: IMG.panico, amb: [AMB.camerino], mus: MUS.teatroBajo, pj: null,
           lineas: [
             { id: 't3_009', quien: 'CANTANTE', texto: 'No llego. Hoy no llego al agudo. ¡Hay que suspender!', espera: .3 },
@@ -347,8 +346,8 @@
         { id: 'p12d', nombre: 'Una mano en el hombro', img: IMG.mano, amb: [AMB.plazaBaja], mus: false, pj: null, antes: 1.6,
           imgs: [{ t: 0, img: IMG.mano, vid: 'vid/mano.mp4', vidUnaVez: true }],
           lineas: [
-            { id: 't3_027', quien: 'CHICO', texto: '¿Iria? ¿Eres tú?', espera: .8 },
-            { id: 't3_028', quien: 'NOA', img: IMG.noaHelada, pj: null, texto: 'Iria… Así se llama mi madre.', espera: 1.6 }
+            { id: 't3_027', quien: 'CHICO', texto: 'Iria, ¿dónde te habías metido?', espera: .8 },
+            { id: 't3_028', quien: 'NOA', img: IMG.noaGira, pj: null, texto: 'Me confundes. Me llamo Noa.', espera: 1.6 }
           ] },
         { id: 'p12e', nombre: 'Negro', negro: true, auto: 1.4, amb: [], mus: false, pj: null }
       ] }
