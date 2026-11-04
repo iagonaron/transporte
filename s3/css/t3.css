@@ -123,8 +123,8 @@
 .mt-sis .n-ok path,.mt-sis .n-ok rect{fill:#7dffa8;stroke:#7dffa8}
 .mt-sis .n-ayuda path,.mt-sis .n-ayuda rect{fill:var(--cian);stroke:var(--cian)}
 .mt-sis .n-pasa path,.mt-sis .n-pasa rect{fill:rgba(234,243,255,.32);stroke:rgba(234,243,255,.32)}
-.mt-sis .n-act{filter:drop-shadow(0 0 6px rgba(255,181,71,.8))}
-.mt-sis .n-ok{filter:drop-shadow(0 0 5px rgba(125,255,168,.6))}
+.mt-sis .n-act .vf-notehead{filter:drop-shadow(0 0 5px rgba(255,181,71,.75))}   /* (4-nov) brillo solo en la cabeza: plica y corchete, nítidos */
+.mt-sis .n-ok .vf-notehead{filter:drop-shadow(0 0 4px rgba(125,255,168,.55))}
 .mt-fan .vf-clef path{fill:var(--cian);filter:drop-shadow(0 0 6px rgba(99,230,255,.9))}
 .i-claves .mt-pe .vf-clef,.i-claves .mt-pe .vf-keysignature{opacity:.3}
 .fan-arm{fill:var(--cian);font:600 22px 'Saira SC',sans-serif;letter-spacing:.04em}
@@ -155,6 +155,7 @@
 /* teclado (teclas negras en grupos de 2 y 3) */
 .mt-tw{width:1560px}
 .i-final .mt-tw{width:1640px}
+.i-final .t3-teclado{height:210px}
 .t3-teclado{position:relative;height:230px;user-select:none;-webkit-user-select:none;touch-action:none}
 .t3-teclado.bloq{opacity:.5;pointer-events:none}
 .t3-tb{position:absolute;top:0;bottom:0;box-sizing:border-box;border:2px solid #1d2130;border-top:0;border-radius:0 0 9px 9px;background:linear-gradient(#e9e6df,#f8f6f1 18%,#f4f1ea);cursor:pointer;
@@ -329,7 +330,8 @@
 .mt-cuenta{font:600 34px var(--f-texto);color:#7d7264;display:flex;gap:10px;align-items:center;opacity:0;transition:opacity .25s}
 .mt-metro.entrada .mt-cuenta{opacity:1}
 .mt-cuenta span.ya{color:#f7f1e6}.mt-cuenta span.act{color:#f0c674}.mt-cuenta em{font-style:normal;color:#5b5247}
-.mt-metro.en-final{position:absolute;left:50%;transform:translateX(-50%);top:8px;z-index:4}
+.mt-metro.en-final{min-height:40px}
+.mt-metro.en-final .mt-cuenta{font-size:28px;color:var(--tenue)}.mt-metro.en-final .mt-cuenta span.ya{color:var(--tinta)}.mt-metro.en-final .mt-cuenta span.act{color:var(--ambar)}
 .mt-metro.en-final .mt-punto{background:#1b3c55}
 @media (prefers-reduced-motion:reduce){.mt-punto.late,.mt-punto.late.fuerte{animation:none;background:#f0c674}}
 /* piel «teatro» del cartel y la barra durante el atril */
@@ -360,3 +362,33 @@
 .tr-aviso.pospuesta .av-pospuesto{opacity:1}
 .tr-aviso.sale{transform:translateX(130%) scaleY(.6);opacity:0}
 @media (prefers-reduced-motion:reduce){.tr-aviso.sale{transform:none}}
+/* (Iago 4-nov) ejercicio final guiado: pasos, ventanas emergentes de la consola y trazos de luz */
+.mf-fila{display:flex;align-items:center;justify-content:center;gap:34px;min-height:46px}
+.mf-pasos{display:flex;gap:10px}
+.mf-pasos span{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;font:500 20px var(--f-ui);color:var(--tenue);border:1px solid rgba(99,230,255,.25);clip-path:polygon(9px 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,0 100%,0 9px)}
+.mf-pasos span i{font-style:normal;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border:1px solid currentColor;font:600 17px var(--f-ui)}
+.mf-pasos span.act{color:var(--ambar);border-color:var(--ambar);background:rgba(255,181,71,.1)}
+.mf-pasos span.ya{color:#7dffa8;border-color:rgba(125,255,168,.5)}
+.mf-pop{position:absolute;left:50%;top:540px;transform:translate(-50%,16px);z-index:12;opacity:0;transition:opacity .22s ease,transform .22s ease;pointer-events:none}
+.mf-pop.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.mf-caja{width:1040px;padding:22px 30px 18px;display:flex;flex-direction:column;align-items:center;gap:16px;border:1px solid rgba(99,230,255,.55);background:var(--hud),rgba(5,12,28,.96);box-shadow:0 0 50px rgba(99,230,255,.18),0 20px 40px rgba(0,0,0,.6)}
+.mf-tit{font:600 34px var(--f-ui);letter-spacing:.04em;color:var(--cian)}
+.mf-ops{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+#escena #inter button.mf-op{min-width:210px;min-height:76px;font:500 30px var(--f-ui)}
+#escena #inter button.mf-op.ok{background:#7dffa8!important}#escena #inter button.mf-op.ok::before{background:rgba(18,70,40,.95)}
+#escena #inter button.mf-op.mal{background:rgba(255,138,122,.55)!important;color:rgba(234,243,255,.5);cursor:default}#escena #inter button.mf-op.mal::before{background:rgba(40,14,14,.95)}
+.mf-pista{margin:0;min-height:0;font:400 24px/1.35 var(--f-texto);color:#ffc98a;text-align:center;opacity:0;transition:opacity .2s}.mf-pista.on{opacity:1}.mf-pista b{color:#ffe7c4;font-weight:500}
+.mf-luz{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;touch-action:none;cursor:crosshair;z-index:2}
+.mf-trazo{fill:none;stroke:#63e6ff;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px #63e6ff) drop-shadow(0 0 9px rgba(99,230,255,.6));transition:opacity .5s}
+.mf-trazo.fija{stroke:#ffb547;filter:drop-shadow(0 0 4px #ffb547) drop-shadow(0 0 8px rgba(255,181,71,.55))}
+.mf-trazo.borra{opacity:0}
+.mf-rot{fill:#63e6ff;font:600 19px 'Saira SC',sans-serif;letter-spacing:.03em;filter:drop-shadow(0 0 4px rgba(99,230,255,.8))}
+.mf-clave path{fill:#63e6ff}.mf-clave{filter:drop-shadow(0 0 5px rgba(99,230,255,.9))}
+@media (prefers-reduced-motion:reduce){.mf-pop{transition:none;transform:translate(-50%,0)}}
+/* (4-nov) notas de color: plicas y corchetes con el mismo grosor y opacidad que las negras (sin halo) */
+.mt-sis .vf-stavenote .vf-stem path,.at-hoja .vf-stavenote .vf-stem path{stroke-width:1.5;opacity:1}
+.mt-sis .vf-stavenote .vf-flag,.mt-sis .vf-stavenote .vf-stem,.at-hoja .vf-stavenote .vf-stem{filter:none}
+/* (secuencia 3b) el destello breve de la llegada de Noa entre bastidores */
+#escena.destello-t3 #efecto{background:radial-gradient(ellipse at 50% 55%,rgba(200,240,255,.85),rgba(120,200,255,.25) 40%,transparent 70%);animation:dT3 .9s ease-out}
+@keyframes dT3{from{opacity:1}to{opacity:0}}
+@media (prefers-reduced-motion:reduce){#escena.destello-t3 #efecto{animation:none;opacity:.4}}
