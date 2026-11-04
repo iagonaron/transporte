@@ -63,7 +63,7 @@
   /* (T4) nivel también puede ser un objeto como los de NIVEL (+ acc: nº de alteraciones accidentales que se añaden) */
   E.generar = function (nivel) {
     const N = typeof nivel === 'object' && nivel ? nivel : (NIVEL[nivel] || NIVEL[3]);
-    for (let i = 0; i < 400; i++) { let c = intenta(N); if (c && N.acc) c = E.conAccidentales(c, N.acc); if (c) return c; }
+    for (let i = 0; i < 400; i++) { let c = intenta(N); if (c && N.acc) c = E.conAccidentales(c, N.acc, N.afect); if (c) return c; }
     return intenta(NIVEL[1], true);
   };
   function intenta(N, forzar) {
@@ -167,7 +167,8 @@
   };
   /* añade n alteraciones accidentales a una melodía generada (cromatismos de paso o de bordadura, nunca en la 1.ª ni en la última
      nota, nunca dobles, ni dos veces la misma nota en el compás), y comprueba que la transportada no necesita dobles alteraciones */
-  E.conAccidentales = function (ex, n) {
+  /* afect: al menos una cae en una nota afectada por la diferencia (su alteración copiada no vale: cambia ½ tono) */
+  E.conAccidentales = function (ex, n, afect) {
     const f = ex.key.fifths, ok = [];
     for (let i = 1; i < ex.notas.length - 1; i++) {
       const a = ex.notas[i], sig = ex.notas[i + 1], ant = ex.notas[i - 1];
@@ -182,10 +183,12 @@
       /* (T4, 2.º GP) nada de do♭, fa♭, mi♯ ni si♯, ni en el original ni en la transportada */
       const raro = (st, al) => (al === -1 && (st === 'C' || st === 'F')) || (al === 1 && (st === 'E' || st === 'B'));
       if (raro(a.step, nuevo) || raro(s.step, at)) continue;
-      ok.push({ i: i, alter: nuevo, midi: m });
+      ok.push({ i: i, alter: nuevo, midi: m, cambia: at !== nuevo });
     }
     if (ok.length < n) return null;
-    const elegidas = []; while (elegidas.length < n && ok.length) { const x = ok.splice(rint(ok.length), 1)[0]; if (!elegidas.some(y => Math.abs(y.i - x.i) < 2)) elegidas.push(x); }
+    const elegidas = [];
+    if (afect) { const cs = ok.filter(x => x.cambia); if (!cs.length) return null; const x = cs[rint(cs.length)]; elegidas.push(x); ok.splice(ok.indexOf(x), 1); }
+    while (elegidas.length < n && ok.length) { const x = ok.splice(rint(ok.length), 1)[0]; if (!elegidas.some(y => Math.abs(y.i - x.i) < 2)) elegidas.push(x); }
     if (elegidas.length < n) return null;
     elegidas.forEach(x => { const a = ex.notas[x.i]; a.alter = x.alter; a.midi = x.midi; });
     ex.conAcc = true;
@@ -222,7 +225,9 @@
     }
     return midi(alu.step, alu.octave, alterEfectiva(alu, ex.aluArm));
   };
-  const correctaAltura = (ex, gi, alu) => E.midiAlu(ex, alu, gi) === ex.notas[gi].midi + ex.transp.dir * ex.transp.semis;
+  /* (Iago 4-nov 22:11) una nota «?» (alteración copiada del original, sin validar) cuenta como mal aunque la copia sea la buena */
+  const correctaAltura = (ex, gi, alu) => !alu.duda && E.midiAlu(ex, alu, gi) === ex.notas[gi].midi + ex.transp.dir * ex.transp.semis;
+  E.dudas = ex => ex.aluNotas.filter(a => a && a.duda).length;
   function stepTransportado(orig, transp) {
     const ti = STEPS.indexOf(orig.step), p = transp.dir * transp.dgrado;
     return { step: STEPS[(ti + p + 700) % 7], octave: orig.octave + Math.floor((ti + p) / 7) };
@@ -239,7 +244,7 @@
   E.notasBien = function (ex) {
     let ok = 0;
     ex.notas.forEach((n, i) => { const a = ex.aluNotas[i]; if (!a) return; const s = stepTransportado(n, ex.transp);
-      if (a.step === s.step && a.octave === s.octave && (!ex.conAcc || correctaAltura(ex, i, a))) ok++; });
+      if (a.step === s.step && a.octave === s.octave && !a.duda && (!ex.conAcc || correctaAltura(ex, i, a))) ok++; });
     return ok;
   };
   E.notasMal = ex => ex.notas.map((n, i) => { const a = ex.aluNotas[i]; return !a || !correctaAltura(ex, i, a); });
@@ -280,9 +285,10 @@
       const extra = (fila === 0 ? 70 : 42) + armAncho, wRest = (Wt - L - R - extra) / nFila;
       const x = L + (enFila === 0 ? 0 : extra + enFila * wRest), wC = enFila === 0 ? wRest + extra : wRest;
       const st = new VF.Stave(x, ys + fila * rowH, wC);
-      if (enFila === 0) { st.addClef('treble'); if (fifths != null && fifths !== 0) st.addKeySignature(ksName(fifths)); if (fila === 0) st.addTimeSignature(ex.compas.num + '/' + ex.compas.den); }
-      if (ci === n - 1) st.setEndBarType(VF.Barline.type.END);
+      if (enFila === 0) { st.addClef('treble'); if (fifths != null && fifths !== 0) st.addKeySignature(ksName(fifths)); if (fila === 0 && !op.sinCompas) st.addTimeSignature(ex.compas.num + '/' + ex.compas.den); }
+      if (ci === n - 1 && !op.sinFinal) st.setEndBarType(VF.Barline.type.END);
       st.setContext(ctx).draw();
+      if (enFila === 0 && op.inicioNotas) st.setNoteStartX(x + op.inicioNotas);   // (T4, transpAnim) capas superpuestas con las notas en el mismo sitio
       /* (T4) en el original, las alteraciones accidentales se escriben (con la regla del compás) */
       const accO = !alu ? E.accCompas(mn, fifths || 0) : null;
       const sns = mn.map((nn, ki) => {
@@ -320,6 +326,10 @@
       new VF.Formatter().joinVoices([voice]).format([voice], Math.max(40, area));
       beams.forEach(b => { const ns = b.getNotes ? b.getNotes() : (b.notes || []), c = ns.length && ns.every(x => x._col === ns[0]._col) ? ns[0]._col : TINTA; b.setStyle({ fillStyle: c, strokeStyle: c }); });
       voice.draw(ctx, st); beams.forEach(b => b.setContext(ctx).draw());
+      /* (T4) notas «?»: un interrogante ámbar sobre la nota hasta que el alumno valida o cambia su alteración */
+      if (alu) mn.forEach((nn, ki) => { const nota = op.notas ? op.notas[gi0 + ki] : ex.aluNotas[gi0 + ki]; if (!nota || !nota.duda || op.corr) return;
+        let cx; try { cx = sns[ki].getAbsoluteX(); } catch (e) { return; }
+        const yy = yNota(st, nota), q = svgEl('text', { x: cx - 13, y: Math.min(yy - 16, st.getYForLine(0) - 6), class: 'esc-duda', 'text-anchor': 'middle' }); q.textContent = '?'; svg.appendChild(q); });
       const cg = { stave: st, notes: [], fila: fila, cy: (st.getYForLine(0) + st.getYForLine(4)) / 2 };
       sns.forEach((sn, ki) => { let cx; try { cx = sn.getAbsoluteX() + 6; } catch (e) { cx = x + wC / 2; } cg.notes.push({ gi: gi0 + ki, x: cx, dur: mn[ki].dur, el: sn.getSVGElement ? sn.getSVGElement() : null }); });
       geo.comps.push(cg);
@@ -392,7 +402,7 @@
     const hA = el('div', 'partitura esc-alu'); pA.appendChild(hA); hoja.appendChild(pA);
     const ctl = el('div', 'esc-ctl'); w.appendChild(ctl);
     host.appendChild(w);
-    let sel = null, bloqueado = false, corregido = false, geo = null;
+    let sel = null, bloqueado = false, corregido = false, geo = null, abre = null;
     /* (T4) cada nota que se coloca suena con el instrumento del alumno (con lo que SUENA: p. ej. saxo alto, −9) o con el piano */
     const suenaNota = m => { const S = cfg.sonAlu; if (S && S.inst && S.inst !== 'piano') B.viento.nota(S.inst, m + (S.off || 0), B.ac().currentTime + .01, .45, .7); else B.viento.piano(m + ((S && S.off) || 0), B.ac().currentTime + .01, .35, .35); };
     const vacio = () => { for (let i = 0; i < ex.notas.length; i++) if (!ex.aluNotas[i]) return i; return -1; };
@@ -403,6 +413,8 @@
       if (!bloqueado) engancha();
       if (sel != null && ex.aluNotas[sel] && !corregido && !bloqueado) cruz();
       pintaAcc(); bDes.disabled = !ex.undo.length || bloqueado;
+      if (abre != null && !bloqueado && !corregido && ex.aluNotas[abre] && ex.aluNotas[abre].duda) selector(abre); else abre = null;
+      if (cfg.alCambio) cfg.alCambio(ex);
     }
     /* ── colocar notas: ratón (mover = fantasma, clic = colocar) y táctil (tocar → arrastrar → soltar = colocar) ── */
     function cercana(pt) {
@@ -418,7 +430,9 @@
         const pt = svgPt(svg, ev); if (!pt) return; let b = cercana(pt); if (!b) return;
         /* (Iago 3-nov, iPad) en táctil, igual que con ratón: la nota va al hueco que tocas, no al siguiente vacío */
         const s = alturaY(b.cg.stave, pt.y), gi = b.nt.gi, prev = ex.aluNotas[gi];
-        if (prev && prev.step === s.step && prev.octave === s.octave) { sel = gi; redraw(); return; }   // tocar la nota ya puesta: solo seleccionarla
+        const ix = n => STEPS.indexOf(n.step) + n.octave * 7;
+        if (prev && (prev.step === s.step && prev.octave === s.octave || (prev.duda && Math.abs(ix(prev) - ix(s)) <= 1))) { sel = gi; abre = prev.duda ? gi : null; redraw(); return; }   // (T4) con el dedo: a un grado de una nota «?» también abre su selector   // tocar la nota ya puesta: solo seleccionarla (si es «?», se abre su selector)
+        abre = null;
         ex.undo.push({ gi: gi, prev: prev ? Object.assign({}, prev) : null });
         ex.aluNotas[gi] = { step: s.step, octave: s.octave, alter: 0 };
         sel = gi; suenaNota(E.midiAlu(ex, ex.aluNotas[gi], gi));
@@ -466,8 +480,24 @@
     const bAb = btn('♭', 'cuad acc', () => acc(-1), 'Bemol en la nota seleccionada'), bAn = btn('♮', 'cuad acc', () => acc(0), 'Becuadro en la nota seleccionada'), bAs = btn('♯', 'cuad acc', () => acc(1), 'Sostenido en la nota seleccionada');
     [bAb, bAn, bAs].forEach(b => fAcc.appendChild(b)); gAcc.appendChild(fAcc);
     if (cfg.alterar !== false) ctl.appendChild(gAcc);   /* (3-nov) alterar:false → sin ♭ ♮ ♯ (T2: melodías sin alteraciones accidentales) */
+    /* (Iago 4-nov 22:11) selector junto a una nota «?»: ♭ · ♮ · ♯ grandes (ratón y dedo), la copiada ya marcada en ámbar, y «✓ Validar».
+       Pulsar la marcada (o Validar) la da por buena; elegir otra la cambia. Suena la nota y se cierra. */
+    function selector(gi) {
+      const r = destinoGi(gi), a = ex.aluNotas[gi]; if (!r || !a) return;
+      const svg = geo.svg, vb = svg.viewBox.baseVal, rs = svg.getBoundingClientRect(), rh = hA.getBoundingClientRect(), k = rs.width / vb.width || 1;
+      const k2 = (rh.width / (hA.offsetWidth || 1)) || 1;   // la escena va escalada: se pasa a píxeles del contenedor
+      const y = yNota(r.cg.stave, a), cur = a.nat ? 0 : (a.alter || 0);
+      const caja = el('div', 'esc-sel'); caja.style.left = ((rs.left - rh.left) / k2 + r.nt.x * k / k2) + 'px'; caja.style.top = ((rs.top - rh.top) / k2 + (y - 30) * k / k2) + 'px';
+      const elige = v => { ex.undo.push({ gi: gi, prev: Object.assign({}, a) }); a.duda = false; a.alter = v === 0 ? 0 : v; a.nat = v === 0; abre = null; sel = gi;
+        suenaNota(E.midiAlu(ex, a, gi)); limpiaCorr(); redraw(); };
+      [[-1, '♭', 'Bemol'], [0, '♮', 'Becuadro'], [1, '♯', 'Sostenido']].forEach(o => { const b = btn(o[1], 'acc' + (o[0] === cur ? ' on' : ''), () => elige(o[0]), o[2] + (o[0] === cur ? ' (la copiada: púlsala para validarla)' : '')); caja.appendChild(b); });
+      caja.appendChild(btn('✓ Validar', 'prim esc-val', () => elige(cur), 'Validar la alteración copiada del original'));
+      ['pointerdown', 'pointerup', 'click'].forEach(t => caja.addEventListener(t, ev => ev.stopPropagation()));
+      hA.appendChild(caja);
+    }
     function acc(v) {
       if (sel == null || bloqueado) return; const a = ex.aluNotas[sel]; if (!a) return;
+      if (a.duda) { ex.undo.push({ gi: sel, prev: Object.assign({}, a) }); a.duda = false; a.alter = v === 0 ? 0 : v; a.nat = v === 0; abre = null; suenaNota(E.midiAlu(ex, a, sel)); limpiaCorr(); redraw(); return; }   // (T4) decide la nota «?»
       const ya = (a.alter === v && v !== 0) || (v === 0 && a.nat);
       ex.undo.push({ gi: sel, prev: Object.assign({}, a) });
       if (ya) { a.alter = 0; a.nat = false; }                                   // pulsar otra vez la misma: se quita
@@ -520,8 +550,11 @@
          que se quedan para que el alumno decida (♭ ♮ ♯). Devuelve cuántas deja sin escribir. */
       transcribe() {
         const sol = E.solucionAlu(ex); let quedan = 0;
-        ex.notas.forEach((n, i) => { if ((n.alter || 0) !== armAlt(n.step, ex.key.fifths)) { quedan++; return; } ex.aluNotas[i] = sol[i]; });
-        sel = null; redraw(); return quedan;
+        /* (Iago 22:10–22:11) las que llevan alteración accidental en el original se escriben en su sitio con la MISMA alteración copiada
+           (si♭ → fa♭, do♮ → sol♮, sol♯ → re♯) y un «?»: el alumno la valida o la cambia */
+        ex.notas.forEach((n, i) => { if ((n.alter || 0) !== armAlt(n.step, ex.key.fifths)) { quedan++; const al = n.alter || 0;
+          ex.aluNotas[i] = { step: sol[i].step, octave: sol[i].octave, alter: al, nat: al === 0, duda: true }; return; } ex.aluNotas[i] = sol[i]; });
+        sel = null; abre = null; limpiaCorr(); redraw(); return quedan;
       },
       /* (T4) tras el «paso 0»: la tonalidad y la armadura nuevas quedan puestas y fijas en las ruedas */
       fijaTonArm() {
@@ -533,7 +566,7 @@
         if (!gArm.querySelector('.esc-lbl')) gArm.appendChild(el('b', 'esc-lbl', E.armTxt(ex.destino.fifths)));
         redraw();
       },
-      redraw: () => redraw(),
+      redraw: () => redraw(), dudas: () => E.dudas(ex),
       bloquea(on) { bloqueado = on !== false; bCor.disabled = bloqueado; const fija = gTon.classList.contains('fija'); [rTon, rArm].forEach(r => r.classList.toggle('quieta', bloqueado || fija)); [bTb, bTs, bM, bm].forEach(b => { b.disabled = bloqueado || fija; }); redraw(); },
       boton: bCor, resultado: res
     };
