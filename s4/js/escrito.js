@@ -516,6 +516,13 @@
         const sol = E.solucionAlu(ex); ex.notas.forEach((n, i) => { ex.aluNotas[i] = sol[i]; });   // (T4) con sus alteraciones accidentales
         corrige();
       },
+      /* (Iago 4-nov 22:01) «Transcribir»: escribe todas las notas transportadas MENOS las que llevan alteración accidental en el original,
+         que se quedan para que el alumno decida (♭ ♮ ♯). Devuelve cuántas deja sin escribir. */
+      transcribe() {
+        const sol = E.solucionAlu(ex); let quedan = 0;
+        ex.notas.forEach((n, i) => { if ((n.alter || 0) !== armAlt(n.step, ex.key.fifths)) { quedan++; return; } ex.aluNotas[i] = sol[i]; });
+        sel = null; redraw(); return quedan;
+      },
       /* (T4) tras el «paso 0»: la tonalidad y la armadura nuevas quedan puestas y fijas en las ruedas */
       fijaTonArm() {
         ex.aluTonNat = ES[ex.destino.step]; ex.aluTonAlt = ex.destino.alter; ex.aluTonModo = 'M'; ex.aluModoElegido = true;

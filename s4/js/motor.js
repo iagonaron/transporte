@@ -106,14 +106,33 @@
   /* vídeo de fondo en bucle, mudo (p. ej. el dron sobre Coruña): si no está, se queda la lámina */
   let vfondo = null;
   let vfondoSrc = null;
+  /* (Iago 4-nov 21:56) que los vídeos arranquen fluidos desde el primer fotograma: se bajan al empezar la sesión y, poco antes de usarlos,
+     se «ceban» (un <video> oculto que ya ha decodificado su primer fotograma). Como mucho 2 a la vez (memoria del iPad). */
+  const VLISTO = {};
+  M.preparaVideo = function (src) {
+    if (!src || VLISTO[src] || src === vfondoSrc || !B.hayVideo(src)) return;
+    const ks = Object.keys(VLISTO); if (ks.length >= 2) { const k = ks[0], o = VLISTO[k]; delete VLISTO[k]; if (o.v) { try { o.v.pause(); } catch (e) { } o.v.remove(); } }
+    const o = VLISTO[src] = { v: null };
+    B.precargaVideo(src).then(url => {
+      if (!url || VLISTO[src] !== o) return;
+      const v = B.el('video', 'vfondo vcebo'); v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = url;
+      v.style.cssText = 'opacity:0;pointer-events:none';
+      document.body.appendChild(v);
+      const pr = v.play(); const para = () => { try { v.pause(); v.currentTime = 0; } catch (e) { } };
+      if (pr && pr.then) pr.then(para).catch(para); else para();
+      o.v = v;
+    });
+  };
   function fondoVideo(src, unaVez) {
     if (src && src === vfondoSrc && vfondo) return;
     vfondoSrc = src && B.hayVideo(src) ? src : null;
     if (vfondo) { const v = vfondo; vfondo = null; const quita = () => { try { v.pause(); } catch (e) { } v.remove(); }; if (pendiente) alPintar.push(quita); else quita(); }
     if (!src || !B.hayVideo(src)) return;
-    B.precargaVideo(src).then(url => {
+    const listo = VLISTO[src]; if (listo && listo.v) delete VLISTO[src];
+    (listo && listo.v ? Promise.resolve(listo.v.src) : B.precargaVideo(src)).then(url => {
       if (!url || vfondoSrc !== src) return;
-      const v = vfondo = B.el('video', 'vfondo'); v.muted = true; v.loop = !unaVez; v.playsInline = true; v.style.opacity = '0'; v.src = url;
+      const v = vfondo = (listo && listo.v) || B.el('video', 'vfondo'); v.muted = true; v.loop = !unaVez; v.playsInline = true; v.style.opacity = '0';
+      if (listo && listo.v) { v.classList.remove('vcebo'); try { v.currentTime = 0; } catch (e) { } } else v.src = url;
       v.addEventListener('playing', () => { v.style.opacity = ''; }, { once: true });   // hasta que pinta su primer fotograma, se ve la lámina
       $('fondo').appendChild(v); const p = v.play(); if (p && p.catch) p.catch(() => { });
       B.vida.quita();   // la «vida» se pensó para la lámina: con el vídeo del dron sobra
@@ -401,6 +420,7 @@
     }
     montaPlano(p);
     const ls = B.arr(p.lineas);
+    vidsDe(p).slice(0, 2).forEach(M.preparaVideo);
     B.arr(p.imgs).concat(ls.concat(B.arr(p.despues)).reduce((a, l) => a.concat(l.img ? [{ img: l.img }] : [], B.arr(l.imgs)), [])).forEach(x => M.predecod(x.img));
     let paso = ls.length ? (p.antes ? (caja(false), B.espera(RAPIDO ? .1 : p.antes, c).then(ok => ok ? (caja(true), lineas(ls, c)) : false)) : (caja(true), lineas(ls, c)))
       : (caja(false), B.espera(RAPIDO ? .3 : (p.auto || 0), c));
@@ -523,7 +543,9 @@
     }));
     return r.concat(B.capas.recursos(S), B.arr(S.recursos));
   }
-  function videos() { const v = []; if (B.hayVideo(TUNEL) && S.escenas.some(e => e.planos.some(p => p.tunel))) v.push(TUNEL); S.escenas.forEach(e => e.planos.forEach(p => { if (p.video && B.hayVideo(p.video)) v.push(p.video); if (p.fondoVid && B.hayVideo(p.fondoVid)) v.push(p.fondoVid); B.arr(p.destellos).forEach(d => { if (d.video && B.hayVideo(d.video)) v.push(d.video); }); })); return v; }
+  function vidsDe(p) { const v = []; const I = l => B.arr(l && l.imgs).forEach(x => x.vid && v.push(x.vid)); I(p); B.arr(p.lineas).forEach(I);
+    if (p.inter && p.inter.vids) Object.values(p.inter.vids).forEach(x => B.arr(x).forEach(y => v.push(y))); return v.filter(x => B.hayVideo(x)); }
+  function videos() { const v = []; if (B.hayVideo(TUNEL) && S.escenas.some(e => e.planos.some(p => p.tunel))) v.push(TUNEL); S.escenas.forEach(e => e.planos.forEach(p => { if (p.video && B.hayVideo(p.video)) v.push(p.video); if (p.fondoVid && B.hayVideo(p.fondoVid)) v.push(p.fondoVid); B.arr(p.destellos).forEach(d => { if (d.video && B.hayVideo(d.video)) v.push(d.video); }); vidsDe(p).forEach(x => v.indexOf(x) < 0 && v.push(x)); })); return v; }
 
   /* ══════════ ARRANQUE ══════════ */
   B.sesion = function (d) { S = d; };

@@ -35,7 +35,8 @@
     else if (fa <= 0 && fb <= 0) partes.push(num(n, 'bemol', 'bemoles') + (asc ? ' menos' : ' más'));
     else if (fa < 0) partes.push(num(-fa, 'bemol', 'bemoles') + ' menos', num(fb, 'sostenido', 'sostenidos') + ' más');
     else partes.push(num(fa, 'sostenido', 'sostenidos') + ' menos', num(-fb, 'bemol', 'bemoles') + ' más');
-    return 'De ' + T4.arm(fa) + ' a ' + T4.arm(fb) + ': ' + partes.join(' y ') + ' → <b>' + (n === 0 ? 'ninguna diferencia' : num(n, 'diferencia', 'diferencias') + ' ' + (asc ? (n === 1 ? 'ascendente' : 'ascendentes') : (n === 1 ? 'descendente' : 'descendentes'))) + '</b>.';
+    return 'De ' + T4.arm(fa) + ' a ' + T4.arm(fb) + ': ' + partes.join(' y ') + ' → <b>' + (n === 0 ? 'ninguna diferencia' : num(n, 'diferencia', 'diferencias') + ' ' + (asc ? (n === 1 ? 'ascendente' : 'ascendentes') : (n === 1 ? 'descendente' : 'descendentes'))) + '</b>' +
+      (n ? ' · ' + (n === 1 ? 'nota afectada' : 'notas afectadas') + ': <b>' + (asc ? ORD_S : ORD_B).slice(0, n).join(', ') + '</b>' : '') + '.';   /* (Iago 4-nov 21:58) decir las notas afectadas */
   };
   const flecha = (d, t) => '<svg viewBox="0 0 24 24" width="' + t + '" height="' + t + '" aria-hidden="true"><path d="' + (d === 'asc' ? 'M12 3 L20 13 H15 V21 H9 V13 H4 Z' : 'M12 21 L20 11 H15 V3 H9 V11 H4 Z') + '" fill="currentColor"/></svg>';
   T4.flecha = flecha;
@@ -246,6 +247,9 @@
         B.viento.ui(okN ? 'ok' : 'mal');
         T4.viaja(m, capaG, fa, fb, c).then(ok => {
           if (!ok) return;
+          /* (Iago 4-nov 22:00) letrero fugaz con las notas afectadas */
+          if (sol.n) { const L = el('div', 'mt-afect ' + sol.dir, '<small>' + (sol.n === 1 ? 'La nota afectada es' : 'Las notas afectadas son') + '</small><b>' + (sol.dir === 'asc' ? ORD_S : ORD_B).slice(0, sol.n).join(' · ') + '</b><i>' + (sol.dir === 'asc' ? 'suben un semitono' : 'bajan un semitono') + '</i>');
+            mapa.appendChild(L); B.viento.ui('ok'); setTimeout(() => L.remove(), 4200); }
           if (k < cfg.items.length - 1) bSig.style.display = '';
           else if (!listo) { listo = true; M().barraTexto(cfg.fin || 'Ya sabes contar las diferencias: cuántos niveles y hacia dónde.'); M().esperaSigue(c).then(o => sigue && sigue(o)); }
         });
@@ -356,6 +360,11 @@
     let api = null, intentos = 0, listo = false, solVista = false, sigue = null;
     const bSol = btn('Ver la solución', '', () => { if (!api) return; solVista = true; api.solucion(); api.bloquea(); habilita(cfg.trasSolucion || 'Así queda tu parte de saxo: <b>La M</b> (3♯), cada nota una 5.ª justa más arriba y los accidentales con su nota.'); });
     bSol.style.display = 'none';
+    /* (Iago 4-nov 22:01) botón «Transcribir»: pone todas las notas salvo las que llevan alteraciones accidentales, para decidir solo esas */
+    const bTra = btn('✎ Transcribir', '', () => { if (!api || !api.transcribe) return; const q = api.transcribe(); bTra.disabled = true;
+      M().barraTexto('Ya están escritas todas las notas <b>sin alteraciones accidentales</b>. Te quedan <b>' + q + '</b>: decide tú su alteración (♭ ♮ ♯) — recuerda que <b>fa</b> es la nota afectada por la diferencia. Después, <b>Corregir</b>.'); },
+      'Escribe todas las notas transportadas menos las que llevan alteraciones accidentales');
+    bTra.style.display = 'none';
     api = E().panel(p, ex, { alterar: true, guiado: true, lado: true, porFila: 4, altoFila: 100,
       titulo: 'Pasa la parte de <b>clarinete en Si♭</b> a <b>saxo alto en Mi♭</b> · <b>' + ex.transp.lbl + '</b>',
       etiquetaOrig: 'Parte de Xoán · <b>clarinete en Si♭</b> · <b>' + ex.key.name + ' Mayor</b> (' + T4.arm(ex.key.fifths) + ')',
@@ -378,11 +387,11 @@
     }
     function habilita(txt) { if (txt) M().barraTexto(txt); if (!listo) { listo = true; M().esperaSigue(c).then(ok => sigue && sigue(ok)); } }
     const P0 = cfg.paso0 || {};
-    return M().cartel(cfg.cartel, { botones: [bSol], aulaSolo: false }).then(() => new Promise(res => {
+    return M().cartel(cfg.cartel, { botones: [bTra, bSol], aulaSolo: false }).then(() => new Promise(res => {
       sigue = res; c.alMorir.push(() => res(false));
       M().barraTexto(P0.barra || '<b>Paso 0</b> · elige la tonalidad y la armadura de tu parte de saxo.');
       paso0(p, { ex: ex, titulo: P0.titulo || 'Paso 0 · La tonalidad de tu parte', texto: P0.texto || '', validar: true, pistas: cfg.pistas, bien: P0.bien,
-        alListo: () => { api.fijaTonArm(); M().barraTexto(cfg.cartelCorto || 'Coloca cada nota una 5.ª justa más arriba. Después, <b>Corregir</b>.'); } });
+        alListo: () => { api.fijaTonArm(); bTra.style.display = ''; M().barraTexto((cfg.cartelCorto || 'Coloca cada nota una 5.ª justa más arriba. Después, <b>Corregir</b>.') + ' Si quieres, <b>✎ Transcribir</b> escribe todas menos las que llevan alteraciones.'); } });
     }));
   };
 
