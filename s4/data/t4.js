@@ -112,7 +112,7 @@
       R3('mariapita', { luz: .6 })),
     tararea: O(I4('noa_tararea', 'Bajo los soportales, de noche: Noa tararea (labios entreabiertos, marca el ritmo con la mano), con el ' + SAXO + ' colgado sin tocarlo; Xoán, a su lado, escribe en un cuaderno de pentagramas apoyado en la rodilla; plano a dos', { ocultaPj: ['NOA'], vida: BR('noa_tararea') }),
       R3('noa_mariapita')),
-    cuaderno: O(I4('cuaderno_xoan', 'DETALLE: la mano de Xoán escribe a LÁPIZ notas en un cuaderno de pentagramas (clave de sol y dos sostenidos en la armadura, notación correcta), bajo la luz cálida de una farola de los soportales', { vida: BR('cuaderno_xoan', { a: .25, chispa: 0 }).concat(POLVO()) }),
+    cuaderno: O(I4('cuaderno_xoan_notas', 'DETALLE: la mano de Xoán escribe a LÁPIZ notas en un cuaderno de pentagramas (clave de sol y dos sostenidos en la armadura, notación correcta), bajo la luz cálida de una farola de los soportales', { vida: [{ tipo: 'brillos', p: [[.045, .06, 24, '#ffd59a']], a: .3 }] }   /* (Iago 4-nov) las notas reales del tema de Noa, compuestas en código sobre cuaderno_xoan_base */),
       R3('mariapita', { luz: .6 })),
     sacan: O(I4('soportales_instrumentos', 'Bajo los soportales, de noche: Noa y Xoán sacan y montan sus instrumentos (' + SAXO + ' y ' + CLAR + '), los estuches abiertos en el suelo, el cuaderno de pentagramas en un atril plegable; plano a dos', { ocultaPj: ['NOA'], vida: BR('soportales_instrumentos', { chispa: .05 }).concat(SUELO()) }),
       R3('mariapita', { luz: .6 })),
@@ -274,7 +274,7 @@
         { id: 'p4c', nombre: 'Los accidentales', img: IMG.accCuaderno, recuerdo: false, amb: SOPORTALES, mus: MUS.terrazaBaja, pj: null, antes: .5,
           lineas: [
             { id: 't4_016', quien: 'XOAN', lamina: ACC, pj: null,
-              texto: 'Y ojo con las alteraciones accidentales. Si en mi parte hay un do becuadro, en la tuya será un sol becuadro: se copia igual. Pero mira este si bemol: va a parar a fa, la nota afectada por la diferencia. Así que no será fa bemol, sino fa becuadro: la diferencia lo ha subido.', espera: 1.4 }
+              texto: 'Y ojo: las diferencias solo importan en las notas con alteraciones accidentales; las demás ya las resuelve la armadura nueva. Si en mi parte hay un do becuadro, en la tuya será un sol becuadro: se copia igual. Pero mira este si bemol: va a parar a fa, la nota afectada por la diferencia. Así que no será fa bemol, sino fa becuadro: la diferencia lo ha subido.', espera: 1.4 }
           ] }
       ] },
       /* 5 · Interactivo 1: la montaña de las diferencias */
@@ -373,10 +373,10 @@
           lineas: [
             { id: 't4_028', quien: 'NARRADOR', lamina: { tipo: 'escalaDif', titulo: 'Las diferencias', de: 'Re M', a: 'La M', t: 3.5, todas: ['Do M', 'Sol M', 'Fa M', 'Si♭ M'] },
               texto: 'Transportar por diferencias es comparar las dos armaduras: cuántas alteraciones cambian y hacia dónde. Si hay más sostenidos o menos bemoles, son ascendentes; si hay más bemoles o menos sostenidos, descendentes.', espera: .8 },
-            { id: 't4_029', quien: 'NARRADOR', lamina: { tipo: 'tablaDif', titulo: 'Transporte por diferencias', ens: [0, .08, .3, .55, .82] },
-              texto: 'Las notas afectadas se cuentan en el orden de las alteraciones: fa, do, sol… si son ascendentes; si, mi, la… si son descendentes. Esas notas suben o bajan un semitono.', espera: 1 },
+            { id: 't4_029', quien: 'NARRADOR', lamina: { tipo: 'tablaDif', titulo: 'Transporte por diferencias', ens: [0, .08, .25, .45, .65, .85] },
+              texto: 'Las notas afectadas se cuentan en el orden de las alteraciones: fa, do, sol… si son ascendentes; si, mi, la… si son descendentes. Pero ojo: esto solo se aplica a las notas que llevan alteraciones accidentales; las demás ya las resuelve la armadura nueva.', espera: 1 },
             { id: 't4_030', quien: 'NARRADOR', lamina: Object.assign({}, ACC, { titulo: 'Y los accidentales', ens: [.22, .4, .64] }),
-              texto: 'Y las alteraciones accidentales: solo cambian las de las notas afectadas. Con una diferencia ascendente, la nota afectada es fa: por eso el si bemol pasa a fa becuadro. Las demás no cambian: el do becuadro pasa a sol becuadro, y el sol sostenido, a re sostenido.', espera: 1.4 }
+              texto: 'Si una nota afectada lleva una alteración accidental, esa alteración sube o baja un semitono: por eso el si bemol pasa a fa becuadro. Las demás alteraciones accidentales no cambian: el do becuadro pasa a sol becuadro, y el sol sostenido, a re sostenido.', espera: 1.4 }
           ] }
       ] },
       /* 12 · Ejercicio final OPCIONAL (generador por diferencias, 3 niveles; el 3.º con accidentales) → «Transportarnos al menú principal» */
