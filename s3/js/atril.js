@@ -204,6 +204,14 @@
     const rep = el('div', 'at-repisa' + (cal.lapizEnImagen ? ' en-imagen' : '') + (o.interactivo ? ' coge' : '')); host.appendChild(rep);
     rep.style.left = (L.x * 1920) + 'px'; rep.style.top = (L.y * 1080) + 'px'; rep.style.width = (L.w * 1920) + 'px'; rep.style.transform = 'rotate(' + (L.rot || 0) + 'deg)';
     rep.appendChild(lapizSvg('at-lp-rep'));
+    /* (4-nov) si el lápiz va pintado en la lámina, al cogerlo se tapa con el mismo trozo de la lámina sin lápiz (atril_piano_sinlapiz.webp) */
+    const SIN = 'img/t3/atril_piano_sinlapiz.webp';
+    if (cal.lapizEnImagen && B.existe(SIN)) {
+      const Z = { x: .675, y: .641, w: .201, h: .059 }, par = el('div', 'at-parche');
+      par.style.cssText = 'left:' + (Z.x * 1920) + 'px;top:' + (Z.y * 1080) + 'px;width:' + (Z.w * 1920) + 'px;height:' + (Z.h * 1080) + 'px;' +
+        'background-image:url(' + SIN + ');background-size:1920px 1080px;background-position:-' + (Z.x * 1920) + 'px -' + (Z.y * 1080) + 'px';
+      rep.insertAdjacentElement('afterend', par);
+    }
     if (o.interactivo) rep.appendChild(el('span', 'at-lp-aviso', 'Coge el lápiz'));
     const vuela = el('div', 'at-lp-vuela'); vuela.appendChild(lapizSvg('at-lp-svg', -48)); host.appendChild(vuela);
     let lev = false, pos = null;

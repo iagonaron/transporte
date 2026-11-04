@@ -11,7 +11,9 @@
   const C = B.capas = {};
   let capa = null, pjEl = null, pjAct = null, clavesEl = null, avisoEl = null;
   /* (T2) cada personaje con su carpeta: Noa, Amaro y la madre reutilizan las poses de T1 (PJ[q].dir = '../s1/img/t1/pj/') */
-  const RUTA = (q, pose) => ((B.PJ && B.PJ[q] && B.PJ[q].dir) || 'img/t2/pj/') + String(q).toLowerCase() + '_' + pose + '.webp';
+  /* (T3) PJ[q].rutas = { pose: 'ruta' } para poses nuevas fuera de la carpeta común (p. ej. noa_arrepentida.png de T3) */
+  const RUTA = (q, pose) => (B.PJ && B.PJ[q] && B.PJ[q].rutas && B.PJ[q].rutas[pose]) ||
+    ((B.PJ && B.PJ[q] && B.PJ[q].dir) || 'img/t2/pj/') + String(q).toLowerCase() + '_' + pose + '.webp';
   const PJ = q => (B.PJ && B.PJ[q]) || null;
   C.ruta = RUTA;
   function asegura() {
