@@ -297,7 +297,7 @@
           inter: { tipo: 'secuencia', mp3: CANCION.roto, dur: 33.46, la5: 31.8, quiebra: 31.56, antesCamerino: 6,
             planos: { dron: [IMG.dronBahia, IMG.dronCiudadVieja, IMG.dronRiego, I3('dron_rosalia_f0', 'Primer fotograma del vídeo de dron hacia la fachada del Rosalía')], sala: IMG.salaEnsayo, llegada: IMG.llegada, regidora: IMG.regidora,
               pasillo: IMG.pasillo, camerino: [IMG.camerinoPiano, IMG.cantanteCanta], agudo: IMG.agudo },
-            vids: { dron: ['vid/dron_bahia.mp4', 'vid/dron_ciudad_vieja.mp4', 'vid/dron_riego_de_agua.mp4', 'vid/dron_rosalia.mp4'], llegada: 'vid/llegada_bastidores.mp4' },
+            vids: { montaje: 'vid/dron_montaje.mp4', llegada: 'vid/llegada_bastidores.mp4' },   /* (Iago 4-nov 22:37) los 4 planos de dron en un solo vídeo con cortes directos */
             amb: { dron: [{ src: [SF('sfx_t3_plaza_atardecer'), SF1('amb_ciudad2100')], vol: .3 }, AMB.mar, AMB.gaviotas], sala: [AMB.salaBaja, AMB.crujidosBajo], bastidores: [AMB.bastidores, AMB.crujidos], pasillo: [AMB.pasillo, AMB.crujidosBajo], camerino: [AMB.camerino] },
             sfxPasos: SFx(SF('sfx_t3_pasos_pasillo'), SF1('sfx_pasos_rapidos')), sfxRota: SF('sfx_t3_voz_rota'),
             lineas: {
@@ -446,7 +446,7 @@
           lineas: [
             { id: 't3_027', quien: 'CHICO', texto: 'Iria, ¿dónde te habías metido?', enMus: MUS.final.en.t3_027 },
             { id: 't3_028', quien: 'NOA', img: IMG.noaGira, pj: null, texto: 'Me confundes. Me llamo Noa.', enMus: MUS.final.en.t3_028 },
-            { id: 't3_029', quien: 'CHICO', texto: 'Perdona… te confundí con…', enMus: MUS.final.en.t3_029 },
+            { id: 't3_029', quien: 'CHICO', texto: 'Ah, perdona. Pensaba que eras…', enMus: MUS.final.en.t3_029 },
             { id: 't3_030', quien: 'NOA', texto: '…Iria se llama mi madre. Espera un momento… ¿Cómo te llamas tú?', enMus: MUS.final.en.t3_030 }   /* (D2) acaba a los 23,05 s: 0,4 s de silencio y el golpe */
           ] },
         /* corte a negro; «Continuará…» (motor) cae en el golpe de la música (MUS.final.golpe, s desde que arranca en p12c) */
