@@ -227,3 +227,122 @@
 .fan-orig .vf-clef.fan-sol{transition:opacity 1.2s ease,transform 1.2s ease}
 .i-claves .mt-pe .vf-keysignature.fan-armsuave,.con-fan .fan-orig .vf-keysignature.fan-armsuave{opacity:.2}
 .fan-arm{font-size:20px}
+/* (Iago 4-nov) transición de la consola del repaso: barrido cian + glitch breve y entrada deslizándose */
+.rp-consola::before{content:'';position:absolute;inset:0;z-index:5;pointer-events:none;opacity:0;
+  background:linear-gradient(90deg,transparent 0,rgba(99,230,255,0) 38%,rgba(99,230,255,.55) 49%,rgba(220,250,255,.9) 50%,rgba(99,230,255,.55) 51%,rgba(99,230,255,0) 62%,transparent 100%),
+    repeating-linear-gradient(0deg,rgba(99,230,255,.10) 0 2px,transparent 2px 7px);
+  background-size:220% 100%,100% 100%;background-repeat:no-repeat,repeat}
+.rp-consola.rp-glitch::before,.rp-consola.rp-glitch-g::before{animation:rpBarrido .42s ease-out 1}
+@keyframes rpBarrido{0%{opacity:1;background-position:120% 0,0 0}60%{opacity:1}100%{opacity:0;background-position:-20% 0,0 0}}
+.rp-consola.rp-glitch-g .rp-cab,.rp-consola.rp-glitch .rp-pct{animation:rpGlitch .36s steps(1) 1}
+@keyframes rpGlitch{0%{transform:translate(0,0);filter:none}15%{transform:translate(-5px,0);filter:drop-shadow(3px 0 0 rgba(99,230,255,.8)) drop-shadow(-3px 0 0 rgba(255,181,71,.6))}
+  30%{transform:translate(4px,-1px)}45%{transform:translate(-2px,1px);filter:drop-shadow(2px 0 0 rgba(99,230,255,.7))}60%{transform:translate(2px,0);filter:none}100%{transform:none;filter:none}}
+.rp-entra{animation:rpEntra .46s cubic-bezier(.2,.7,.2,1) 1 both}
+@keyframes rpEntra{0%{opacity:0;transform:translateX(70px);filter:blur(3px) brightness(1.6)}55%{opacity:1;filter:blur(0) brightness(1.15)}100%{opacity:1;transform:none;filter:none}}
+@media (prefers-reduced-motion:reduce){
+  .rp-consola.rp-glitch::before,.rp-consola.rp-glitch-g::before,.rp-consola.rp-glitch-g .rp-cab,.rp-consola.rp-glitch .rp-pct{animation:none}
+  .rp-entra{animation:rpEntraSuave .25s ease 1 both}
+  @keyframes rpEntraSuave{from{opacity:0}to{opacity:1}}
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   (Iago 4-nov) EL ATRIL: partitura impresa en una A4 sobre el atril del piano (fondo), anotaciones a lápiz de grafito,
+   paneles sobrios a los lados y el teclado debajo. Nada de consola futurista: tinta negra, papel blanco, madera lacada.
+   ══════════════════════════════════════════════════════════════════════ */
+#inter.atril{left:0;right:0;top:0;bottom:0;display:block}
+#lamina>.lam-atril{inset:0}
+.at-hoja{position:absolute;color:#141414;font-family:'IM Fell','Palatino Linotype',Georgia,serif}
+.at-cab{position:absolute;left:8%;right:8%;top:7.5%;height:8%;text-align:center}
+.at-cab b{display:block;font:400 26px/1.15 'IM Fell','Palatino Linotype',Georgia,serif;letter-spacing:.02em;color:#141414}
+.at-cab span{position:absolute;bottom:0;font:italic 400 14px 'IM Fell',Georgia,serif;color:#333}
+.at-cab .i{left:0}.at-cab .d{right:0}
+.at-sistemas{position:absolute;left:8%;right:6%;top:16.5%;bottom:3%;display:flex;flex-direction:column;justify-content:flex-start;gap:0}
+.at-sis{position:relative}
+.at-pe svg{display:block;width:100%;height:auto;overflow:visible}
+.at-capa{position:absolute;left:0;top:0;overflow:visible;pointer-events:none;z-index:4}
+.atril.con-lapiz .i-marcar .at-capa,#inter.i-marcar.con-lapiz .at-capa{pointer-events:all;cursor:none;touch-action:none}
+.at-lapiztxt{font:italic 400 20px 'IM Fell',Georgia,serif;fill:#3b3b3d}
+.at-nom{font-size:15px}
+.at-trazo{transition:opacity .6s ease}.at-trazo.borra,.at-fantasma.borra{opacity:0}
+.at-fantasma{opacity:.32}
+/* cursor de lectura y estados de las notas (tinta sobre papel) */
+.at-cursor{position:absolute;width:3px;margin-left:-1.5px;background:rgba(200,104,26,.6);border-radius:2px;opacity:0;pointer-events:none}
+.at-hoja .n-act path,.at-hoja .n-act rect{fill:#c8641a;stroke:#c8641a}
+.at-hoja .n-ok path,.at-hoja .n-ok rect{fill:#1f7a45;stroke:#1f7a45}
+.at-hoja .n-ayuda path,.at-hoja .n-ayuda rect{fill:#2466a8;stroke:#2466a8}
+.at-hoja .n-pasa path,.at-hoja .n-pasa rect{fill:#9a968e;stroke:#9a968e}
+.at-et{position:absolute;left:0;right:0;height:26px}
+.at-etq{position:absolute;top:0;transform:translateX(-50%);font:italic 400 17px/1 'IM Fell',Georgia,serif;color:#3b3b3d;white-space:nowrap}
+.at-etq s{display:none}.at-etq b{font-weight:400}
+.at-etq.act{font:600 20px var(--f-texto);color:#c8641a}
+/* el lápiz: en la repisa (se coge) y escribiendo */
+.at-repisa{position:absolute;height:18px;z-index:6;transform-origin:0 50%;cursor:grab;touch-action:none}
+.at-repisa svg{display:block;width:100%;height:100%;filter:drop-shadow(0 3px 3px rgba(0,0,0,.55))}
+.at-repisa.en-imagen svg{opacity:0}
+.at-repisa.fuera{opacity:0;pointer-events:none;transition:opacity .2s}
+.at-repisa.coge::after{content:'';position:absolute;inset:-14px -10px;border-radius:12px;border:2px solid rgba(255,214,150,.0);animation:lpPulso 1.6s ease-in-out infinite}
+@keyframes lpPulso{50%{border-color:rgba(255,214,150,.7);box-shadow:0 0 16px rgba(255,200,120,.35)}}
+.at-lp-aviso{position:absolute;left:50%;top:28px;transform:translateX(-50%);white-space:nowrap;font:500 20px var(--f-texto);color:#f3e6cf;text-shadow:0 1px 3px #000}
+.at-lp-vuela{position:absolute;width:150px;height:150px;margin-left:0;z-index:30;pointer-events:none;opacity:0;transition:opacity .15s}
+.at-lp-vuela.on{opacity:1}
+.at-lp-vuela svg{display:block;width:150px;height:150px;overflow:visible}
+@media (prefers-reduced-motion:reduce){.at-repisa.coge::after{animation:none;border-color:rgba(255,214,150,.6)}}
+/* paneles sobrios a los lados de la hoja */
+.at-panel{position:absolute;top:124px;width:600px;display:flex;flex-direction:column;gap:18px;padding:22px 26px;border-radius:8px;
+  background:rgba(18,16,14,.84);border:1px solid rgba(255,240,220,.16);box-shadow:0 10px 30px rgba(0,0,0,.45);color:#f2ece2}
+.at-panel.izq{left:60px}.at-panel.der{right:60px}
+.at-ptit{font:500 18px var(--f-texto);letter-spacing:.12em;text-transform:uppercase;color:#bfb3a2}
+.atril .mt-lado{min-width:0}
+.atril .mt-lado small{font:500 17px var(--f-texto);letter-spacing:.08em;color:#bfb3a2}
+.atril .mt-lado b{font:500 32px var(--f-texto);color:#f7f1e6;letter-spacing:0}
+.atril .mt-lado b.cian{color:#f0c674}
+.at-msg{font:400 28px/1.4 var(--f-texto);color:#efe7da;min-height:120px}
+.at-msg b{color:#fff;font-weight:500}
+.at-msg.ok{color:#a9dbb6}.at-msg.mal{color:#f3c79a}.at-msg.pasa{color:#cfc6b8}
+.mc-pasos{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:14px}
+.mc-pasos li{display:flex;gap:16px;align-items:flex-start;color:#a79d8f}
+.mc-pasos li i{flex:none;font:600 22px var(--f-texto);font-style:normal;width:40px;height:40px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center}
+.mc-pasos li b{display:block;font:500 28px var(--f-texto);color:inherit}
+.mc-pasos li small{font:400 19px var(--f-texto)}
+.mc-pasos li.act{color:#f7f1e6}.mc-pasos li.act i{background:#f0c674;border-color:#f0c674;color:#1b1408}
+.mc-pasos li.ya{color:#8fc9a0}.mc-pasos li.ya i{background:#2e6b43;border-color:#8fc9a0;color:#e9fff0}
+.atril .mt-prog i{border-color:rgba(255,240,220,.4);transform:none;border-radius:50%}
+.atril .mt-prog i.ya{background:#8fc9a0;border-color:#8fc9a0}.atril .mt-prog i.act{background:#f0c674;border-color:#f0c674}
+.atril .mt-chips{flex-wrap:wrap;gap:10px}
+.atril .mt-chip{clip-path:none;border-radius:6px;border-color:rgba(255,240,220,.22);color:#bfb3a2;padding:6px 14px}
+.atril .mt-chip.act{color:#1b1408;background:#f0c674;border-color:#f0c674}
+.atril .mt-chip.ya{color:#a9dbb6;border-color:rgba(169,219,182,.5)}
+/* teclado debajo de la repisa, sobrio */
+.atril .mt-tw{position:absolute;left:50%;top:802px;width:1380px;transform:translateX(-50%)}
+.atril .t3-teclado{height:138px;box-shadow:0 -4px 14px rgba(0,0,0,.6)}
+.atril .t3-tb{border-color:#2a2622}
+/* «Empezar» y resultado encima de la hoja */
+.atril .mt-capa{background:rgba(248,246,240,.78);z-index:8}
+.atril .mt-res small{color:#6b5a40}.atril .mt-res b{color:#1f7a45;font-size:84px}.atril .mt-res span{color:#222;text-align:center;padding:0 24px}
+/* metrónomo: punto que late y cuenta de entrada «1 · 2 · 3» */
+.mt-metro{display:flex;align-items:center;gap:18px;min-height:52px}
+.mt-punto{width:26px;height:26px;border-radius:50%;background:#5b5247;flex:none}
+.mt-punto.late{animation:mtLate .32s ease-out}
+.mt-punto.late.fuerte{animation:mtLateF .36s ease-out}
+@keyframes mtLate{0%{background:#f0c674;transform:scale(1.25)}100%{background:#5b5247;transform:none}}
+@keyframes mtLateF{0%{background:#ffdf9a;transform:scale(1.5);box-shadow:0 0 14px rgba(240,198,116,.8)}100%{background:#5b5247;transform:none}}
+.mt-cuenta{font:600 34px var(--f-texto);color:#7d7264;display:flex;gap:10px;align-items:center;opacity:0;transition:opacity .25s}
+.mt-metro.entrada .mt-cuenta{opacity:1}
+.mt-cuenta span.ya{color:#f7f1e6}.mt-cuenta span.act{color:#f0c674}.mt-cuenta em{font-style:normal;color:#5b5247}
+.mt-metro.en-final{position:absolute;left:50%;transform:translateX(-50%);top:8px;z-index:4}
+.mt-metro.en-final .mt-punto{background:#1b3c55}
+@media (prefers-reduced-motion:reduce){.mt-punto.late,.mt-punto.late.fuerte{animation:none;background:#f0c674}}
+/* piel «teatro» del cartel y la barra durante el atril */
+#escena.piel-teatro #barra,#escena.piel-teatro #cartel .cart{background:rgba(20,18,16,.94)!important;border:1px solid rgba(255,240,220,.2)!important;border-radius:8px!important}
+#escena.piel-teatro #cartel .cart b,#escena.piel-teatro #barra .bt b{color:#f0c674}
+#escena.piel-teatro #inter.atril button,#escena.piel-teatro #barra button,#escena.piel-teatro #cartel button{clip-path:none!important;border-radius:6px!important;
+  background:rgba(255,240,220,.28)!important;color:#f7f1e6!important;font-family:var(--f-texto)!important;filter:none!important}
+#escena.piel-teatro #inter.atril button::before,#escena.piel-teatro #barra button::before,#escena.piel-teatro #cartel button::before{background:#26221e!important;clip-path:none!important;border-radius:5px!important}
+#escena.piel-teatro #inter.atril button:hover:not(:disabled),#escena.piel-teatro #barra button:hover:not(:disabled),#escena.piel-teatro #cartel button:hover{background:#f0c674!important}
+#escena.piel-teatro #bInterSig.late,#escena.piel-teatro #inter.atril button.mt-empieza{background:#f0c674!important;color:#1b1408!important}
+#escena.piel-teatro #bInterSig.late::before,#escena.piel-teatro #inter.atril button.mt-empieza::before{background:#f0c674!important}
+#escena.piel-teatro #inter.atril button.mt-guia.on i{background:#f0c674;border-color:#f0c674}
+#escena.piel-teatro #cartel{background:rgba(0,0,0,.35)}
+#escena.piel-teatro #barra button:disabled,#escena.piel-teatro #inter.atril button:disabled{opacity:.42}
+.atril .mt-tw::before{content:'';position:absolute;left:-1000px;right:-1000px;top:-12px;bottom:-400px;z-index:-1;background:linear-gradient(180deg,#0a0a0c,#050506 30%,#030304)}
+.atril .mt-tw{z-index:1}
