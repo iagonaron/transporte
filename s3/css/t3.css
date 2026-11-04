@@ -392,3 +392,7 @@
 #escena.destello-t3 #efecto{background:radial-gradient(ellipse at 50% 55%,rgba(200,240,255,.85),rgba(120,200,255,.25) 40%,transparent 70%);animation:dT3 .9s ease-out}
 @keyframes dT3{from{opacity:1}to{opacity:0}}
 @media (prefers-reduced-motion:reduce){#escena.destello-t3 #efecto{animation:none;opacity:.4}}
+
+/* (4-nov) parche de la repisa sin lápiz: visible cuando el lápiz se ha cogido */
+.at-parche{position:absolute;z-index:5;opacity:0;pointer-events:none;transition:opacity .2s}
+.at-repisa.fuera + .at-parche{opacity:1}
