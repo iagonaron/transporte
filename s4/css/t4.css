@@ -216,3 +216,74 @@
 #escena #inter .esc-sel button.acc{width:70px;min-width:70px;height:70px;min-height:70px;font-size:36px}
 #escena #inter .esc-sel button.esc-val{min-height:70px;font-size:24px;padding:0 18px}
 #barra .bt b.q{color:#ffb547}
+
+/* (Iago 5-nov) lámina «afectadas»: orden de los sostenidos y las notas afectadas iluminándose */
+.afx-fila{display:flex;gap:14px;justify-content:center;margin:34px 0 18px;opacity:.35;transition:opacity .5s}
+.afx-fila.on{opacity:1}
+.afx-n{width:96px;height:104px;border:2px solid rgba(99,230,255,.35);border-radius:6px;background:rgba(8,16,30,.7);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#9fb6cc;transition:all .35s}
+.afx-n b{font:600 40px 'Saira SC',sans-serif;letter-spacing:.02em}
+.afx-n small{font:500 14px 'Saira SC',sans-serif;opacity:.6}
+.afx-n.si{border-color:var(--cian);color:#eaf6ff;background:rgba(20,70,95,.75);box-shadow:0 0 22px rgba(99,230,255,.45)}
+.afx-n.si b{color:var(--cian)}
+.afx-fila.bem .afx-n.si{border-color:#ffb547;box-shadow:0 0 22px rgba(255,181,71,.45)}.afx-fila.bem .afx-n.si b{color:#ffb547}
+.afx-n.pop{animation:afxPop .7s ease}
+@keyframes afxPop{0%{transform:scale(1)}35%{transform:scale(1.22)}100%{transform:scale(1)}}
+.afx-pie{text-align:center;font:500 26px 'Saira SC',sans-serif;color:#cfe6f5;min-height:36px}
+.afx-pie b{color:var(--cian)}
+
+/* ══ (Iago 5-nov 07:18) transpAnim con los DOS pentagramas: Xoán arriba, Noa abajo ══ */
+.tA-pe2{position:relative;margin-top:4px}
+.tA-fila{display:flex;align-items:center;gap:14px;font:500 25px var(--f-ui);color:var(--tenue)}
+.tA-fila b{color:var(--tinta)}
+.tA-fila.noa{margin-top:2px;opacity:.45;transition:opacity .6s}
+.lam-transpAnim.con-arm .tA-fila.noa{opacity:1}
+.lam-transpAnim.con-arm .tA-fila.noa b{color:var(--ambar)}
+.tA-q{padding:2px 12px;font:600 20px var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:#06101f;background:#9fe8c8;border-radius:4px}
+.tA-fila.noa .tA-q{background:#7fd4ff}
+.tA-int{padding:2px 12px;font:600 21px var(--f-ui);color:var(--cian);border:1px solid rgba(99,230,255,.5);border-radius:4px}
+.tA-fija{margin-left:auto;padding:6px 16px;font:600 23px var(--f-ui);color:#9ff0ff;border:2px solid rgba(99,230,255,.75);border-radius:6px;background:rgba(6,20,36,.9);
+  opacity:0;transform:translateY(-6px);transition:opacity .5s,transform .5s,background .4s,box-shadow .4s}
+.tA-fija b{color:#fff;letter-spacing:.06em}
+.tA-fija.on{opacity:1;transform:none}
+.tA-fija.brilla{background:rgba(99,230,255,.28);box-shadow:0 0 0 4px rgba(99,230,255,.35);animation:tAlatido .8s ease 3}
+@keyframes tAlatido{50%{transform:scale(1.06)}}
+.tA-zb{position:relative}
+.tA-zb .tA-capa.c{position:absolute;inset:0}
+.tA-ov{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.tA-pe2>.tA-et{position:absolute;inset:0;pointer-events:none}
+.tA-union{stroke:#63e6ff;stroke-width:1.6;stroke-dasharray:3 5;opacity:.22;transition:opacity .4s,stroke-width .4s}
+.tA-union.fuerte{opacity:.95;stroke-width:3;stroke-dasharray:none}
+.tA-union.fuerte.ambar{stroke:#ffb547}
+.tA-halo{fill:rgba(99,230,255,.14);stroke:#63e6ff;stroke-width:2.5;opacity:0;transform-box:fill-box;transform-origin:center;transform:scale(.6);transition:opacity .35s,transform .45s cubic-bezier(.2,1.5,.4,1)}
+.tA-halo.ambar{fill:rgba(255,181,71,.16);stroke:#ffb547}
+.tA-halo.on{opacity:1;transform:scale(1)}
+.tA-sale path{animation:tASale .5s ease}
+@keyframes tASale{50%{opacity:.35}}
+.tA-afec path,.tA-afec rect{fill:#63e6ff!important;stroke:#63e6ff!important}
+.tA-rot.abajo{transform:translate(-50%,0) translateY(-8px)}
+.tA-rot.abajo.on{transform:translate(-50%,0)}
+.tA-comp{display:flex;justify-content:center;gap:26px;min-height:62px;margin-top:4px;opacity:0;transform:translateY(8px);transition:opacity .6s,transform .6s}
+.tA-comp.on{opacity:1;transform:none}
+.tA-comp span{display:flex;align-items:baseline;gap:12px;padding:8px 22px;font:700 34px var(--f-ui);border:2px solid;border-radius:8px;background:rgba(6,12,29,.9)}
+.tA-comp span small{font:500 20px var(--f-ui);letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+.tA-comp .ambar{color:#ffb547;border-color:rgba(255,181,71,.7)}
+.tA-comp .cian{color:#9ff0ff;border-color:rgba(99,230,255,.8)}
+.tA-comp b{color:#fff}
+.lam-transpAnim{top:96px;padding:18px 34px 18px}
+.tA-zb .tA-capa.b{position:relative;inset:auto}
+
+/* ══ (Iago 5-nov 07:22) notas que parpadean (por definir), corrección inmediata, cartel fijo y recordatorio ══ */
+.esc-parpadea path,.esc-parpadea rect{animation:escTinte 1.15s ease-in-out infinite alternate}
+@keyframes escTinte{0%{opacity:1}100%{opacity:.28;fill:#ff9b2e;stroke:#ff9b2e}}
+.esc-malflash{animation:escSacude .5s ease}
+.esc-malflash path,.esc-malflash rect{fill:#e03131!important;stroke:#e03131!important}
+@keyframes escSacude{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+.esc-alu .vf-stavenote{transform-box:fill-box}
+.esc-cartel{align-self:flex-start;margin:2px 0 -6px 92px;padding:4px 14px;font:600 21px var(--f-ui);color:#0b6b80;border:2px solid #22a6c2;border-radius:6px;background:rgba(99,230,255,.12)}
+.esc-cartel b{color:#08323d;letter-spacing:.06em}
+#inter:not(.cuaderno) .esc-cartel{color:#9ff0ff;border-color:rgba(99,230,255,.75);background:rgba(6,20,36,.9)}
+#inter:not(.cuaderno) .esc-cartel b{color:#fff}
+.esc-af{display:block;max-width:300px;font:600 19px var(--f-ui);letter-spacing:.04em;color:#63e6ff}
+.esc-sel{flex-wrap:wrap;max-width:420px}
+.esc-sel .esc-af{flex-basis:100%;text-align:center;margin-top:2px}
+.tA-fija{margin-left:28px;position:relative;z-index:3}
