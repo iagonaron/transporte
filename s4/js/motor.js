@@ -601,7 +601,20 @@
       if ((ev.key === 'Enter' || ev.key === ' ') && esperaSigue && $('dialogo').classList.contains('on') && !/INPUT|TEXTAREA|BUTTON|SELECT/.test((document.activeElement || {}).tagName || '')) { ev.preventDefault(); esperaSigue(); }
     });
   });
+  /* (Iago 5-nov 16:45) VOLUNTARIOS: con la cuenta Protester y en hora de clase, al empezar sale «Seleccionar voluntario»
+     (gp.lmathome.es/voluntarios/lm-voluntarios.js, cargado por index.html). A los alumnos no les pasa nada: no hay LMVoluntarios. */
+  let volEstado = 0;   // 0 sin ofrecer · 1 ofreciendo · 2 hecho
   function arranca() {
+    if (volEstado === 1) return;
+    if (volEstado === 0 && window.LMVoluntarios && window.LMVoluntarios.ofrece) {
+      volEstado = 1; try { B.ac().resume(); } catch (e) { }
+      const sigue = () => { volEstado = 2; arranca0(); };
+      let p; try { p = window.LMVoluntarios.ofrece({}); } catch (e) { p = null; }
+      return p && p.then ? p.then(sigue, sigue) : sigue();
+    }
+    volEstado = 2; return arranca0();
+  }
+  function arranca0() {
     const ini = $('inicio');
     B.arrancado = true;
     try { B.ac().resume(); } catch (e) { }
