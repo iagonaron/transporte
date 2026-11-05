@@ -1,15 +1,39 @@
 <!doctype html>
 <html lang="es">
 <head>
+<!-- (Iago 5-nov-2026) VOLUNTARIOS · solo con la cuenta Protester: el medallero de gp.lmathome.es abre el portal con «#c=<cuenta>»;
+     se guarda en este navegador y se carga el seleccionador de https://gp.lmathome.es/voluntarios/. En hora de clase, al empezar la
+     sesión sale «Seleccionar voluntario» con la estética de esta sesión (js/motor.js, arranca). A los alumnos no les hace nada.
+     Quitarlo: borrar este bloque. -->
+<script>
+window.LM_VOL_CONFIG = function () { return { portal: 'transporte', tema: 'trfoco', engancha: false }; };
+(function () {
+  try {
+    var m = /(?:^#|&)c=([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i.exec(location.hash || ''), c = null, h0 = location.hash;
+    if (m) { c = m[1].toLowerCase(); try { localStorage.setItem('lm_vol_cuenta', c); } catch (e) {} }
+    else { try { c = localStorage.getItem('lm_vol_cuenta'); } catch (e) {} }
+    if (!c) return;
+    var s = document.createElement('script'); s.async = true;
+    s.src = 'https://gp.lmathome.es/voluntarios/lm-voluntarios.js?h=' + Math.floor(Date.now() / 36e5);
+    s.onload = function () {
+      var ir = function () { try { if (window.LMVoluntarios) window.LMVoluntarios.monta(window.LM_VOL_CONFIG()); } catch (e) {}
+        /* el seleccionador quita «c=» de la dirección; Transporte la necesita para el menú y «Volver al portal»: se repone */
+        try { if (m && location.hash !== h0) history.replaceState(history.state, '', location.pathname + location.search + h0); } catch (e) {} };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ir); else ir();
+    };
+    document.head.appendChild(s);
+  } catch (e) {}
+})();
+</script>
 <meta charset="utf-8">
 <!-- controles.js (Modulación) va PRIMERO: la pausa general envuelve el reloj, los temporizadores y el AudioContext -->
-<script src="js/controles.js?v=20261105b"></script>
+<script src="js/controles.js?v=20261105v"></script>
 <link rel="icon" href="../s1/img/t1/icono.webp" type="image/webp">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Transporte 3 · El transporte mental</title>
-<link rel="stylesheet" href="css/tr.css?v=20261105b">
-<link rel="stylesheet" href="css/decibelios.css?v=20261105b">
-<link rel="stylesheet" href="css/t3.css?v=20261105b">
+<link rel="stylesheet" href="css/tr.css?v=20261105v">
+<link rel="stylesheet" href="css/decibelios.css?v=20261105v">
+<link rel="stylesheet" href="css/t3.css?v=20261105v">
 <script>window.MOD_VOLVER = '../prueba.html'; window.MOD_BASE = '../s1/';   /* el piano de reserva (sonido.js) es el de T1; el de T3 (s3/mus/piano, ayudante A) lo carga js/teclado.js */</script>
 </head>
 <body>
@@ -42,28 +66,28 @@
     </div>
   </div>
 </div>
-<script src="data/recursos.js?v=20261105b"></script>
-<script src="data/melodia_t3.js?v=20261105b"></script>
-<script src="js/nucleo.js?v=20261105b"></script>
-<script src="js/sonido.js?v=20261105b"></script>
-<script src="js/vexflow.js?v=20261105b"></script>
-<script src="js/viento.js?v=20261105b"></script>
-<script src="js/pauta.js?v=20261105b"></script>
-<script src="js/vida.js?v=20261105b"></script>
-<script src="js/tunel.js?v=20261105b"></script>
-<script src="js/capas.js?v=20261105b"></script>
-<script src="js/motor.js?v=20261105b"></script>
-<script src="js/rueda.js?v=20261105b"></script>
-<script src="js/escrito.js?v=20261105b"></script>
-<script src="js/lamina.js?v=20261105b"></script>
-<script src="js/inter.js?v=20261105b"></script>
-<script src="js/teclado.js?v=20261105b"></script>
-<script src="js/atril.js?v=20261105b"></script>
-<script src="js/marcar.js?v=20261105b"></script>
-<script src="js/repaso.js?v=20261105b"></script>
-<script src="js/mental.js?v=20261105b"></script>
-<script src="js/secuencia.js?v=20261105b"></script>
-<script src="data/t3.js?v=20261105b"></script>
+<script src="data/recursos.js?v=20261105v"></script>
+<script src="data/melodia_t3.js?v=20261105v"></script>
+<script src="js/nucleo.js?v=20261105v"></script>
+<script src="js/sonido.js?v=20261105v"></script>
+<script src="js/vexflow.js?v=20261105v"></script>
+<script src="js/viento.js?v=20261105v"></script>
+<script src="js/pauta.js?v=20261105v"></script>
+<script src="js/vida.js?v=20261105v"></script>
+<script src="js/tunel.js?v=20261105v"></script>
+<script src="js/capas.js?v=20261105v"></script>
+<script src="js/motor.js?v=20261105v"></script>
+<script src="js/rueda.js?v=20261105v"></script>
+<script src="js/escrito.js?v=20261105v"></script>
+<script src="js/lamina.js?v=20261105v"></script>
+<script src="js/inter.js?v=20261105v"></script>
+<script src="js/teclado.js?v=20261105v"></script>
+<script src="js/atril.js?v=20261105v"></script>
+<script src="js/marcar.js?v=20261105v"></script>
+<script src="js/repaso.js?v=20261105v"></script>
+<script src="js/mental.js?v=20261105v"></script>
+<script src="js/secuencia.js?v=20261105v"></script>
+<script src="data/t3.js?v=20261105v"></script>
 <script>document.getElementById('escena').classList.add('en-marcha');</script>
 </body>
 </html>
