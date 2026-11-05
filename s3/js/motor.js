@@ -249,6 +249,8 @@
         res(ok);
       }
       esperaSigue = toca;
+      /* (Iago 5-nov) l.sigueEn: a esos segundos de la voz, la frase siguiente entra SIN «Continuar» (la interrumpe; la voz sigue sonando) */
+      if (l.sigueEn != null && !RAPIDO) setTimeout(() => { if (hecho) return; escrito = true; pintaTexto(txt, txt.length); fin(true); }, 1000 * l.sigueEn);
       if (c) c.alMorir.push(() => fin(false));
     });
   };
