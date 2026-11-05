@@ -4,6 +4,40 @@
 <meta charset="utf-8">
 <link rel="icon" href="s1/img/t1/icono.webp" type="image/webp">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>/* (5-nov-2026, Iago: «como todos los demás… se van abriendo después de cada sesión con ellos») LAS SESIONES SE ABREN EN CLASE,
+   como los capítulos de Atonalidad o las bobinas del Magnetófono. El portal de gp.lmathome.es (la medalla y los avisos «Transporte ·
+   Sesión N» de la campana) abre esta página con «#cu=<cuenta>&dias=1.2» (y «&dia=2» desde el aviso de esa sesión): aquí se quita de
+   la dirección, se guarda en este navegador y el menú solo deja entrar en esas sesiones; las demás, con candado («Se abre en clase»).
+   Sin cuenta de alumno guardada (el profe con su «#c=», el ordenador de clase, quien llega por la dirección sin más): todo abierto.
+   Las sesiones (s1/…s4/) miran lo mismo y devuelven al menú si no están abiertas. También le dice al latido «portada» (la campana
+   del Diario). Quitarlo: borrar este bloque y el del final del menú (5-nov-2026). */
+(function () {
+  var K = 'lm_tra_hitos', st = null, ir = 0;
+  var UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  try { document.documentElement.setAttribute('data-lm-ejercicio', 'portada'); } catch (e) {}
+  try { st = JSON.parse(localStorage.getItem(K) || 'null'); } catch (e) {}
+  try {
+    var ps = (location.hash || '').replace(/^#/, '').split('&'), q = {};
+    ps.forEach(function (p) { var i = p.indexOf('='); if (i > 0) { try { q[p.slice(0, i)] = decodeURIComponent(p.slice(i + 1)); } catch (e) {} } });
+    if (q.c && UUID.test(q.c)) { st = null; try { localStorage.removeItem(K); } catch (e) {} }   // el profe: todo abierto
+    else if (q.cu && UUID.test(q.cu)) {
+      var d = String(q.dias || '').split(/[.,]/).map(Number).filter(function (n) { return n >= 1 && n <= 4; });
+      if (d.length) { st = { cuenta: q.cu.toLowerCase(), dias: d, en: new Date().toISOString() }; try { localStorage.setItem(K, JSON.stringify(st)); } catch (e) {} }
+    }
+    if (/^[1-4]$/.test(q.dia || '')) ir = +q.dia;
+    if ('cu' in q || 'dias' in q || 'dia' in q) {
+      var resto = ps.filter(function (p) { return p && !/^(cu|dias|dia)=/.test(p); }).join('&');
+      history.replaceState(history.state, '', location.pathname + location.search + (resto ? '#' + resto : ''));
+    }
+  } catch (e) {}
+  var ab = (st && Array.isArray(st.dias) && st.dias.length) ? st.dias.map(Number) : null;   // null = todo abierto
+  window.TraHitos = {
+    activo: function () { return !!ab; },
+    abierto: function (n) { n = +n; return !ab || ab.indexOf(n) >= 0; },
+    ir: function () { var n = ir; ir = 0; return n; }
+  };
+})();
+</script>
 <script src="https://ge.lmathome.es/piel/latido.js?v=1"></script>
 <title>Transporte · Unidad 9</title>
 <style>
@@ -97,6 +131,20 @@ a.nodo.off .t,a.nodo.off .hz{color:#5b6d93}
     if (!callado) { var a = new Audio('s1/sfx/sfx_flash_sale.mp3'); a.volume = .8; var pr = a.play(); if (pr && pr.catch) pr.catch(function(){}); } } catch (e) {} })();
 /* los enlaces llevan la cuenta (#c=…) a cada sesión */
 [].forEach.call(document.querySelectorAll('a.nodo[data-ir]'), function(a){ a.href = a.getAttribute('data-ir') + location.hash; });
+/* (5-nov-2026) las sesiones que aún no se han visto en clase, con candado («Se abre en clase»); desde el aviso de una sesión, directo a ella */
+(function(){
+  var T = window.TraHitos; if (!T) return;
+  [].forEach.call(document.querySelectorAll('a.nodo[data-ir]'), function(a){
+    var n = +((/s(\d)\//.exec(a.getAttribute('data-ir')) || [])[1] || 0);
+    if (!n || T.abierto(n)) return;
+    a.removeAttribute('href'); a.classList.add('cerrada'); a.setAttribute('aria-disabled', 'true'); a.title = 'Se abre en clase';
+    var dd = a.querySelector('.d'); if (dd) dd.textContent = '🔒 Se abre en clase';
+    a.addEventListener('click', function(ev){ ev.preventDefault(); }, true);
+  });
+  if (!document.getElementById('tra-cerrada-css')) { var s = document.createElement('style'); s.id = 'tra-cerrada-css';
+    s.textContent = 'a.nodo.cerrada{opacity:.42;cursor:not-allowed;filter:grayscale(.6)}a.nodo.cerrada:hover{transform:none}'; document.head.appendChild(s); }
+  var n = T.ir(); if (n && T.abierto(n)) location.replace('s' + n + '/' + location.hash);
+})();
 /* el escenario 1920×1080 se escala para caber entero */
 function encaja(){ var e=document.getElementById('esc'), k=Math.min(innerWidth/1920, innerHeight/1080); e.style.transform='translate(-50%,-50%) scale('+k.toFixed(4)+')'; }
 encaja(); addEventListener('resize', encaja);
