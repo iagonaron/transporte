@@ -5,6 +5,7 @@ Antes de subir nada: mira el último commit de `main`, lee esto, apunta abajo fe
 El index.html de siempre (el portal antiguo) no se toca: lo nuevo va en prueba.html, s1/, s2/…
 
 ## Registro (lo más reciente arriba · hora de Galicia)
+- 5-nov 17:41 · Transporte (C4) · EN CURSO · T4: rombos guía de la montaña tan largos como la distancia (s4/js/t4.js, s4/css/t4.css, s4/index.html ?v=20261105w). Deshacer: revertir al commit anterior a EN CURSO.
 - 5-nov 17:30 · Mantenimiento (con el ok de Iago: «como todos los demás… se van abriendo después de cada sesión») · HECHO · TRANSPORTE POR SESIONES (tras vuestros voluntarios de las 17:22, sin tocarlos) PARA LOS ALUMNOS.
   Solo bloques nuevos marcados «5-nov-2026», nada más de lo vuestro: prueba.html (al principio, el bloque TraHitos: «#cu=…&dias=1.2&dia=N» desde
   gp.lmathome.es → candado «Se abre en clase» en las sesiones no vistas; «#c=» del profe = todo abierto; y tras la línea de los href de los nodos,
