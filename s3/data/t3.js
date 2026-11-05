@@ -68,7 +68,7 @@
     /* (Iago 4-nov) el final: clímax sobre el tema de Noa (A, 29,0 s). golpe = segundo del GOLPE en el fichero (audio/t3/LISTA.md · tiempos_t3.json
        t3_mus_final.golpe_s); en = segundo en que entra cada voz (sus huecos en la música). Si A rehace la música, cambiar SOLO estos números */
     final: { src: [{ src: 'mus/t3_mus_final.mp3', vol: .55, bucle: false }, { src: 'mus/t3_mus_pita.mp3', vol: .5, bucle: false }, { src: S1 + 'mus/mus_cierre.mp3', vol: .3 }], golpe: 23.45,
-      en: { t3_026: 1.6, mano: 5.8, t3_027: 7.6, t3_028: 10.4, t3_029: 13.6, t3_030: 18.3 } }   // silencio total de 23,05 a 23,45; el acorde se apaga hacia 28,5 s
+      en: { t3_026: 1.6, mano: 5.8, t3_027: 7.6, t3_028: 10.4, t3_029: 14.8, t3_030: 17.15 }   /* (Iago 5-nov) Noa interrumpe al chico justo en «eras…» */ }   // silencio total de 23,05 a 23,45; el acorde se apaga hacia 28,5 s
   };
   /* la canción del recital (A): el original en Re M (con el agudo roto) y la transportada a Do M; si faltan, js/mental.js la toca con el piano */
   const CANCION = { do: 'mus/t3_cancion_do.mp3', roto: 'mus/t3_cancion_re_rota.mp3', c1: 4.8 };   // (A, audio/t3/LISTA.md) 2 compases de piano: el c. 1 empieza a los 4,80 s; cada compás 2,25 s
@@ -446,7 +446,7 @@
           lineas: [
             { id: 't3_027', quien: 'CHICO', texto: 'Iria, ¿dónde te habías metido?', enMus: MUS.final.en.t3_027 },
             { id: 't3_028', quien: 'NOA', img: IMG.noaGira, pj: null, texto: 'Me confundes. Me llamo Noa.', enMus: MUS.final.en.t3_028 },
-            { id: 't3_029', quien: 'CHICO', texto: 'Ah, perdona. Pensaba que eras…', enMus: MUS.final.en.t3_029 },
+            { id: 't3_029', quien: 'CHICO', texto: 'Ah, perdona. Pensaba que eras…', enMus: MUS.final.en.t3_029, sigueEn: 2.35 },
             { id: 't3_030', quien: 'NOA', texto: '…Iria se llama mi madre. Espera un momento… ¿Cómo te llamas tú?', enMus: MUS.final.en.t3_030 }   /* (D2) acaba a los 23,05 s: 0,4 s de silencio y el golpe */
           ] },
         /* corte a negro; «Continuará…» (motor) cae en el golpe de la música (MUS.final.golpe, s desde que arranca en p12c) */
