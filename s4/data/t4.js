@@ -41,7 +41,7 @@
     plaza: { src: [SF('amb_t4_plaza'), SF1('amb_ciudad2100')], vol: .32 }, plazaBaja: { src: [SF('amb_t4_plaza'), SF1('amb_ciudad2100')], vol: .16 },
     terraza: { src: [SF('amb_t4_terraza'), SF('amb_t4_plaza'), SF1('amb_ciudad2100')], vol: .3 }, terrazaBaja: { src: [SF('amb_t4_terraza'), SF('amb_t4_plaza'), SF1('amb_ciudad2100')], vol: .14 },
     soportales: { src: [SF('amb_t4_soportales'), SF('amb_t4_plaza'), SF1('amb_ciudad2100')], vol: .26 }, soportalesBaja: { src: [SF('amb_t4_soportales'), SF('amb_t4_plaza'), SF1('amb_ciudad2100')], vol: .12 },
-    noche: { src: [SF('amb_t4_plaza_noche'), SF1('amb_mar_noche')], vol: .26 }, nocheBaja: { src: [SF('amb_t4_plaza_noche'), SF1('amb_mar_noche')], vol: .14 },
+    noche: { src: [SF('amb_t4_plaza_noche'), SF3('sfx_t3_plaza_atardecer')], vol: .3 }, nocheBaja: { src: [SF('amb_t4_plaza_noche'), SF3('sfx_t3_plaza_atardecer')], vol: .16 },
     gaviotas: { src: SF3('amb_t3_gaviotas'), vol: .1 }, gaviotasBaja: { src: SF3('amb_t3_gaviotas'), vol: .05 },
     mar: { src: SF1('amb_mar_noche'), vol: .14 }, marLejos: { src: SF1('amb_mar_noche'), vol: .06 },
     lab: { src: SF1('amb_laboratorio'), vol: .34 }, labBajo: { src: SF1('amb_laboratorio'), vol: .16 },
@@ -50,12 +50,16 @@
     recuerdo: { src: [SF('amb_t4_videojuego'), SF1('amb_viento_juncos')], vol: .1 }
   };
   const PLAZA = [AMB.plaza, AMB.gaviotas], TERRAZA = [AMB.terraza, AMB.gaviotasBaja], SOPORTALES = [AMB.soportales, AMB.gaviotasBaja],
-    SOPI = [AMB.soportalesBaja], NOCHE = [AMB.noche, AMB.mar], LABA = [AMB.lab, AMB.zumbido, AMB.consola, AMB.marLejos], CASA = [AMB.casa];
+    SOPI = [AMB.soportalesBaja], NOCHE = [AMB.noche],   /* (Iago 5-nov) sin mar en la plaza de noche: gente */ LABA = [AMB.lab, AMB.zumbido, AMB.consola, AMB.marLejos], CASA = [AMB.casa];
   const MUS = {
     tema: { src: [{ src: S1 + 'mus/t1_tema_sint.mp3', vol: .2 }] },
     terraza: { src: [{ src: 'mus/t4_terraza.mp3', vol: .42 }, { src: S1 + 'mus/mus_cierre.mp3', vol: .22 }] },     // (A) bucle sin costura, −17 LUFS: bajo el narrador
     terrazaBaja: { src: [{ src: 'mus/t4_terraza.mp3', vol: .18 }, { src: S1 + 'mus/mus_cierre.mp3', vol: .1 }] },
     despedida: { src: [{ src: 'mus/t4_despedida.mp3', vol: .5, bucle: false }, { src: S1 + 'mus/t1_tema_sint.mp3', vol: .2 }] },   // (A) 30,1 s, el clarinete solo
+    /* (Iago 5-nov 07:25) del final del dúo a la despedida: la banda sonora principal del portal, en bucle, para ir cerrando */
+    cierre: { src: [{ src: S1 + 'mus/t1_tema_sint.mp3', vol: .3 }] },
+    /* (Iago 5-nov 07:26) la casa de la madre CON música: nana del tema de Noa (piano y cuerdas pp), emotiva */
+    casa: { src: [{ src: 'mus/t4_casa.mp3', vol: .5, bucle: false }, { src: S1 + 'mus/t1_tema_sint.mp3', vol: .2 }] },
     viaje: { src: [{ src: S1 + 'mus/mus_viaje.mp3', vol: .55, bucle: false }] },
     resumen: { src: [{ src: S1 + 'mus/mus_coruna2100.mp3', vol: .16 }] }
   };
@@ -213,7 +217,7 @@
           lineas: [
             { id: 't4_001', quien: 'XOAN', pj: null, imgs: [{ t: .45, img: IMG.xoanLlama }], texto: 'Iria, ¿dónde te habías metido?', espera: .2 },
             { id: 't4_002', quien: 'NOA', img: IMG.noaGira, pj: null, texto: 'Me confundes. Me llamo Noa.', espera: .3 },
-            { id: 't4_003', quien: 'XOAN', img: IMG.xoanPerdona, pj: null, texto: 'Ah, perdona. Pensaba que eras…', espera: .2 },
+            { id: 't4_003', quien: 'XOAN', img: IMG.xoanPerdona, pj: null, texto: 'Ah, perdona. Pensaba que eras…', sigueEn: 2.35 },   /* (Iago 5-nov) Noa le interrumpe en «eras…» */
             { id: 't4_004', quien: 'NOA', img: IMG.noaSospecha, pj: null, texto: '…Iria se llama mi madre. Espera un momento… ¿Cómo te llamas tú?', espera: .5 },
             { id: 't4_005', quien: 'XOAN', img: IMG.xoanSonrie, pj: null, texto: 'Xoán.', espera: 1.2 },
             { id: 't4_006', quien: 'NARRADOR', img: IMG.dos, imgs: [{ t: 0, img: IMG.dos, vid: 'vid/reencuentro.mp4', vidUnaVez: true }], mus: MUS.tema,
@@ -257,26 +261,34 @@
             { id: 't4_013', quien: 'XOAN', img: IMG.explica, lamina: { tipo: 'escalaDif', titulo: 'Una diferencia ascendente', de: 'Re M', a: 'La M', t: 1.3, rotulos: false }, pj: null,
               texto: 'Eso es una diferencia. Y como hay más sostenidos, es ascendente.', espera: .4 },
             /* (Iago 4-nov 21:58) faltaba decir qué notas quedan afectadas */
-            { id: 't4_013b', quien: 'XOAN', img: IMG.explica, pj: null, claves: { claves: ['Nota afectada: fa'], ens: [.45], pos: 'arriba' },
-              texto: 'Y una diferencia ascendente afecta a una nota: la primera del orden de los sostenidos, fa. Si fueran dos, serían fa y do; si fueran tres, fa, do y sol.', espera: .8 }
+            { id: 't4_013b', quien: 'XOAN', img: IMG.explica, pj: null,
+              lamina: { tipo: 'afectadas', titulo: 'Notas afectadas · orden de los sostenidos', orden: 's', pasos: [[.3, 0], [6.0, 1], [8.3, 2], [10.9, 1], [11.4, 2], [12.0, 3]] },   /* (Iago 5-nov) tiempos medidos en las pausas de voz/t4/t4_013b.mp3 */
+              texto: 'Y una diferencia ascendente afecta a una nota: la primera del orden de los sostenidos, fa. Si fueran dos, serían fa y do; si fueran tres, fa, do y sol.', espera: .8 },
+            /* (Iago 5-nov 07:18) lo saca Noa, y momento de risas */
+            { id: 't4_013c', quien: 'NOA', img: IMG.noaCuenta, lamina: null, pj: null, texto: 'Creo que ya lo entiendo… Es como un videojuego al que estuve viciada de niña. Siempre me reñías porque no estudiaba saxo.', espera: .3 },
+            { id: 't4_013d', quien: 'XOAN', img: IMG.explica, pj: null, texto: '¿Que yo te reñía? Vaya… qué padre más pesado voy a ser.', espera: .3 }
           ] },
         /* (Iago 4-nov 21:56) el videojuego, dentro de una consola portátil en manos de Noa niña (vídeo incrustado en la pantalla de img/t4/flash_consola) */
         /* FLASHBACK: el videojuego de Modulación (C: vid/flash_montana.mp4 y vid/flash_agua.mp4, 5 s, 1080p; si faltan, sus láminas) */
         { id: 'p4b', nombre: 'Recuerdo · la montaña', img: IMG.flashMontana, recuerdo: true, amb: [AMB.recuerdo], mus: MUS.terrazaBaja, pj: null, antes: .4,
           lineas: [
-            { id: 't4_014', quien: 'XOAN', imgs: [{ t: 0, img: IMG.flashMontana, vid: 'vid/flash_montana_consola.mp4', vidUnaVez: true }],
-              lamina: { tipo: 'simbolos', simbolo: '♯', t0: 5.6, cada: .7 }, pj: null,
-              texto: '¿Recuerdas aquel videojuego al que jugabas de pequeña? Imagínate cuando escalabas una montaña… Eso son las diferencias ascendentes: cuanto más subes, más sostenidos.', espera: .6 },
+            /* (Iago 5-nov) lo saca la propia Noa: así Xoán no tiene por qué saber nada del videojuego. Un solo vídeo para las dos frases (sigueEn: sin «Continuar») */
+            { id: 't4_013e', quien: 'NOA', imgs: [{ t: 0, img: IMG.flashMontana, vid: 'vid/flash_montana_consola.mp4', vidUnaVez: true }], pj: null, sigueEn: 5.5,
+              texto: 'Un poco, sí. Era un juego de escalar montañas y de bucear en el agua.' },
+            { id: 't4_014', quien: 'XOAN', lamina: { tipo: 'simbolos', simbolo: '♯', t0: 7.2, cada: .7 }, pj: null, sigueEn: 12.25,
+              texto: 'Pues atiende, que esto es un poco raro y complejo. Imagínate que escalas una de esas montañas… Eso son las diferencias ascendentes: cuanto más subes, más sostenidos.' },
             { id: 't4_015', quien: 'XOAN', img: IMG.flashAgua, imgs: [{ t: 0, img: IMG.flashAgua, vid: 'vid/flash_agua_consola.mp4', vidUnaVez: true }],
-              lamina: { tipo: 'simbolos', simbolo: '♭', t0: 1.8, cada: .6 }, pj: null,
-              texto: 'Y cuando te metías en el agua, hacia abajo… más bemoles. Las diferencias descendentes.', espera: 1 }
+              lamina: { tipo: 'simbolos', simbolo: '♭', t0: 2.9, cada: .6 }, pj: null,
+              texto: 'Y cuando te metes en el agua, hacia abajo… más bemoles. Las diferencias descendentes.', espera: 1 }
           ] },
         { id: 'p4c', nombre: 'Los accidentales', img: IMG.accCuaderno, recuerdo: false, amb: SOPORTALES, mus: MUS.terrazaBaja, pj: null, antes: .5,
           lineas: [
-            /* (Iago 22:07) la animación sobre la parte real (cc. 4–7, con sol♯, do♮ y si♭). ens en s, cuadrados con voz/t4/t4_016.mp3 (24,1 s):
+            /* (Iago 22:07 · 5-nov 07:18) los DOS pentagramas (Xoán arriba, Noa abajo) sobre la parte real (cc. 4–7, con sol♯, do♮ y si♭). ens en s:
                armadura «la armadura nueva» 5,2 · cascada «Si en mi parte hay un do becuadro…» 8,2 · letrero «la nota afectada» 16,9 · fa♮ «sino fa becuadro» 20 */
-            { id: 't4_016', quien: 'XOAN', lamina: { tipo: 'transpAnim', titulo: 'La parte de Xoán, una 5.ª justa más arriba', compases: [3, 7], paso: .25, ens: { arm: 5.2, cascada: 8.2, letrero: 16.9, fa: 20 } }, pj: null,
-              texto: 'Y ojo: las diferencias solo importan en las notas con alteraciones accidentales; las demás ya las resuelve la armadura nueva. Si en mi parte hay un do becuadro, en la tuya será un sol becuadro: se copia igual. Pero mira este si bemol: va a parar a fa, la nota afectada por la diferencia. Así que no será fa bemol, sino fa becuadro: la diferencia lo ha subido.', espera: 1.4 }
+            { id: 't4_016', quien: 'XOAN', lamina: { tipo: 'transpAnim', titulo: 'La parte de Xoán, una 5.ª justa más arriba', compases: [3, 7], paso: .25,
+                /* (5-nov) cuadrados con la voz nueva (28,8 s, silencedetect): «la armadura nueva» 5,2 · «Si en mi parte…» 8,5 · «sol becuadro» 10,4 · «sol no es la nota afectada… se queda igual» 12,7–16,6 · «este si bemol» 17,4 · «va a parar a fa» 19,3 · «y fa sí es la nota afectada» 20,6 · «sino fa becuadro» 25,2 · «lo ha subido» 27,2 */
+                ens: { arm: 5.4, cascada: 8.4, do: 11.2, doDura: 4.9, sib: 17.4, fa: 19.4, afect: 20.7, morfo: 25.4, comp: 27.3 } }, pj: null,
+              texto: 'Y ojo: las diferencias solo importan en las notas con alteraciones accidentales; las demás ya las resuelve la armadura nueva. Si en mi parte hay un do becuadro, en la tuya será un sol becuadro: sol no es la nota afectada, así que el becuadro se queda igual. Pero mira este si bemol: va a parar a fa, y fa sí es la nota afectada por la diferencia. Así que no será fa bemol, sino fa becuadro: la diferencia lo ha subido.', espera: 1.4 }
           ] }
       ] },
       /* 5 · Interactivo 1: la montaña de las diferencias */
@@ -318,7 +330,7 @@
             imgs: [{ t: 0, img: IMG.duo, vid: 'vid/tocan.mp4', vidUnaVez: true }, { t: 5.4, img: FD(IMG.duoNoa) }, { t: 10.6, img: FD(IMG.duoXoan) }, { t: 15.4, img: FD(IMG.publico) }, { t: DUO.vuelta2, img: FD(IMG.duo, .8) },
               { t: 23.4, img: FD(IMG.duoNoa, 1.01) }, { t: 28.4, img: FD(IMG.duoXoan, 1.01) }, { t: 33.4, img: FD(IMG.miradas) }] },
           sfx: [] },
-        { id: 'p7b', nombre: 'Suena igual', img: IMG.noaEmocion, amb: SOPORTALES, mus: false, pj: null, antes: .6,
+        { id: 'p7b', nombre: 'Suena igual', img: IMG.noaEmocion, amb: SOPORTALES, mus: MUS.cierre, pj: null, antes: .6,
           sfx: [{ src: SFx(SF('sfx_t4_aplausos'), SF3('sfx_t3_aplausos')), t: 0, vol: .45 }],
           lineas: [
             { id: 't4_017', quien: 'NOA', pj: null, texto: 'Papá… suena igual que cuando la tocabas en casa para dormirme.', espera: 1 }
@@ -326,16 +338,16 @@
       ] },
       /* 8 · La despedida (de noche; A: mus/t4_despedida.mp3, el tema en el clarinete solo) */
       { id: 'e8', titulo: 'La despedida', planos: [
-        { id: 'p8a', nombre: 'Plaza casi vacía', img: IMG.despedida, amb: NOCHE, mus: MUS.despedida, pj: null, auto: 3 },
+        { id: 'p8a', nombre: 'Plaza casi vacía', img: IMG.despedida, amb: NOCHE, mus: MUS.cierre, pj: null, auto: 3 },
         { id: 'p8b', nombre: 'Vuelve con tu madre', img: IMG.xoanSereno, amb: NOCHE, pj: null,
           lineas: [
             { id: 't4_018', quien: 'XOAN', pj: null, texto: 'Oye… vuelve con tu madre. Te necesita. Y no hay tanto tiempo como crees.', espera: .6 },
             { id: 't4_019', quien: 'NOA', img: IMG.noaDuda, pj: null, texto: 'Si me quedo aquí, contigo…', espera: .2 },
             { id: 't4_020', quien: 'XOAN', img: IMG.xoanSonrisa, pj: null, texto: '…acabaría habiendo dos Noas. Tienes que irte, para no crear esa paradoja temporal. Y quiero que cuides de tu madre.', espera: .6 },
-            { id: 't4_021', quien: 'NOA', img: IMG.abrazo, imgs: [{ t: 0, img: IMG.abrazo, vid: 'vid/abrazo.mp4', vidUnaVez: true }], pj: null,
+            { id: 't4_021', quien: 'NOA', img: IMG.abrazo, pj: null,   /* (Iago 5-nov) «Gracias, papá» en imagen fija, sin vídeo */
               sfx: [{ src: SF('sfx_t4_abrazo'), t: 0, vol: .5 }], texto: 'Gracias, papá.', espera: 2.4 },
             /* Amaro llama por la pulsera (sin id en el guion: t4_021b; ⚠ falta su voz) */
-            { id: 't4_021b', quien: 'AMARO', img: IMG.pulsera, nombre: 'Pulsera · Amaro', filtro: 'telefono', pj: { q: 'AMARO', pose: 'tableta', lado: 'der', marco: 'llamada' },
+            { id: 't4_021b', quien: 'AMARO', img: IMG.pulsera, mus: false,   /* (Iago 5-nov) la pulsera corta en seco la banda sonora */ nombre: 'Pulsera · Amaro', filtro: 'telefono', pj: { q: 'AMARO', pose: 'tableta', lado: 'der', marco: 'llamada' },
               sfx: [{ src: SF1('sfx_pulsera_vibra'), t: 0, vol: .7 }, { src: SFx(SF('sfx_t4_pulsera_llamada'), SF1('sfx_notificacion')), t: .15, vol: .5 }],
               texto: 'Noa… es la hora.', espera: 1 }
           ] }
@@ -354,7 +366,7 @@
       ] },
       /* 10 · Casa de la madre (la de T2): abrazo y cena, SIN música (Iago) */
       { id: 'e10', titulo: 'Cena con mamá', planos: [
-        { id: 'p10a', nombre: 'El edificio de la madre', img: IMG.edificio, amb: [AMB.casaBaja, AMB.mar], mus: false, pj: null, auto: 3.2 },
+        { id: 'p10a', nombre: 'El edificio de la madre', img: IMG.edificio, amb: [AMB.casaBaja, AMB.mar], mus: MUS.casa, pj: null, auto: 3.2 },
         { id: 'p10b', nombre: 'La puerta se abre', img: IMG.puerta, amb: CASA, pj: null, auto: 2.6,
           sfx: [{ src: SF1('sfx_puerta_scifi'), t: .1, vol: .6 }, { src: SF2('sfx_lumi'), t: 1.1, vol: .2 }] },
         { id: 'p10c', nombre: 'Siempre hay sitio', img: IMG.iria, amb: CASA, pj: null, antes: .3,
@@ -378,7 +390,7 @@
               texto: 'Transportar por diferencias es comparar las dos armaduras: cuántas alteraciones cambian y hacia dónde. Si hay más sostenidos o menos bemoles, son ascendentes; si hay más bemoles o menos sostenidos, descendentes.', espera: .8 },
             { id: 't4_029', quien: 'NARRADOR', lamina: { tipo: 'tablaDif', titulo: 'Transporte por diferencias', ens: [0, .08, .25, .45, .65, .85] },
               texto: 'Las notas afectadas se cuentan en el orden de las alteraciones: fa, do, sol… si son ascendentes; si, mi, la… si son descendentes. Pero ojo: esto solo se aplica a las notas que llevan alteraciones accidentales; las demás ya las resuelve la armadura nueva.', espera: 1 },
-            { id: 't4_030', quien: 'NARRADOR', lamina: Object.assign({}, ACC, { titulo: 'Y los accidentales', ens: [.22, .4, .64] }),
+            { id: 't4_030', quien: 'NARRADOR', lamina: Object.assign({}, ACC, { titulo: 'Y los accidentales', filas: [ACC.filas[2], ACC.filas[0], ACC.filas[1]], ens: [6.0, 11.9, 14.1] }),   /* (Iago 5-nov) primero si♭→fa, como dice el texto; tiempos medidos en la voz */
               texto: 'Si una nota afectada lleva una alteración accidental, esa alteración sube o baja un semitono: por eso el si bemol pasa a fa becuadro. Las demás alteraciones accidentales no cambian: el do becuadro pasa a sol becuadro, y el sol sostenido, a re sostenido.', espera: 1.4 }
           ] }
       ] },
@@ -392,7 +404,7 @@
               { keys: null, tr: [0, 1, 3, 4, 5, 7, 8, 9, 10], comp: ['2/4', '3/4', '6/8'], sin: ['16'], maxF: 4, acc: 2, afect: true },
               { keys: null, tr: [0, 1, 3, 4, 5, 7, 8, 9, 10], comp: ['2/4', '3/4', '6/8'], sin: ['16'], maxF: 4, acc: 3, afect: true }
             ],
-            cartel: 'Si quieres, practica el <b>transporte por diferencias</b>: <b>tres melodías</b>, cada una más difícil y todas con <b>alteraciones accidentales</b>. En cada una, el <b>paso 0</b> (tonalidad nueva, armadura, diferencias y notas afectadas) vale la mitad de la nota; las notas, la otra mitad. Con <b>✎ Transcribir</b> se escriben solas y tú decides las de <b>?</b>. Al final verás tu nota.',
+            cartel: 'Si quieres, practica el <b>transporte por diferencias</b>: <b>tres melodías</b>, cada una más difícil y todas con <b>alteraciones accidentales</b>. En cada una, el <b>paso 0</b> (tonalidad nueva, armadura, diferencias y notas afectadas) vale la mitad de la nota; las notas, la otra mitad. Con <b>✎ Transcribir</b> se escriben solas y tú defines las que <b>parpadean</b> (cada decisión se corrige al momento; cuenta el primer intento). Al final verás tu nota.',
             cartelCorto: 'Coloca cada nota transportada, con sus alteraciones. Después, <b>Corregir</b> (una sola vez).' } }
       ] }
     ]
