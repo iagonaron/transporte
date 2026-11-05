@@ -266,7 +266,11 @@
         if (ok) { huecos[fa].classList.add('act'); huecos[fb].classList.add('act'); huecos[fa].classList.remove('viejo'); huecos[fb].classList.remove('viejo');
           m.via.style.display = ''; m.via.style.transition = 'none'; m.via.style.transform = 'translate(' + (MT.xEsc - 26) + 'px,' + T4.yNivel(fa) + 'px)'; m.via.setAttribute('transform', 'translate(' + (MT.xEsc - 26) + ',' + T4.yNivel(fa) + ')');
           /* (Iago 5-nov 09:15) guía sutil: chevrones que tintinean desde el círculo hacia donde va */
-          if (fb !== fa) { const gu = el('div', 'mt-guia ' + (fb > fa ? 'arriba' : 'abajo'), '<i></i><i></i><i></i>');
+          /* (Iago 5-nov 17:37) tantos rombos como distancia: 3 por nivel, del círculo hasta la tonalidad de destino, en ola */
+          if (fb !== fa) { const sube = fb > fa, nv = Math.abs(fb - fa), n = 3 * nv, gu = el('div', 'mt-guia ' + (sube ? 'arriba' : 'abajo')),
+              dur = Math.max(1.5, 1.2 + n * .12);
+            for (let i = 0; i < n; i++) { const r = el('i'), d = 14 + i * MT.paso / 3;
+              r.style.top = (sube ? -d - 6 : d - 6) + 'px'; r.style.animationDelay = (i * .12) + 's'; r.style.animationDuration = dur + 's'; gu.appendChild(r); }
             gu.style.left = ((MT.xEsc - 26) / MT.W * 100) + '%'; gu.style.top = (T4.yNivel(fa) / MT.H * 100) + '%'; mapa.appendChild(gu); }
           M().barraTexto('El viajero está en <b>' + it.de + '</b>. ¿Cuántos niveles hay hasta <b>' + it.a + '</b>, y hacia dónde?'); } };
       /* las fichas: tocar y tocar su altura, o arrastrar */
