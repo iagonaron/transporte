@@ -302,9 +302,7 @@
 .mt-guia{position:absolute;z-index:6;pointer-events:none;width:0;height:0}
 .mt-guia i{position:absolute;left:-6px;width:12px;height:12px;border-right:2.5px solid #ffb547;border-bottom:2.5px solid #ffb547;opacity:0;animation:mtGuia 1.5s ease-in-out infinite}
 .mt-guia.abajo i{transform:rotate(45deg)}.mt-guia.arriba i{transform:rotate(-135deg)}
-.mt-guia.abajo i:nth-child(1){top:22px}.mt-guia.abajo i:nth-child(2){top:41px;animation-delay:.18s}.mt-guia.abajo i:nth-child(3){top:60px;animation-delay:.36s}
-.mt-guia.arriba i:nth-child(1){top:-34px}.mt-guia.arriba i:nth-child(2){top:-53px;animation-delay:.18s}.mt-guia.arriba i:nth-child(3){top:-72px;animation-delay:.36s}
-@keyframes mtGuia{0%,100%{opacity:0}35%{opacity:.85}70%{opacity:.15}}
+@keyframes mtGuia{0%,100%{opacity:.14}35%{opacity:.9}70%{opacity:.22}}
 
 #escena #inter .esc-sel button.esc-val{flex-basis:100%}
 /* (Iago 5-nov 09:17) ✓ sobre la nota acertada (con un pequeño «pop» la primera vez) */
