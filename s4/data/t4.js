@@ -41,7 +41,7 @@
     plaza: { src: [SF('amb_t4_plaza'), SF1('amb_ciudad2100')], vol: .32 }, plazaBaja: { src: [SF('amb_t4_plaza'), SF1('amb_ciudad2100')], vol: .16 },
     terraza: { src: [SF('amb_t4_terraza'), SF('amb_t4_plaza'), SF1('amb_ciudad2100')], vol: .3 }, terrazaBaja: { src: [SF('amb_t4_terraza'), SF('amb_t4_plaza'), SF1('amb_ciudad2100')], vol: .14 },
     soportales: { src: [SF('amb_t4_soportales'), SF('amb_t4_plaza'), SF1('amb_ciudad2100')], vol: .26 }, soportalesBaja: { src: [SF('amb_t4_soportales'), SF('amb_t4_plaza'), SF1('amb_ciudad2100')], vol: .12 },
-    noche: { src: [SF('amb_t4_plaza_noche'), SF3('sfx_t3_plaza_atardecer')], vol: .3 }, nocheBaja: { src: [SF('amb_t4_plaza_noche'), SF3('sfx_t3_plaza_atardecer')], vol: .16 },
+    noche: { src: [SF('amb_t4_plaza_noche'), SF3('sfx_t3_plaza_atardecer')], vol: .3 }, nocheDuo: { src: [SF('amb_t4_plaza_noche'), SF3('sfx_t3_plaza_atardecer')], vol: .2 },   /* (Iago 5-nov 09:18) gente cerca durante el dúo */ nocheBaja: { src: [SF('amb_t4_plaza_noche'), SF3('sfx_t3_plaza_atardecer')], vol: .16 },
     gaviotas: { src: SF3('amb_t3_gaviotas'), vol: .1 }, gaviotasBaja: { src: SF3('amb_t3_gaviotas'), vol: .05 },
     mar: { src: SF1('amb_mar_noche'), vol: .14 }, marLejos: { src: SF1('amb_mar_noche'), vol: .06 },
     lab: { src: SF1('amb_laboratorio'), vol: .34 }, labBajo: { src: SF1('amb_laboratorio'), vol: .16 },
@@ -144,6 +144,9 @@
       R3('noa_mariapita')),
     duoXoan: O(I4('duo_xoan', XOAN + ' toca el ' + CLAR + ', mira de reojo a Noa con una sonrisa; plano medio; soportales de noche', { vida: BR('duo_xoan', { chispa: .08 }) }),
       R3('mariapita', { luz: .6 })),
+    /* (Iago 5-nov 09:18) sin público amontonado (no sale en más planos): una paseante a lo lejos se gira a disfrutarlo */
+    paseante: O(I4('soportales_paseante', 'De noche, bajo los soportales de María Pita (2070): UNA paseante se para a unos metros, se gira hacia los soportales y sonríe disfrutando; al fondo, pequeños y desenfocados, Noa y Xoán tocando; nada de público', { vida: BR('soportales_paseante', { chispa: .06 }).concat(SUELO()) }),
+      I4('soportales_duo', '')),
     publico: O(I4('soportales_publico', 'La gente se para a escuchar bajo los soportales de María Pita, de noche (2070): caras, edades, pieles y ropas variadas, nadie se parece a Noa; alguno graba con una pulsera; en primer término, desenfocados, los dos músicos', { vida: BR('soportales_publico', { chispa: .06 }).concat(SUELO()) }),
       R3('mariapita', { luz: .6 })),
     miradas: O(I4('duo_miradas', 'Noa y Xoán terminan la última nota y se miran, sonriendo, con los instrumentos aún en posición de tocar; plano a dos de perfil; farolas', { ocultaPj: ['NOA'], vida: BR('duo_miradas', { chispa: .08 }) }),
@@ -264,6 +267,10 @@
             { id: 't4_013b', quien: 'XOAN', img: IMG.explica, pj: null,
               lamina: { tipo: 'afectadas', titulo: 'Notas afectadas · orden de los sostenidos', orden: 's', pasos: [[.3, 0], [6.0, 1], [8.3, 2], [10.9, 1], [11.4, 2], [12.0, 3]] },   /* (Iago 5-nov) tiempos medidos en las pausas de voz/t4/t4_013b.mp3 */
               texto: 'Y una diferencia ascendente afecta a una nota: la primera del orden de los sostenidos, fa. Si fueran dos, serían fa y do; si fueran tres, fa, do y sol.', espera: .8 },
+            /* (Iago 5-nov 09:10) la curiosidad: de bemoles a MENOS bemoles también son ascendentes, y afectan fa, do… (tiempos: voz/t4/t4_013f.mp3) */
+            { id: 't4_013f', quien: 'XOAN', img: IMG.explica, pj: null,
+              lamina: { tipo: 'difAfect', titulo: 'Menos ♭: también ascendentes', de: 'Mi♭ M', a: 'Fa M', t: 4.6, todas: ['Do M', 'Si♭ M'], pasos: [[11.3, 1], [12.05, 2]] },   /* (Iago 09:31) lo curioso: afectan las del orden de los SOSTENIDOS aunque todo sean bemoles */
+              texto: 'Y ojo con esto, que es curioso: si pasas a una tonalidad con menos bemoles, las diferencias son ascendentes, y las notas afectadas son las del orden de los sostenidos: fa, do… aunque las dos armaduras tengan bemoles.', espera: .8 },
             /* (Iago 5-nov 07:18) lo saca Noa, y momento de risas */
             { id: 't4_013c', quien: 'NOA', img: IMG.noaCuenta, lamina: null, pj: null, texto: 'Creo que ya lo entiendo… Es como un videojuego al que estuve viciada de niña. Siempre me reñías porque no estudiaba saxo.', espera: .3 },
             { id: 't4_013d', quien: 'XOAN', img: IMG.explica, pj: null, texto: '¿Que yo te reñía? Vaya… qué padre más pesado voy a ser.', espera: .3 }
@@ -273,8 +280,8 @@
         { id: 'p4b', nombre: 'Recuerdo · la montaña', img: IMG.flashMontana, recuerdo: true, amb: [AMB.recuerdo], mus: MUS.terrazaBaja, pj: null, antes: .4,
           lineas: [
             /* (Iago 5-nov) lo saca la propia Noa: así Xoán no tiene por qué saber nada del videojuego. Un solo vídeo para las dos frases (sigueEn: sin «Continuar») */
-            { id: 't4_013e', quien: 'NOA', imgs: [{ t: 0, img: IMG.flashMontana, vid: 'vid/flash_montana_consola.mp4', vidUnaVez: true }], pj: null, sigueEn: 5.5,
-              texto: 'Un poco, sí. Era un juego de escalar montañas y de bucear en el agua.' },
+            { id: 't4_013e', quien: 'NOA', imgs: [{ t: 0, img: IMG.flashMontana, vid: 'vid/flash_montana_consola.mp4', vidUnaVez: true }], pj: null, sigueEn: 10.1,   /* voz v2: 9,82 s; el vídeo de la consola dura ahora 23 s (se añadió otra escalada al final) */
+              texto: 'Un poco, sí. En ese juego, las tonalidades con más sostenidos estaban arriba, en las montañas, y las de más bemoles, en el fondo del mar.' },   /* (Iago 5-nov 09:10) */
             { id: 't4_014', quien: 'XOAN', lamina: { tipo: 'simbolos', simbolo: '♯', t0: 7.2, cada: .7 }, pj: null, sigueEn: 12.25,
               texto: 'Pues atiende, que esto es un poco raro y complejo. Imagínate que escalas una de esas montañas… Eso son las diferencias ascendentes: cuanto más subes, más sostenidos.' },
             { id: 't4_015', quien: 'XOAN', img: IMG.flashAgua, imgs: [{ t: 0, img: IMG.flashAgua, vid: 'vid/flash_agua_consola.mp4', vidUnaVez: true }],
@@ -285,7 +292,7 @@
           lineas: [
             /* (Iago 22:07 · 5-nov 07:18) los DOS pentagramas (Xoán arriba, Noa abajo) sobre la parte real (cc. 4–7, con sol♯, do♮ y si♭). ens en s:
                armadura «la armadura nueva» 5,2 · cascada «Si en mi parte hay un do becuadro…» 8,2 · letrero «la nota afectada» 16,9 · fa♮ «sino fa becuadro» 20 */
-            { id: 't4_016', quien: 'XOAN', lamina: { tipo: 'transpAnim', titulo: 'La parte de Xoán, una 5.ª justa más arriba', compases: [3, 7], paso: .25,
+            { id: 't4_016', quien: 'XOAN', lamina: { tipo: 'transpAnim', titulo: 'La parte de Noa, una 5.ª justa más arriba', compases: [3, 7], paso: .25,
                 /* (5-nov) cuadrados con la voz nueva (28,8 s, silencedetect): «la armadura nueva» 5,2 · «Si en mi parte…» 8,5 · «sol becuadro» 10,4 · «sol no es la nota afectada… se queda igual» 12,7–16,6 · «este si bemol» 17,4 · «va a parar a fa» 19,3 · «y fa sí es la nota afectada» 20,6 · «sino fa becuadro» 25,2 · «lo ha subido» 27,2 */
                 ens: { arm: 5.4, cascada: 8.4, do: 11.2, doDura: 4.9, sib: 17.4, fa: 19.4, afect: 20.7, morfo: 25.4, comp: 27.3 } }, pj: null,
               texto: 'Y ojo: las diferencias solo importan en las notas con alteraciones accidentales; las demás ya las resuelve la armadura nueva. Si en mi parte hay un do becuadro, en la tuya será un sol becuadro: sol no es la nota afectada, así que el becuadro se queda igual. Pero mira este si bemol: va a parar a fa, y fa sí es la nota afectada por la diferencia. Así que no será fa bemol, sino fa becuadro: la diferencia lo ha subido.', espera: 1.4 }
@@ -311,7 +318,7 @@
       { id: 'e6', titulo: 'Pasar la parte', planos: [
         { id: 'p6', nombre: 'La parte de saxo alto', img: IMG.mesa, amb: SOPI, mus: false, pj: null, auto: .3,
           inter: { tipo: 'pasarParte',
-            cartel: 'Ahora tú: pasa la parte de clarinete en Si♭ de Xoán (<b>Re mayor</b>) a la parte de <b>saxo alto en Mi♭</b> de Noa: una <b>5.ª justa ascendente</b>. Primero, el <b>paso 0</b>: la tonalidad y la armadura nuevas. Después coloca cada nota con sus alteraciones (♭ ♮ ♯) y pulsa <b>Corregir</b>. Con <b>▶ Los dos a la vez</b> oyes si encajan.',
+            cartel: 'Ahora tú: pasa la parte de clarinete en Si♭ de Xoán (<b>Re mayor</b>) a la parte de <b>saxo alto en Mi♭</b> de Noa: una <b>5.ª justa ascendente</b>. Primero, el <b>paso 0</b>: la tonalidad y la armadura nuevas. Después, <b>✎ Transcribir</b> escribe las notas y tú decides la alteración (♭ ♮ ♯) de las que parpadean; al final, <b>Corregir</b>. Con <b>▶ Los dos a la vez</b> oyes si encajan.',
             cartelCorto: 'Cada nota, una <b>5.ª justa más arriba</b>. Los accidentales se copian igual, salvo en la nota afectada por la diferencia (fa), que sube un semitono.',
             paso0: { titulo: 'Paso 0 · La tonalidad de tu parte', texto: 'La parte de Xoán está en <b>Re mayor</b> (2♯). Tu saxo la necesita una <b>5.ª justa más arriba</b>. ¿En qué tonalidad va tu parte, qué armadura lleva, cuántas diferencias hay, hacia dónde y qué nota queda afectada?',
               bien: '<b>La Mayor</b>, con tres sostenidos: una diferencia ascendente, y la nota afectada es <b>fa</b>.' },
@@ -323,13 +330,13 @@
       ] },
       /* 7 · Tocan juntos bajo los soportales (A: mus/t4_duo.mp3, 39 s; 2.ª vuelta a los 17,69 s con el saxo una 3.ª por encima) */
       { id: 'e7', titulo: 'El dúo', planos: [
-        { id: 'p7a', nombre: 'Tocan juntos', img: IMG.duo, amb: SOPI, mus: false, pj: null, auto: .4,
+        { id: 'p7a', nombre: 'Tocan juntos', img: IMG.duo, amb: [AMB.nocheDuo, AMB.soportalesBaja], mus: false, pj: null, auto: .4,
           inter: { tipo: 'escucha', mp3: DUO.bien, sint: 'bien', sigueSolo: true,
             rotulo: 'Clarinete en Si♭ · <b>Re M</b> + saxo alto en Mi♭ · <b>La M</b> = suenan en <b>Do M</b>',
             texto: 'Cada uno lee <b>su</b> parte: el clarinete en Re M y el saxo en La M. Suenan juntos, en Do M.',
-            imgs: [{ t: 0, img: IMG.duo, vid: 'vid/tocan.mp4', vidUnaVez: true }, { t: 5.4, img: FD(IMG.duoNoa) }, { t: 10.6, img: FD(IMG.duoXoan) }, { t: 15.4, img: FD(IMG.publico) }, { t: DUO.vuelta2, img: FD(IMG.duo, .8) },
+            imgs: [{ t: 0, img: IMG.duo, vid: 'vid/tocan.mp4', vidUnaVez: true }, { t: 5.4, img: FD(IMG.duoNoa) }, { t: 10.6, img: FD(IMG.duoXoan) }, { t: 15.4, img: FD(IMG.paseante) }, { t: DUO.vuelta2, img: FD(IMG.duo, .8) },
               { t: 23.4, img: FD(IMG.duoNoa, 1.01) }, { t: 28.4, img: FD(IMG.duoXoan, 1.01) }, { t: 33.4, img: FD(IMG.miradas) }] },
-          sfx: [] },
+          sfx: [{ src: SF('sfx_t4_aplausos_pocos'), t: DUO.vuelta2 - .3, vol: .2 }] },   /* (Iago 5-nov 09:18) algunos aplauden entre vuelta y vuelta */
         { id: 'p7b', nombre: 'Suena igual', img: IMG.noaEmocion, amb: SOPORTALES, mus: MUS.cierre, pj: null, antes: .6,
           sfx: [{ src: SFx(SF('sfx_t4_aplausos'), SF3('sfx_t3_aplausos')), t: 0, vol: .45 }],
           lineas: [
@@ -386,7 +393,8 @@
       { id: 'e11', titulo: 'Por diferencias', planos: [
         { id: 'p11', nombre: 'Resumen', img: IMG.mesa, amb: SOPI, mus: MUS.resumen, pj: null, antes: .6,
           lineas: [
-            { id: 't4_028', quien: 'NARRADOR', lamina: { tipo: 'escalaDif', titulo: 'Las diferencias', de: 'Re M', a: 'La M', t: 3.5, todas: ['Do M', 'Sol M', 'Fa M', 'Si♭ M'] },
+            /* (Iago 5-nov 09:21) refuerzo visual: las alteraciones aparecen o se van, con flecha (tiempos medidos en voz/t4/t4_028.mp3) */
+            { id: 't4_028', quien: 'NARRADOR', lamina: { tipo: 'reglaDif', titulo: 'Las diferencias', ens: { arm: .4, asc: 6.8, s1: 7.2, b1: 8.2, desc: 10.45, b2: 10.9, s2: 11.9 } },
               texto: 'Transportar por diferencias es comparar las dos armaduras: cuántas alteraciones cambian y hacia dónde. Si hay más sostenidos o menos bemoles, son ascendentes; si hay más bemoles o menos sostenidos, descendentes.', espera: .8 },
             { id: 't4_029', quien: 'NARRADOR', lamina: { tipo: 'tablaDif', titulo: 'Transporte por diferencias', ens: [0, .08, .25, .45, .65, .85] },
               texto: 'Las notas afectadas se cuentan en el orden de las alteraciones: fa, do, sol… si son ascendentes; si, mi, la… si son descendentes. Pero ojo: esto solo se aplica a las notas que llevan alteraciones accidentales; las demás ya las resuelve la armadura nueva.', espera: 1 },
