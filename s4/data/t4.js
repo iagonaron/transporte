@@ -246,7 +246,7 @@
               sfx: [{ src: SFx(SF('sfx_t4_lapiz'), SF3('sfx_t3_lapiz_escribe')), en: .45, vol: .5 }],
               texto: 'Así. Pero si la tocamos con tu parte y la mía… no va a sonar igual.', espera: .4 },
             { id: 't4_010', quien: 'XOAN', img: IMG.sacan, pj: null, sfx: [{ src: SFx(SF('sfx_t4_estuche_abre'), SF1('sfx_estuche_cierra')), t: .2, vol: .5 }, { src: SF1('sfx_llave_saxo'), en: .6, vol: .4 }],
-              texto: 'Claro: mi clarinete está en si bemol y tu saxo en mi bemol. Hay que pasar mi parte a la tuya.', espera: .5 }
+              texto: 'Claro: mi clarinete está en si bemol y tu saxo en mi bemol.', espera: .5 }   /* (Iago 5-nov 17:28) sin «Hay que pasar mi parte a la tuya» (voz recortada; la entera en copias/t4_sinusar/t4_010_v1_entera.mp3) */
           ] },
         /* (GUION) suena mal a propósito: los dos leen la MISMA partitura (A: mus/t4_duo_mal.mp3, 5,9 s) */
         { id: 'p3b', nombre: 'Así no: la misma partitura', img: IMG.tocanMal, amb: SOPI, mus: false, pj: null, auto: .3,
