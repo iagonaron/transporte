@@ -137,7 +137,11 @@
     let d = 'M 120 ' + (MT.mar - 4); for (let f = 1; f <= 5; f++) d += ' L ' + (f % 2 ? 640 - f * 22 : 260 + f * 30) + ' ' + (Y(f) + 10);
     sv('path', { d: d, fill: 'none', stroke: '#ffd59a', 'stroke-opacity': .5, 'stroke-width': 3, 'stroke-dasharray': '2 10', 'stroke-linecap': 'round' }, svg);
     /* el mar y las profundidades */
-    sv('rect', { x: 0, y: MT.mar, width: W, height: H - MT.mar, fill: 'url(#mtMar)' }, svg);
+    /* (Iago 5-nov) bajo el mar se ve, a través del agua, el fondo: la montaña sigue hacia abajo hasta la fosa de los bemoles */
+    gr('mtRoca', [[0, '#2f6f86'], [1, '#0b2236']]);
+    sv('path', { d: 'M ' + MT.x0 + ' ' + MT.mar + ' L 110 ' + Y(-1.4) + ' L 190 ' + Y(-2.5) + ' L 260 ' + Y(-2.2) + ' L 330 ' + Y(-3.5) + ' L 410 ' + Y(-4.4) + ' L 470 ' + Y(-5) + ' L 540 ' + Y(-4.3) + ' L 600 ' + Y(-3.9) + ' L 670 ' + Y(-2.8) + ' L 730 ' + Y(-1.7) + ' L 790 ' + MT.mar + ' Z', fill: 'url(#mtRoca)', opacity: .95 }, svg);
+    sv('path', { d: 'M 150 ' + Y(-2) + ' q 30 -16 60 0 M 520 ' + Y(-4) + ' q 26 -14 52 0 M 640 ' + Y(-2.6) + ' q 20 -12 40 0', fill: 'none', stroke: '#7fd8c8', 'stroke-opacity': .35, 'stroke-width': 3, 'stroke-linecap': 'round' }, svg);   // algas
+    sv('rect', { x: 0, y: MT.mar, width: W, height: H - MT.mar, fill: 'url(#mtMar)', opacity: .62 }, svg);   // agua semitransparente
     sv('path', { d: 'M 0 ' + (H - 26) + ' Q 120 ' + (H - 60) + ' 240 ' + (H - 30) + ' T 480 ' + (H - 36) + ' T 760 ' + (H - 22) + ' L 760 ' + H + ' L 0 ' + H + ' Z', fill: '#020a14', opacity: .8 }, svg);
     for (let i = 0; i < 14; i++) sv('circle', { cx: 60 + (i * 151) % 700, cy: MT.mar + 40 + (i * 83) % (H - MT.mar - 70), r: 2 + i % 4, fill: 'none', stroke: '#bff0ff', 'stroke-opacity': .45, class: 'mt-burbuja', style: 'animation-delay:' + (-i * .7) + 's' }, svg);
     let ola = 'M 0 ' + MT.mar; for (let x = 0; x <= W; x += 40) ola += ' Q ' + (x + 10) + ' ' + (MT.mar - 6) + ' ' + (x + 20) + ' ' + MT.mar + ' T ' + (x + 40) + ' ' + MT.mar;
@@ -293,7 +297,10 @@
     function arrastrable(ch) {
       let fantasma = null, id = null, x0 = 0, y0 = 0, mov = false;
       const esc = () => B.$('#escena').getBoundingClientRect(), k1 = () => esc().width / 1920;
-      ch.addEventListener('pointerdown', ev => { id = ev.pointerId; x0 = ev.clientX; y0 = ev.clientY; mov = false; try { ch.setPointerCapture(id); } catch (e) { } });
+      /* (Iago 5-nov, iPad: se quedó una ficha «Re M» flotando) limpieza a prueba de toques: otro dedo, captura perdida o soltar fuera */
+      const limpia = () => { B.$$('.mt-chip.fantasma').forEach(x => x.remove()); fantasma = null; ch.classList.remove('cogida'); B.$$('.mt-hueco', mapa).forEach(h => h.classList.remove('sobre')); };
+      ch.style.touchAction = 'none';
+      ch.addEventListener('pointerdown', ev => { if (id != null || fantasma) { limpia(); mov = false; } id = ev.pointerId; x0 = ev.clientX; y0 = ev.clientY; mov = false; try { ch.setPointerCapture(id); } catch (e) { } });
       ch.addEventListener('pointermove', ev => {
         if (ev.pointerId !== id) return;
         if (!mov && Math.hypot(ev.clientX - x0, ev.clientY - y0) < 8) return;
@@ -303,13 +310,15 @@
       });
       const suelta = ev => {
         if (ev.pointerId !== id) return; id = null;
-        if (!mov) return;
+        if (!mov) { limpia(); return; }
         ev.stopPropagation(); ch.classList.remove('cogida'); if (fantasma) { fantasma.remove(); fantasma = null; }
         let f = null; B.$$('.mt-hueco', mapa).forEach(h => { if (h.classList.contains('sobre')) f = +h.dataset.f; h.classList.remove('sobre'); });
         if (f != null) prueba(ch, f);
         ch._sinClic = true; setTimeout(() => { ch._sinClic = false; }, 50);
       };
       ch.addEventListener('pointerup', suelta); ch.addEventListener('pointercancel', suelta);
+      ch.addEventListener('lostpointercapture', ev => { if (ev.pointerId === id) suelta(ev); else if (fantasma && id == null) limpia(); });
+      window.addEventListener('pointerup', ev => { if (fantasma && (id == null || ev.pointerId === id)) { if (ev.pointerId === id) suelta(ev); else limpia(); } }, true);
       ch.addEventListener('click', ev => { if (ch._sinClic) ev.stopImmediatePropagation(); }, true);
     }
     monta();
@@ -393,8 +402,19 @@
   T4.paso0 = paso0;
 
   /* (Iago 22:10–22:11) la barra cuenta las notas «?» que quedan por decidir */
-  const barraDudas = (api, txtFin) => { if (!api || !api._transcrito) return; const n = api.dudas();
-    M().barraTexto(n ? 'Te quedan <b>' + n + '</b> ' + (n === 1 ? 'nota' : 'notas') + ' con <b class="q">?</b>: decide su alteración. Las notas con <b class="q">?</b> llevan copiada la alteración del original: <b>púlsala</b> y valídala o cámbiala.' : (txtFin || 'Todas las notas decididas. Pulsa <b>Corregir</b>.')); };
+  const barraDudas = (api, txtFin) => { if (!api || !api._transcrito || (api._pista && api._pista > Date.now())) return; const n = api.dudas();   // (no pisa la pista de un fallo)
+    M().barraTexto(n ? 'Te quedan <b>' + n + '</b> ' + (n === 1 ? 'nota que parpadea' : 'notas que parpadean') + ': define su alteración. Llevan copiada la del original: <b>púlsala</b> y elige ♭ ♮ ♯ o <b>✓ Validar</b>. Cada decisión se corrige al momento y cuenta el <b>primer intento</b>.' : (txtFin || 'Todas las notas definidas. Pulsa <b>Corregir</b>.')); };
+  /* (Iago 07:22) pista al fallar una nota que parpadeaba: si cae en una nota afectada, su alteración cambia ½ tono; si no, se copia igual */
+  const NOM_ES = { C: 'do', D: 're', E: 'mi', F: 'fa', G: 'sol', A: 'la', B: 'si' };
+  const alDecidir = getApi => (ok, gi, ex) => { const api = getApi(); if (ok) { api._pista = 0; return barraDudas(api); }
+    api._pista = Date.now() + 3600;
+    const n = ex.notas[gi], sN = E().solNota(ex, gi), nom = NOM_ES[sN.step], cambia = (n.alter || 0) !== sN.alter;
+    M().barraTexto('<b>Pista:</b> ' + (cambia ? '<b>' + nom + '</b> es la nota afectada: su alteración ' + (sN.alter > (n.alter || 0) ? 'sube' : 'baja') + ' ½ tono.' : '<b>' + nom + '</b> no es nota afectada: la alteración se copia igual.') + ' Vuelve a intentarlo.');
+    setTimeout(() => { if (api && api.dudas && api.dudas()) barraDudas(api); }, 3700); };
+  /* el cartel fijo y el recordatorio, a partir de la melodía (después del paso 0) */
+  const ponAfect = (api, ex) => { const n = Math.abs(ex.destino.fifths - ex.key.fifths), asc = ex.destino.fifths > ex.key.fifths, af = T4.afectadas(n, asc);
+    api.ponCartel(n + ' ' + (n === 1 ? 'diferencia' : 'diferencias') + ' ' + (asc ? '↑' : '↓') + ' · ' + (af.length === 1 ? 'nota afectada' : 'notas afectadas') + ': <b>' + af.join(' · ').toUpperCase() + '</b>');
+    api.ponAfectadas((af.length === 1 ? 'Nota afectada: ' : 'Notas afectadas: ') + af.join(', ').toLowerCase()); };
   const bTranscribir = getApi => { const b = btn('✎ Transcribir', '', () => { const api = getApi(); if (!api || !api.transcribe) return; api._transcrito = true; api.transcribe(); b.disabled = true; barraDudas(api); },
     'Escribe todas las notas transportadas; las que llevan alteración accidental, con la del original copiada y un «?»'); b.style.display = 'none'; return b; };
 
@@ -413,7 +433,7 @@
       etiquetaOrig: 'Parte de Xoán · <b>clarinete en Si♭</b> · <b>' + ex.key.name + ' Mayor</b> (' + T4.arm(ex.key.fifths) + ')',
       etiquetaAlu: '<b>Tu parte de saxo alto en Mi♭</b> · pulsa en el pentagrama para colocar cada nota; con ♭ ♮ ♯, sus alteraciones',
       sonOrig: { inst: 'clarinete', off: -2 }, sonAlu: { inst: 'saxo', off: -9 }, txtOrig: '▶ Clarinete', txtAlu: '▶ Tu saxo', juntos: '▶ Los dos a la vez',
-      alCambio: () => barraDudas(api), alCorregir: (pt, e) => corr(pt, e) });
+      sinFantasma: true, alDecidir: alDecidir(() => api), alCambio: () => barraDudas(api), alCorregir: (pt, e) => corr(pt, e) });
     B._apiEscrito = api;
     function corr(pt, ex2) {
       intentos++;
@@ -434,7 +454,7 @@
       sigue = res; c.alMorir.push(() => res(false));
       M().barraTexto(P0.barra || '<b>Paso 0</b> · elige la tonalidad y la armadura de tu parte de saxo.');
       paso0(p, { ex: ex, titulo: P0.titulo || 'Paso 0 · La tonalidad de tu parte', texto: P0.texto || '', validar: true, pistas: cfg.pistas, bien: P0.bien, diferencias: true, afectadas: true,
-        alListo: () => { api.fijaTonArm(); bTra.style.display = ''; M().barraTexto((cfg.cartelCorto || 'Coloca cada nota una 5.ª justa más arriba. Después, <b>Corregir</b>.') + ' Si quieres, <b>✎ Transcribir</b> las escribe todas; las que llevan alteración accidental, con un <b class="q">?</b> para que decidas.'); } });
+        alListo: () => { api.fijaTonArm(); ponAfect(api, ex); bTra.style.display = ''; M().barraTexto((cfg.cartelCorto || 'Coloca cada nota una 5.ª justa más arriba. Después, <b>Corregir</b>.') + ' Si quieres, <b>✎ Transcribir</b> las escribe todas; las que llevan alteración accidental <b>parpadean</b> para que las definas.'); } });
     }));
   };
 
@@ -457,12 +477,12 @@
         /* (Iago 22:09) paso 0 = 50 %: tonalidad y armadura 25 % · número y dirección 12,5 % · notas afectadas 12,5 %; las notas, el otro 50 % */
         puntua: e => (s0 ? (s0.tonOk && s0.armOk ? .25 : 0) + (s0.difOk ? .125 : 0) + (s0.afOk ? .125 : 0) : 0) + .5 * E().notasBien(e) / e.notas.length,
         resTxt: () => (s0 && s0.tonOk && s0.armOk ? '✓' : '✗') + ' tonalidad y armadura · ' + (s0 && s0.difOk ? '✓' : '✗') + ' diferencias · ' + (s0 && s0.afOk ? '✓' : '✗') + ' notas afectadas',
-        alCambio: () => barraDudas(api), alCorregir: pt => corr(pt) });
+        sinFantasma: true, alDecidir: alDecidir(() => api), alCambio: () => barraDudas(api), alCorregir: pt => corr(pt) });
       B._apiEscrito = api;
       M().barraTexto('<b>Paso 0</b> · tonalidad, armadura, diferencias y notas afectadas. Una sola vez: cuenta para la nota.');
       paso0(p, { ex: ex, diferencias: true, afectadas: true, validar: false, titulo: 'Paso 0 · Melodía ' + (k + 1) + ' de ' + niveles.length,
         texto: 'La melodía está en <b>' + ex.key.name + ' Mayor</b> (' + T4.arm(ex.key.fifths) + ') y hay que transportarla una <b>' + ex.transp.lbl + '</b>. ¿Tonalidad nueva, armadura, diferencias y notas afectadas?',
-        alListo: r => { s0 = r; api.fijaTonArm(); bTra.style.display = ''; M().barraTexto((cfg.cartelCorto || 'Coloca cada nota transportada (y sus alteraciones). Después, <b>Corregir</b>.') + ' Si quieres, <b>✎ Transcribir</b> las escribe y tú decides las de <b class="q">?</b>.'); } });
+        alListo: r => { s0 = r; api.fijaTonArm(); ponAfect(api, ex); bTra.style.display = ''; M().barraTexto((cfg.cartelCorto || 'Coloca cada nota transportada (y sus alteraciones). Después, <b>Corregir</b>.') + ' Si quieres, <b>✎ Transcribir</b> las escribe y tú defines las que <b>parpadean</b>.'); } });
     }
     function corr(pt) {
       notas[k] = pt; api.bloquea(); bTra.style.display = 'none';
@@ -538,93 +558,131 @@
         if (cambia) B.espera(RAP() ? .1 : 1.6, c).then(ok2 => { if (ok2) { b.classList.add('ya'); B.viento.ui('ok'); } }); });
     });
   };
-  /* ══ (Iago 4-nov 22:07) TRANSPORTE ANIMADO sobre un trozo real de la parte, «en plan los vídeos didácticos de Teoría at home» ══
-     { titulo, compases:[desde, hasta) (0 = c. 1), ens:{ arm, cascada, letrero, fa } (s si > 1; si no, fracción de la frase), paso (s por nota) }
-     Tres capas VexFlow superpuestas con las notas en el mismo sitio (inicioNotas): A = clarinete en Re M · B = saxo en La M con la
-     alteración del original COPIADA · C = la nota afectada ya corregida (verde). Solo transform y opacity (nada de filtros: iPad). */
+  /* ══ (Iago 4-nov 22:07 · 5-nov 07:18–07:19) TRANSPORTE ANIMADO sobre un trozo real de la parte, con LOS DOS PENTAGRAMAS ══
+     Arriba Xoán (clarinete en Si♭, Re M); abajo Noa (saxo alto en Mi♭, La M: su armadura entra animada). Cada nota BAJA del pentagrama de
+     Xoán al de Noa, una 5.ª J más arriba, y deja una línea de unión tenue con su original. Mientras Xoán habla de un caso, la pareja se
+     resalta en los dos pentagramas. Etiqueta FIJA «1 diferencia ↑ · nota afectada: FA» (brilla cuando se nombra fa). Al final, la
+     comparación «sol ♮ = ♮» frente a «fa ♭ → ♮».
+     s = { titulo, compases:[desde, hasta), paso, ens:{ arm, cascada, sos, do, sib, fa, morfo, comp } (s; si ≤ 1, fracción de la frase) }
+     Capas VexFlow: A (Xoán) · B (Noa, con la alteración COPIADA del original) · C (la nota afectada ya corregida, verde) + una capa SVG
+     de uniones y halos. Solo transform y opacity (nada de filtros: iPad). */
   L.transpAnim = function (box, s, c) {
     if (s.titulo) box.appendChild(el('div', 'lam-tit', s.titulo));
     const ex = T4.ex(), cs = s.compases || [3, 7], K = RAP() ? .12 : 1, dur = (B.motor && B.motor._durLinea) || 24;
     const T = x => (x > 1 ? x : x * dur) * K;
-    const ens = Object.assign({ arm: 5.2, cascada: 8.2, letrero: 16.9, fa: 20 }, s.ens || {}), paso = (s.paso || .25) * K;
+    const ens = Object.assign({ arm: 5.4, cascada: 8.4, sos: null, do: 11.2, doDura: 4.9, sib: 17.4, fa: 19.4, afect: 20.7, morfo: 25.4, comp: 27.3 }, s.ens || {}), paso = (s.paso || .25) * K;
     const sub = ex.compases.slice(cs[0], cs[1]), notas = [].concat.apply([], sub), idx = notas.map(n => ex.notas.indexOf(n));
-    const fO = ex.key.fifths, fD = ex.destino.fifths;
+    const fO = ex.key.fifths, fD = ex.destino.fifths, nDif = Math.abs(fD - fO), asc = fD > fO, AF = T4.afectadas(nDif, asc);
     const sol = idx.map(i => E().solNota(ex, i));
     const acc = notas.map(n => (n.alter || 0) !== E().armAlt(n.step, fO));
-    /* B: cada nota transportada; las que llevan accidental, con la MISMA alteración del original */
     const nB = notas.map((n, k) => Object.assign({}, n, { step: sol[k].step, octave: sol[k].octave, alter: acc[k] ? (n.alter || 0) : sol[k].alter }));
     const nC = notas.map((n, k) => Object.assign({}, n, { step: sol[k].step, octave: sol[k].octave, alter: sol[k].alter }));
     const cambia = notas.map((n, k) => acc[k] && (n.alter || 0) !== sol[k].alter);
     const mk = (ns, f) => { const cps = [], it = ns.slice(); sub.forEach((m, ci) => { cps.push(it.splice(0, m.length).map(x => Object.assign({}, x, { compas: ci }))); });
       return { key: { fifths: f }, compas: ex.compas, compases: cps, notas: [].concat.apply([], cps) }; };
-    const cab = el('div', 'tA-cab', '<span class="tA-de">Clarinete en Si♭ · <b>' + ex.key.name + ' M</b> · ' + T4.arm(fO) + '</span><span class="tA-fl">' + ex.transp.corto + '</span><span class="tA-a">Saxo alto en Mi♭ · <b>' + ex.destino.name + ' M</b> · ' + T4.arm(fD) + '</span>');
-    box.appendChild(cab);
-    const pe = el('div', 'tA-pe'), hA = el('div', 'tA-capa a'), hB = el('div', 'tA-capa b'), hC = el('div', 'tA-capa c'), et = el('div', 'tA-et');
-    [hA, hB, hC, et].forEach(x => pe.appendChild(x)); box.appendChild(pe);
-    const op = { modo: 'orig', otroF: 4, alto: 190, y: 56, W: 900, inicioNotas: 128, sinCompas: true, sinFinal: true };
-    const gA = E().pinta(hA, mk(notas, fO), Object.assign({}, op, { fifths: fO }));
-    const gB = E().pinta(hB, mk(nB, fD), Object.assign({}, op, { fifths: fD }));
-    const gC = E().pinta(hC, mk(nC, fD), Object.assign({}, op, { fifths: fD }));
+    const NS = 'http://www.w3.org/2000/svg', mkS = (tag, at, padre) => { const e = document.createElementNS(NS, tag); Object.keys(at).forEach(k => e.setAttribute(k, at[k])); if (padre) padre.appendChild(e); return e; };
+    const pe = el('div', 'tA-pe2'); box.appendChild(pe);
+    const rA = el('div', 'tA-fila xoan', '<span class="tA-q">Xoán</span> Clarinete en Si♭ · <b>' + ex.key.name + ' M</b> · ' + T4.arm(fO)), hA = el('div', 'tA-capa a');
+    const rB = el('div', 'tA-fila noa', '<span class="tA-q">Noa</span> Saxo alto en Mi♭ · <b>' + ex.destino.name + ' M</b> · ' + T4.arm(fD) + '<span class="tA-int">' + ex.transp.corto + '</span>');
+    const fija = el('div', 'tA-fija', nDif + ' ' + (nDif === 1 ? 'diferencia' : 'diferencias') + ' ' + (asc ? '↑' : '↓') + ' · ' + (AF.length === 1 ? 'nota afectada' : 'notas afectadas') + ': <b>' + AF.join(' · ').toUpperCase() + '</b>');
+    rB.appendChild(fija);
+    const zB = el('div', 'tA-zb'), hB = el('div', 'tA-capa b'), hC = el('div', 'tA-capa c'); zB.appendChild(hB); zB.appendChild(hC);
+    const comp = el('div', 'tA-comp');
+    [rA, hA, rB, zB, comp].forEach(x => pe.appendChild(x));
+    const ov = mkS('svg', { class: 'tA-ov', 'aria-hidden': 'true' }, null); pe.appendChild(ov);
+    const et = el('div', 'tA-et'); pe.appendChild(et);
+    const opA = { modo: 'orig', otroF: 4, alto: 122, y: 4, W: 900, inicioNotas: 128, sinCompas: true, sinFinal: true, fifths: fO };
+    const opB = Object.assign({}, opA, { alto: 150, y: 18, fifths: fD });
+    const gA = E().pinta(hA, mk(notas, fO), opA), gB = E().pinta(hB, mk(nB, fD), opB), gC = E().pinta(hC, mk(nC, fD), opB);
     const notasDe = g => [].concat.apply([], g.comps.map(cg => cg.notes.map(n => n.el)));
     const eA = notasDe(gA), eB = notasDe(gB), eC = notasDe(gC);
-    const VB = { w: 900, h: 190 };
-    /* lo que no son notas ni corchetes de B y de C, invisible (el pentagrama y la clave son los de A); la armadura nueva, aparte */
-    [gB.svg, gC.svg].forEach((sv, j) => Array.from(sv.children).forEach(x => { if (x.classList && (x.classList.contains('vf-stavenote') || (j === 0 && (x.classList.contains('vf-beam') || x.classList.contains('vf-keysignature'))))) return; x.style.opacity = '0'; }));
-    const kA = gA.svg.querySelector('.vf-keysignature'), kB = gB.svg.querySelector('.vf-keysignature');
-    if (kB) { kB.style.opacity = '0'; kB.classList.add('tA-fade'); }
-    if (kA) kA.classList.add('tA-fade');
-    eC.forEach(g => { if (g) g.style.opacity = '0'; });
-    eB.forEach(g => { if (g) { g.classList.add('tA-nota'); g.style.opacity = '0'; g.style.transform = 'translate(0px,20px)'; } });   // una 5.ª J = 4 grados = 20 unidades: sale de donde está la del clarinete
-    eA.forEach(g => { if (g) g.classList.add('tA-fade'); });
-    const beams = sv => Array.from(sv.querySelectorAll('.vf-beam'));
-    const bA = beams(gA.svg), bB = beams(gB.svg);
-    bB.forEach(b => { b.classList.add('tA-fade'); b.style.opacity = '0'; });
-    bA.forEach(b => b.classList.add('tA-fade'));
-    /* (VexFlow 4) las plicas de las notas con corchete se dibujan FUERA del grupo de la nota (grupos .vf-stem sueltos): van con su nota por la x */
+    /* B: el pentagrama y la clave se ven desde el principio; la armadura, las notas, corchetes y plicas, no. C: solo su nota afectada, después */
+    const kB = gB.svg.querySelector('.vf-keysignature'), kidsB = kB ? Array.from(kB.children) : [];
+    kidsB.forEach(x => { x.classList.add('tA-fade'); x.style.opacity = '0'; });
+    Array.from(gC.svg.children).forEach(x => { x.style.opacity = '0'; });
+    eC.forEach(g => { if (g) { g.style.opacity = '0'; g.parentNode && g.parentNode.style && (g.parentNode.style.opacity = ''); } });
     const plicas = sv => Array.from(sv.children).filter(x => x.classList && x.classList.contains('vf-stem'));
-    const sA = plicas(gA.svg), sB = plicas(gB.svg);
-    sA.concat(sB).forEach(x => x.classList.add('tA-fade'));
-    const cerca = (ls, p) => p ? ls.filter(x => { const b = x.getBBox(); return Math.abs(b.x + b.width / 2 - p.x) < 14; }) : [];
+    const beams = sv => Array.from(sv.querySelectorAll('.vf-beam'));
+    const bB = beams(gB.svg), sB = plicas(gB.svg);
+    bB.concat(sB).forEach(x => { x.classList.add('tA-fade'); x.style.opacity = '0'; });
+    eB.forEach(g => { if (g) { g.style.opacity = '0'; } });
     const cabeza = g => { const h = g && g.querySelector('.vf-notehead'); if (!h) return null; const b = h.getBBox(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; };
+    const cerca = (ls, p) => p ? ls.filter(x => { const b = x.getBBox(); return Math.abs(b.x + b.width / 2 - p.x) < 14; }) : [];
     const enBeam = (bs, g) => { const p = cabeza(g); if (!p) return null; let r = null; bs.forEach(b => { const bb = b.getBBox(); if (p.x >= bb.x - 9 && p.x <= bb.x + bb.width + 9) r = b; }); return r; };
-    const pct = (x, y) => ({ left: (x / VB.w * 100) + '%', top: (y / VB.h * 100) + '%' });
-    const rotulo = (txt, cls, x, y, ms) => { const r = el('div', 'tA-rot ' + cls, txt), q = pct(x, y); r.style.left = q.left; r.style.top = q.top; et.appendChild(r);
-      requestAnimationFrame(() => requestAnimationFrame(() => r.classList.add('on'))); if (ms) setTimeout(() => { r.classList.remove('on'); setTimeout(() => r.remove(), 600); }, ms * K); return r; };
-    const destello = (sv, p, col) => { const r = sv.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'rect'); r.setAttribute('x', p.x - 22); r.setAttribute('y', p.y - 16); r.setAttribute('width', 44); r.setAttribute('height', 32); r.setAttribute('rx', 6);
-      r.setAttribute('fill', col); r.setAttribute('class', 'tA-dest'); sv.insertBefore(r, sv.firstChild); setTimeout(() => r.remove(), 1800 * K + 200); };
+    /* posiciones en píxeles del contenedor (la escena va escalada) */
+    const esc = () => { const r = pe.getBoundingClientRect(); return { r: r, k: (r.width / (pe.offsetWidth || 1)) || 1 }; };
+    const en = (g) => { const h = g && g.querySelector('.vf-notehead'); if (!h) return null; const b = h.getBoundingClientRect(), E2 = esc(); return { x: (b.left + b.width / 2 - E2.r.left) / E2.k, y: (b.top + b.height / 2 - E2.r.top) / E2.k, r: b.height / 2 / E2.k }; };
+    const ajustaOv = () => { const w = pe.offsetWidth, h = pe.offsetHeight; ov.setAttribute('viewBox', '0 0 ' + w + ' ' + h); ov.setAttribute('width', w); ov.setAttribute('height', h); };
+    const uniones = [];
+    const halo = (g, cls, ms) => { const p = en(g); if (!p) return null; ajustaOv(); const r = mkS('rect', { x: p.x - 30, y: p.y - 24, width: 60, height: 48, rx: 10, class: 'tA-halo ' + cls }, ov);
+      requestAnimationFrame(() => requestAnimationFrame(() => r.classList.add('on'))); if (ms) setTimeout(() => { r.classList.remove('on'); setTimeout(() => r.remove(), 700); }, ms * 1000 * K); return r; };
+    const etiqueta = (txt, cls, g, abajo, ms) => { const p = en(g); if (!p) return null; const r = el('div', 'tA-rot ' + cls + (abajo ? ' abajo' : ''), txt); r.style.left = p.x + 'px'; r.style.top = (p.y + (abajo ? 40 : -40)) + 'px'; et.appendChild(r);
+      requestAnimationFrame(() => requestAnimationFrame(() => r.classList.add('on'))); if (ms) setTimeout(() => { r.classList.remove('on'); setTimeout(() => r.remove(), 600); }, ms * 1000 * K); return r; };
+    const pareja = (k, cls, ms) => { halo(eA[k], cls, ms); halo(cambia[k] && eC[k] && eC[k].style.opacity === '1' ? eC[k] : eB[k], cls, ms); const u = uniones[k]; if (u) { u.classList.add('fuerte', cls); if (ms) setTimeout(() => u.classList.remove('fuerte'), ms * 1000 * K); } };
     const PCn = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }, MID = n => 12 * (n.octave + 1) + PCn[n.step] + (n.alter || 0);
-    const saxo = k => { try { B.viento.nota('saxo', MID(nB[k]) - 9, B.ac().currentTime + .01, .3, .38); } catch (e) { } };   // lo que suena el saxo alto (−9)
-    /* 1 · la armadura: 2♯ → 3♯; el sostenido nuevo entra brillando en cian */
+    const saxo = (n, d) => { try { B.viento.nota('saxo', MID(n) - 9, B.ac().currentTime + .01, d || .3, .38); } catch (e) { } };   // lo que suena el saxo alto (−9)
+    const kSos = acc.findIndex((a, k) => a && !cambia[k] && (notas[k].alter || 0) === 1), kNat = acc.findIndex((a, k) => a && !cambia[k] && (notas[k].alter || 0) === 0), kf = cambia.indexOf(true);
+    /* 1 · la armadura de Noa entra sostenido a sostenido; el nuevo (sol♯), en cian. Con ella, la etiqueta fija */
     B.espera(T(ens.arm), c).then(ok => { if (!ok || !box.isConnected) return;
-      if (kA) kA.style.opacity = '0'; if (kB) { kB.style.opacity = '1'; const nuevo = kB.lastElementChild || kB; nuevo.classList.add('tA-nuevo'); }
+      kidsB.forEach((x, i) => B.espera(i * .32 * K, c).then(o => { if (!o) return; x.style.opacity = '1'; if (i >= kidsB.length - nDif) x.classList.add('tA-nuevo'); }));
+      B.espera(kidsB.length * .32 * K + .2, c).then(o => { if (o) fija.classList.add('on'); });
       box.classList.add('con-arm'); B.viento.ui('ok'); });
-    /* 2 · la cascada: cada nota sube una 5.ª J y aterriza en la parte de saxo */
+    /* 2 · la cascada: cada nota baja del pentagrama de Xoán al de Noa (una 5.ª J más arriba) y deja su unión */
     B.espera(T(ens.cascada), c).then(ok => { if (!ok || !box.isConnected) return;
       box.classList.add('en-saxo');
       eB.forEach((g, k) => { if (!g) return; B.espera(k * paso, c).then(ok2 => { if (!ok2 || !box.isConnected) return;
-        const a = eA[k], ba = enBeam(bA, a); if (a) a.style.opacity = '0'; if (ba) ba.style.opacity = '0'; cerca(sA, cabeza(a)).forEach(x => { x.style.opacity = '0'; });
-        const p = cabeza(g);
-        if (p) { const r = g.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'rect'); r.setAttribute('x', p.x - 3.5); r.setAttribute('y', p.y); r.setAttribute('width', 7); r.setAttribute('height', 20); r.setAttribute('rx', 3.5); r.setAttribute('class', 'tA-rastro'); gB.svg.insertBefore(r, gB.svg.firstChild); setTimeout(() => r.remove(), 900); }
-        g.style.opacity = '1'; g.style.transform = 'translate(0px,0px)';
-        B.espera(.42 * K, c).then(ok3 => { if (!ok3 || !box.isConnected) return; saxo(k); cerca(sB, p).forEach(x => { x.style.opacity = '1'; });
+        const pa = en(eA[k]), pb = en(g), E2 = esc(), vb = gB.svg.viewBox.baseVal, kb = gB.svg.getBoundingClientRect().width / E2.k / vb.width;
+        const dy = pa && pb ? (pa.y - pb.y) / kb : -60;
+        g.style.transition = 'none'; g.style.transform = 'translate(0px,' + dy.toFixed(1) + 'px)'; g.getBoundingClientRect();
+        g.classList.add('tA-nota'); g.style.transition = ''; g.style.opacity = '1'; g.style.transform = 'translate(0px,0px)';
+        if (eA[k]) { eA[k].classList.add('tA-sale'); setTimeout(() => eA[k].classList.remove('tA-sale'), 500); }
+        B.espera(.5 * K, c).then(ok3 => { if (!ok3 || !box.isConnected) return; saxo(nB[k]);
+          const p = cabeza(g); cerca(sB, p).forEach(x => { x.style.opacity = '1'; });
           const bb = enBeam(bB, g); if (bb && eB.filter(h => h && enBeam(bB, h) === bb).every(h => h.style.opacity === '1')) bb.style.opacity = '1';
-          if (acc[k] && !cambia[k] && p) { destello(gB.svg, p, '#ffb547'); rotulo('se copia igual', 'ambar', p.x, p.y - 34, 2600); }
-          if (cambia[k] && p) destello(gB.svg, p, '#63e6ff'); }); }); });
+          const a2 = en(eA[k]), b2 = en(g); if (a2 && b2) { ajustaOv(); uniones[k] = mkS('line', { x1: a2.x, y1: a2.y + a2.r + 4, x2: b2.x, y2: b2.y - b2.r - 4, class: 'tA-union' }, ov); }
+          if (k === kSos && ens.sos == null) pareja(k, 'ambar', 1.8);   // sol♯ ↔ re♯: breve, aunque no lo nombre
+        }); }); });
     });
-    /* 3 · la nota afectada: aterriza con la alteración copiada (fa♭) y la diferencia la sube medio tono (fa♮, en verde) */
-    const kf = cambia.indexOf(true);
+    if (ens.sos != null && kSos >= 0) B.espera(T(ens.sos), c).then(ok => { if (ok && box.isConnected) pareja(kSos, 'ambar', 1.8); });
+    /* 3 · do♮ ↔ sol♮: sol NO es nota afectada → el ♮ se queda */
+    if (kNat >= 0) B.espera(T(ens.do), c).then(ok => { if (!ok || !box.isConnected) return; pareja(kNat, 'ambar', ens.doDura);
+      etiqueta('<b>' + NOMS[nB[kNat].step] + '</b>: NO es nota afectada → el ♮ se queda', 'ambar', eB[kNat], true, ens.doDura + .2); B.viento.ui('ok'); });
+    /* 4 · si♭ ↔ fa: fa SÍ es nota afectada → ♭ sube a ♮ (el fa, del color de la etiqueta fija) */
     if (kf >= 0) {
-      B.espera(T(ens.letrero), c).then(ok => { if (!ok || !box.isConnected) return; const p = cabeza(eB[kf]); if (!p) return;
-        destello(gB.svg, p, '#63e6ff'); rotulo('<b>' + NOMS[nB[kf].step] + '</b> = nota afectada por la diferencia', 'cian', p.x, p.y - 40, 0); });
-      B.espera(T(ens.fa), c).then(ok => { if (!ok || !box.isConnected) return; const p = cabeza(eB[kf]);
+      B.espera(T(ens.sib), c).then(ok => { if (ok && box.isConnected) halo(eA[kf], 'cian', 2.6); });
+      B.espera(T(ens.fa), c).then(ok => { if (!ok || !box.isConnected) return; pareja(kf, 'cian', 0); fija.classList.add('brilla');
+        etiqueta('<b>' + NOMS[nB[kf].step] + '</b>: SÍ es nota afectada → ♭ sube a ♮', 'cian', eB[kf], true, 0); eB[kf].classList.add('tA-afec'); setTimeout(() => fija.classList.remove('brilla'), 2400 * K); });
+      if (ens.afect != null) B.espera(T(ens.afect), c).then(ok => { if (!ok || !box.isConnected) return; fija.classList.remove('brilla'); void fija.offsetWidth; fija.classList.add('brilla'); setTimeout(() => fija.classList.remove('brilla'), 2600 * K); });
+      B.espera(T(ens.morfo), c).then(ok => { if (!ok || !box.isConnected) return; const p = en(eB[kf]);
         eB[kf].classList.add('tA-fuera'); eB[kf].style.opacity = '0'; if (eC[kf]) { eC[kf].classList.add('tA-verde'); eC[kf].style.opacity = '1'; }
-        B.$$('.tA-rot.cian', et).forEach(r => r.classList.remove('on'));
-        if (p) { rotulo('↑ ½ tono · <b>' + T3n(nC[kf]) + '</b>', 'verde', p.x, p.y - 40, 0); destello(gC.svg, p, '#7dffa8'); }
-        B.viento.ui('ok'); try { B.viento.nota('saxo', MID(nC[kf]) - 9, B.ac().currentTime + .05, .6, .42); } catch (e) { } });
+        fija.classList.add('brilla'); setTimeout(() => fija.classList.remove('brilla'), 2400 * K);
+        if (p) { etiqueta('↑ ½ tono · <b>' + T3n(nC[kf]) + '</b>', 'verde', eC[kf] || eB[kf], false, 0); }
+        B.viento.ui('ok'); saxo(nC[kf], .6); });
     }
+    /* 5 · al final, una junto a la otra: «sol ♮ = ♮» frente a «fa ♭ → ♮» */
+    B.espera(T(ens.comp), c).then(ok => { if (!ok || !box.isConnected) return;
+      const sim = a => a === 1 ? '♯' : a === -1 ? '♭' : '♮';
+      comp.innerHTML = (kNat >= 0 ? '<span class="ambar"><b>' + NOMS[nB[kNat].step] + '</b> ' + sim(nB[kNat].alter) + ' = ' + sim(nC[kNat].alter) + '<small>no es nota afectada</small></span>' : '') +
+        (kf >= 0 ? '<span class="cian"><b>' + NOMS[nB[kf].step] + '</b> ' + sim(nB[kf].alter) + ' → ' + sim(nC[kf].alter) + '<small>nota afectada</small></span>' : '');
+      B.$$('.tA-rot.ambar, .tA-rot.cian', et).forEach(r => r.classList.remove('on'));
+      comp.classList.add('on'); });
   };
   const NOMS = { C: 'do', D: 're', E: 'mi', F: 'fa', G: 'sol', A: 'la', B: 'si' };
   const T3n = n => NOMS[n.step] + (n.alter === 1 ? '♯' : n.alter === -1 ? '♭' : '♮');
+  /* (Iago 5-nov) refuerzo visual de t4_013b: el orden de los sostenidos y, al compás de la voz, se iluminan fa · fa do · fa do sol
+     s = { titulo, orden: 's' | 'b', pasos: [[t, n], …] } (t en s desde que empieza la frase) */
+  L.afectadas = function (box, s, c) {
+    if (s.titulo) box.appendChild(el('div', 'lam-tit', s.titulo));
+    const ord = s.orden === 'b' ? ORD_B : ORD_S, fila = el('div', 'afx-fila' + (s.orden === 'b' ? ' bem' : '')); box.appendChild(fila);
+    const cs = ord.map((n, i) => { const x = el('div', 'afx-n', '<b>' + n + '</b><small>' + (i + 1) + '.º</small>'); fila.appendChild(x); return x; });
+    const pie = el('div', 'afx-pie', ''); box.appendChild(pie);
+    B.arr(s.pasos).forEach(([t, n]) => B.espera(RAP() ? .05 : t, c).then(ok => {
+      if (!ok) return; fila.classList.add('on');
+      cs.forEach((x, i) => { const on = i < n; if (on && !x.classList.contains('si')) { x.classList.add('si', 'pop'); setTimeout(() => x.classList.remove('pop'), 700); } else if (!on) x.classList.remove('si'); });
+      pie.innerHTML = n ? (n === 1 ? '1 diferencia → <b>' : n + ' diferencias → <b>') + ord.slice(0, n).join(' · ') + '</b>' : '';
+      if (n) B.viento.ui('ok');
+    }));
+  };
   /* la tabla resumen (como la de Teoría at home PRO): { titulo, ens } */
   L.tablaDif = function (box, s, c) {
     if (s.titulo) box.appendChild(el('div', 'lam-tit', s.titulo));

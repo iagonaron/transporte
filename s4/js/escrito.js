@@ -244,7 +244,7 @@
   E.notasBien = function (ex) {
     let ok = 0;
     ex.notas.forEach((n, i) => { const a = ex.aluNotas[i]; if (!a) return; const s = stepTransportado(n, ex.transp);
-      if (a.step === s.step && a.octave === s.octave && !a.duda && (!ex.conAcc || correctaAltura(ex, i, a))) ok++; });
+      if (a.step === s.step && a.octave === s.octave && !a.duda && a.primer !== false && (!ex.conAcc || correctaAltura(ex, i, a))) ok++; });   // (Iago 07:22) cuenta el PRIMER intento
     return ok;
   };
   E.notasMal = ex => ex.notas.map((n, i) => { const a = ex.aluNotas[i]; return !a || !correctaAltura(ex, i, a); });
@@ -299,6 +299,8 @@
           if (alu) { if (nota.alter) sn.addModifier(new VF.Accidental(nota.alter === 1 ? '#' : 'b'), 0); else if (nota.nat) sn.addModifier(new VF.Accidental('n'), 0); }
           else if (accO[ki]) sn.addModifier(new VF.Accidental(accO[ki]), 0);
           if (op.corr) col = correctaAltura(ex, gi, nota) ? VERDE : ROJO;
+          else if (alu && nota.malFlash) col = ROJO;
+          else if (alu && nota.bienDec) col = VERDE;
           else if (gi === op.sel || gi === op.hl) col = AMBAR;
           else if (op.apagadas && op.apagadas.indexOf(gi) >= 0) col = K.apagada;
         } else {
@@ -326,10 +328,11 @@
       new VF.Formatter().joinVoices([voice]).format([voice], Math.max(40, area));
       beams.forEach(b => { const ns = b.getNotes ? b.getNotes() : (b.notes || []), c = ns.length && ns.every(x => x._col === ns[0]._col) ? ns[0]._col : TINTA; b.setStyle({ fillStyle: c, strokeStyle: c }); });
       voice.draw(ctx, st); beams.forEach(b => b.setContext(ctx).draw());
-      /* (T4) notas «?»: un interrogante ámbar sobre la nota hasta que el alumno valida o cambia su alteración */
-      if (alu) mn.forEach((nn, ki) => { const nota = op.notas ? op.notas[gi0 + ki] : ex.aluNotas[gi0 + ki]; if (!nota || !nota.duda || op.corr) return;
-        let cx; try { cx = sns[ki].getAbsoluteX(); } catch (e) { return; }
-        const yy = yNota(st, nota), q = svgEl('text', { x: cx - 13, y: Math.min(yy - 16, st.getYForLine(0) - 6), class: 'esc-duda', 'text-anchor': 'middle' }); q.textContent = '?'; svg.appendChild(q); });
+      /* (Iago 5-nov 07:22) notas por decidir: la NOTA misma parpadea (cabeza y alteración) hasta que el alumno la define; al acertar, verde;
+         al fallar, un destello rojo y la sacudida */
+      if (alu) mn.forEach((nn, ki) => { const nota = op.notas ? op.notas[gi0 + ki] : ex.aluNotas[gi0 + ki]; if (!nota || op.corr) return;
+        const g = sns[ki].getSVGElement ? sns[ki].getSVGElement() : null; if (!g) return;
+        if (nota.malFlash) g.classList.add('esc-malflash'); else if (nota.duda) g.classList.add('esc-parpadea'); else if (nota.bienDec) g.classList.add('esc-biendec'); });
       const cg = { stave: st, notes: [], fila: fila, cy: (st.getYForLine(0) + st.getYForLine(4)) / 2 };
       sns.forEach((sn, ki) => { let cx; try { cx = sn.getAbsoluteX() + 6; } catch (e) { cx = x + wC / 2; } cg.notes.push({ gi: gi0 + ki, x: cx, dur: mn[ki].dur, el: sn.getSVGElement ? sn.getSVGElement() : null }); });
       geo.comps.push(cg);
@@ -400,6 +403,7 @@
     const hO = el('div', 'partitura esc-orig'); pO.appendChild(hO); hoja.appendChild(pO);
     const pA = el('div', 'esc-pe'); pA.appendChild(el('small', '', cfg.etiquetaAlu || '<b>Tu transporte</b> · pasa el ratón o el dedo por el pentagrama y pulsa para colocar cada nota (el ritmo se pone solo)'));
     const hA = el('div', 'partitura esc-alu'); pA.appendChild(hA); hoja.appendChild(pA);
+    const cartelAlu = el('div', 'esc-cartel'); cartelAlu.style.display = 'none'; pA.insertBefore(cartelAlu, hA);   // (Iago 07:22) «1 diferencia ↑ · nota afectada: FA»
     const ctl = el('div', 'esc-ctl'); w.appendChild(ctl);
     host.appendChild(w);
     let sel = null, bloqueado = false, corregido = false, geo = null, abre = null;
@@ -424,7 +428,8 @@
     function engancha() {
       const svg = geo.svg; svg.classList.add('activa');
       let tocando = false;
-      const mueve = ev => { const pt = svgPt(svg, ev); if (!pt) return; const b = cercana(pt); if (!b) return quitaFantasma(svg); let x = b.nt.x, dur = b.nt.dur;
+      const mueve = ev => { if (cfg.sinFantasma) return;   /* (Iago 5-nov 07:22, T4) sin nota fantasma: un clic o un toque y la nota aparece */
+        const pt = svgPt(svg, ev); if (!pt) return; const b = cercana(pt); if (!b) return quitaFantasma(svg); let x = b.nt.x, dur = b.nt.dur;
         fantasma(svg, b.cg.stave, x, alturaY(b.cg.stave, pt.y), dur); };
       const coloca = ev => {
         const pt = svgPt(svg, ev); if (!pt) return; let b = cercana(pt); if (!b) return;
@@ -479,6 +484,7 @@
     const gAcc = el('div', 'esc-g'); gAcc.appendChild(el('small', '', 'Alterar nota')); const fAcc = el('div', 'esc-f');
     const bAb = btn('♭', 'cuad acc', () => acc(-1), 'Bemol en la nota seleccionada'), bAn = btn('♮', 'cuad acc', () => acc(0), 'Becuadro en la nota seleccionada'), bAs = btn('♯', 'cuad acc', () => acc(1), 'Sostenido en la nota seleccionada');
     [bAb, bAn, bAs].forEach(b => fAcc.appendChild(b)); gAcc.appendChild(fAcc);
+    const afEl = el('small', 'esc-af', ''); afEl.style.display = 'none'; gAcc.appendChild(afEl);
     if (cfg.alterar !== false) ctl.appendChild(gAcc);   /* (3-nov) alterar:false → sin ♭ ♮ ♯ (T2: melodías sin alteraciones accidentales) */
     /* (Iago 4-nov 22:11) selector junto a una nota «?»: ♭ · ♮ · ♯ grandes (ratón y dedo), la copiada ya marcada en ámbar, y «✓ Validar».
        Pulsar la marcada (o Validar) la da por buena; elegir otra la cambia. Suena la nota y se cierra. */
@@ -488,16 +494,32 @@
       const k2 = (rh.width / (hA.offsetWidth || 1)) || 1;   // la escena va escalada: se pasa a píxeles del contenedor
       const y = yNota(r.cg.stave, a), cur = a.nat ? 0 : (a.alter || 0);
       const caja = el('div', 'esc-sel'); caja.style.left = ((rs.left - rh.left) / k2 + r.nt.x * k / k2) + 'px'; caja.style.top = ((rs.top - rh.top) / k2 + (y - 30) * k / k2) + 'px';
-      const elige = v => { ex.undo.push({ gi: gi, prev: Object.assign({}, a) }); a.duda = false; a.alter = v === 0 ? 0 : v; a.nat = v === 0; abre = null; sel = gi;
-        suenaNota(E.midiAlu(ex, a, gi)); limpiaCorr(); redraw(); };
+      const elige = v => decide(gi, v);
       [[-1, '♭', 'Bemol'], [0, '♮', 'Becuadro'], [1, '♯', 'Sostenido']].forEach(o => { const b = btn(o[1], 'acc' + (o[0] === cur ? ' on' : ''), () => elige(o[0]), o[2] + (o[0] === cur ? ' (la copiada: púlsala para validarla)' : '')); caja.appendChild(b); });
       caja.appendChild(btn('✓ Validar', 'prim esc-val', () => elige(cur), 'Validar la alteración copiada del original'));
+      if (afTxt) caja.appendChild(el('small', 'esc-af', afTxt));   // (Iago 07:22) recuerda las notas afectadas
       ['pointerdown', 'pointerup', 'click'].forEach(t => caja.addEventListener(t, ev => ev.stopPropagation()));
       hA.appendChild(caja);
     }
+    /* (Iago 5-nov 07:22) cada decisión sobre una nota que parpadea se CORRIGE al momento: bien → verde y sonido de acierto; mal → destello
+       rojo, sacudida y una pista (nota afectada o no), y vuelve a parpadear. Cuenta el PRIMER intento (a.primer) */
+    let afTxt = cfg.afectadasTxt || '';
+    function decide(gi, v) {
+      const a = ex.aluNotas[gi]; if (!a) return;
+      ex.undo.push({ gi: gi, prev: Object.assign({}, a) });
+      a.duda = false; a.alter = v === 0 ? 0 : v; a.nat = v === 0; abre = null; sel = gi;
+      const ok = correctaAltura(ex, gi, a);
+      if (a.primer == null) a.primer = ok;
+      suenaNota(E.midiAlu(ex, a, gi)); limpiaCorr();
+      if (ok) { a.bienDec = true; B.viento.ui('ok'); redraw(); if (cfg.alDecidir) cfg.alDecidir(true, gi, ex); return; }
+      a.malFlash = true; B.viento.ui('mal'); redraw();
+      if (cfg.alDecidir) cfg.alDecidir(false, gi, ex);
+      setTimeout(() => { a.malFlash = false; a.duda = true; redraw(); }, 900);
+    }
     function acc(v) {
       if (sel == null || bloqueado) return; const a = ex.aluNotas[sel]; if (!a) return;
-      if (a.duda) { ex.undo.push({ gi: sel, prev: Object.assign({}, a) }); a.duda = false; a.alter = v === 0 ? 0 : v; a.nat = v === 0; abre = null; suenaNota(E.midiAlu(ex, a, sel)); limpiaCorr(); redraw(); return; }   // (T4) decide la nota «?»
+      if (a.duda) return decide(sel, v);   // (T4) decide la nota que parpadea
+      a.bienDec = false;
       const ya = (a.alter === v && v !== 0) || (v === 0 && a.nat);
       ex.undo.push({ gi: sel, prev: Object.assign({}, a) });
       if (ya) { a.alter = 0; a.nat = false; }                                   // pulsar otra vez la misma: se quita
@@ -567,6 +589,9 @@
         redraw();
       },
       redraw: () => redraw(), dudas: () => E.dudas(ex),
+      /* (T4) cartel fijo junto al pentagrama del alumno y recordatorio de las notas afectadas («Nota afectada: fa») */
+      ponCartel(html) { cartelAlu.innerHTML = html || ''; cartelAlu.style.display = html ? '' : 'none'; },
+      ponAfectadas(txt) { afTxt = txt || ''; afEl.textContent = afTxt; afEl.style.display = afTxt ? '' : 'none'; },
       bloquea(on) { bloqueado = on !== false; bCor.disabled = bloqueado; const fija = gTon.classList.contains('fija'); [rTon, rArm].forEach(r => r.classList.toggle('quieta', bloqueado || fija)); [bTb, bTs, bM, bm].forEach(b => { b.disabled = bloqueado || fija; }); redraw(); },
       boton: bCor, resultado: res
     };
