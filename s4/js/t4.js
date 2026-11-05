@@ -43,6 +43,19 @@
         return ok; },
       bloquea() { bs.forEach(b => { b.disabled = true; }); } };
   };
+  /* una nota suelta en clave de sol, con su alteración (ejemplo de la nota afectada) */
+  const NOTA_K = { do: 'c/5', re: 'd/5', mi: 'e/5', fa: 'f/5', sol: 'g/4', la: 'a/4', si: 'b/4' };
+  T4.miniNota = function (host, k, acc, col, rotulo) {
+    try { const VF = Vex.Flow, w = 190, h = 118, r = new VF.Renderer(host, VF.Renderer.Backends.SVG); r.resize(w, h);
+      const ctx = r.getContext(); ctx.setFillStyle('#eaf3ff'); ctx.setStrokeStyle('#eaf3ff');
+      const st = new VF.Stave(4, 6, w - 8); st.addClef('treble'); st.setContext(ctx).draw(); st.setNoteStartX(st.getNoteStartX() + 34);
+      const sn = new VF.StaveNote({ keys: [k], duration: 'w', clef: 'treble' }); if (acc) sn.addModifier(new VF.Accidental(acc), 0);
+      sn.setStyle({ fillStyle: col, strokeStyle: col }); sn.getModifiers().forEach(m => m.setStyle && m.setStyle({ fillStyle: col, strokeStyle: col }));
+      const v = new VF.Voice({ num_beats: 4, beat_value: 4 }).setStrict(false).addTickables([sn]); new VF.Formatter().joinVoices([v]).format([v], 60); v.draw(ctx, st);
+      const svg = host.querySelector('svg'); svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h); svg.style.width = '100%'; svg.style.height = 'auto'; svg.removeAttribute('width'); svg.removeAttribute('height');
+    } catch (e) { }
+    if (rotulo) host.appendChild(el('small', '', rotulo));
+  };
   /* «De 2♯ a 3♯: un sostenido más → 1 diferencia ascendente» */
   const num = (n, s, p) => n + ' ' + (n === 1 ? s : p);
   T4.explica = function (fa, fb, sinNotas) {   // sinNotas: en la montaña, las notas afectadas se preguntan en el 3.er paso
@@ -164,6 +177,19 @@
     return { svg: svg, via: via };
   };
   /* mueve el viajero de una altura a otra, con ♯ o ♭ que saltan en cada nivel y una nota por paso */
+  /* barrido «tecnológico» (sin altura de nota reconocible): sierra + cuadrada desafinadas por un filtro resonante que sube o baja */
+  T4.barrido = function (sube, f) {
+    try { const ac = B.ac(), t = ac.currentTime + .01, d = .42, out = B.bus.sfx || B.bus.master;
+      const g = ac.createGain(), lp = ac.createBiquadFilter(); lp.type = 'bandpass'; lp.Q.value = 6;
+      const o1 = ac.createOscillator(), o2 = ac.createOscillator(); o1.type = 'sawtooth'; o2.type = 'square';
+      const base = 180 + 14 * (f || 0), a = sube ? base : base * 2.6, b = sube ? base * 2.6 : base;
+      o1.frequency.setValueAtTime(a, t); o1.frequency.exponentialRampToValueAtTime(b, t + d);
+      o2.frequency.setValueAtTime(a * 1.013, t); o2.frequency.exponentialRampToValueAtTime(b * 1.013, t + d);
+      lp.frequency.setValueAtTime(sube ? 700 : 3200, t); lp.frequency.exponentialRampToValueAtTime(sube ? 3200 : 700, t + d);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.11, t + .04); g.gain.setValueAtTime(.11, t + d * .6); g.gain.exponentialRampToValueAtTime(.001, t + d);
+      o1.connect(lp); o2.connect(lp); lp.connect(g); g.connect(out); o1.start(t); o2.start(t); o1.stop(t + d + .02); o2.stop(t + d + .02);
+    } catch (e) { }
+  };
   T4.viaja = function (m, capa, fa, fb, c) {
     const via = m.via, Y = T4.yNivel, n = Math.abs(fb - fa), s = fb > fa ? 1 : -1, paso = RAP() ? .05 : .55;
     via.style.display = ''; via.setAttribute('transform', 'translate(' + (MT.xEsc - 26) + ',' + Y(fa) + ')');
@@ -180,7 +206,7 @@
         const g = el('i', 'mt-glifo ' + (gl.indexOf('♯') >= 0 ? 'sos' : 'bem'), gl);
         g.style.top = ((Y(f) - 22) / MT.H * 100) + '%'; g.style.left = ((MT.xEsc - 96) / MT.W * 100) + '%';
         capa.appendChild(g); requestAnimationFrame(() => g.classList.add('on')); setTimeout(() => g.remove(), 2200);
-        try { B.viento.piano(67 + 2 * f, B.ac().currentTime + .01, .4, .3); } catch (e) { }   // cuanto más alto, más agudo
+        T4.barrido(sube, f);   /* (Iago 5-nov 09:14) nada de notas: un barrido electrónico que sube o baja */
         return true;
       }));
     }
@@ -216,7 +242,7 @@
       Object.keys(huecos).forEach(f => huecos[f].classList.remove('act', 'mal', 'ok'));
       Object.keys(puestas).forEach(t => { huecos[puestas[t]].classList.add('viejo'); });
       m.via.style.display = 'none'; selChip = null;
-      ficha.innerHTML = '';
+      ficha.innerHTML = ''; B.$$('.mt-guia', mapa).forEach(x => x.remove());
       ficha.appendChild(el('div', 'esc-cab', '<span class="esc-num">' + (k + 1) + ' de ' + cfg.items.length + '</span>De <b>' + it.de + '</b> a <b>' + it.a + '</b>'));
       const paso1 = el('div', 'mt-paso', '<small>1 · Coloca cada tonalidad a su altura</small>'); ficha.appendChild(paso1);
       const bandeja = el('div', 'mt-bandeja'); paso1.appendChild(bandeja);
@@ -239,6 +265,9 @@
         if (ok && !B.$('.mt-chip', bandeja)) bandeja.innerHTML = '<span class="mt-listo">✓ ' + it.de + ' y ' + it.a + ', cada una a su altura</span>'; [bA, bD, bC].forEach(b => { b.disabled = !ok; }); rN.classList.toggle('quieta', !ok);
         if (ok) { huecos[fa].classList.add('act'); huecos[fb].classList.add('act'); huecos[fa].classList.remove('viejo'); huecos[fb].classList.remove('viejo');
           m.via.style.display = ''; m.via.style.transition = 'none'; m.via.style.transform = 'translate(' + (MT.xEsc - 26) + 'px,' + T4.yNivel(fa) + 'px)'; m.via.setAttribute('transform', 'translate(' + (MT.xEsc - 26) + ',' + T4.yNivel(fa) + ')');
+          /* (Iago 5-nov 09:15) guía sutil: chevrones que tintinean desde el círculo hacia donde va */
+          if (fb !== fa) { const gu = el('div', 'mt-guia ' + (fb > fa ? 'arriba' : 'abajo'), '<i></i><i></i><i></i>');
+            gu.style.left = ((MT.xEsc - 26) / MT.W * 100) + '%'; gu.style.top = (T4.yNivel(fa) / MT.H * 100) + '%'; mapa.appendChild(gu); }
           M().barraTexto('El viajero está en <b>' + it.de + '</b>. ¿Cuántos niveles hay hasta <b>' + it.a + '</b>, y hacia dónde?'); } };
       /* las fichas: tocar y tocar su altura, o arrastrar */
       [it.de, it.a].filter((t, i, a) => a.indexOf(t) === i).forEach(t => {
@@ -261,7 +290,7 @@
       function corrige() {
         const sol = { n: Math.abs(fb - fa), dir: fb > fa ? 'asc' : 'desc' };
         const okN = sel.n === sol.n && (sol.n === 0 || sel.dir === sol.dir);
-        [bA, bD, bC].forEach(b => { b.disabled = true; }); rN.classList.add('quieta');
+        [bA, bD, bC].forEach(b => { b.disabled = true; }); rN.classList.add('quieta'); B.$$('.mt-guia', mapa).forEach(x => x.remove());
         const solTxt = sol.n + ' ' + flecha(sol.dir, 26);
         res.innerHTML = '<div class="' + (okN ? 'ok' : 'mal') + '"><small>Diferencias</small>' + (okN ? solTxt : '<s>' + sel.n + (sel.dir ? ' ' + flecha(sel.dir, 22) : '') + '</s> ' + solTxt) + '</div><p>' + (okN ? (it.bien || '¡Exacto! ') : '') + T4.explica(fa, fb, true) + '</p>';
         B.viento.ui(okN ? 'ok' : 'mal');
@@ -269,16 +298,23 @@
           if (!ok) return;
           if (!sol.n) return sigueItem();
           /* (Iago 4-nov 22:09) 3.er paso: qué notas quedan afectadas, pulsando */
-          paso1.style.display = 'none'; paso3.style.display = ''; B.$('button.prim', paso3).disabled = false;
-          M().barraTexto('Y ahora: ¿qué ' + (sol.n === 1 ? 'nota queda afectada' : 'notas quedan afectadas') + '? Púlsalas y <b>Comprueba</b>.');
+          paso1.style.display = 'none'; paso2.style.display = 'none'; paso3.style.display = '';   /* (Iago 5-nov 09:12) sin el paso 2 no se apiñan los textos */ B.$('button.prim', paso3).disabled = false;
+          M().barraTexto('Y ahora: ¿qué ' + (sol.n === 1 ? 'nota queda afectada? Púlsala' : 'notas quedan afectadas? Púlsalas') + ' y <b>Comprueba</b>.');
         });
         corrige3 = function () {
           const af = T4.afectadas(sol.n, sol.dir === 'asc'), okA = fila3.corrige(af); B.$('button.prim', paso3).disabled = true;
           res3.innerHTML = '<span class="' + (okA ? 'ok' : 'mal') + '">' + (okA ? '✓ ' : '✗ ') + (af.length === 1 ? 'La nota afectada es ' : 'Las notas afectadas son ') + '<b>' + af.join(', ') + '</b>.</span>';
           B.viento.ui(okA ? 'ok' : 'mal');
-          /* (Iago 4-nov 22:00) letrero fugaz con las notas afectadas (confirmación) */
-          const L = el('div', 'mt-afect ' + sol.dir, '<small>' + (sol.n === 1 ? 'La nota afectada es' : 'Las notas afectadas son') + '</small><b>' + (sol.dir === 'asc' ? ORD_S : ORD_B).slice(0, sol.n).join(' · ') + '</b><i>' + (sol.dir === 'asc' ? 'si llevan alteración accidental, sube un semitono' : 'si llevan alteración accidental, baja un semitono') + '</i>');
-          mapa.appendChild(L); setTimeout(() => L.remove(), 4200);
+          /* (Iago 5-nov 09:13) la regla, en la ficha (donde se contesta) y con un ejemplo en pentagrama: la nota afectada con una
+             alteración accidental → cómo queda. Los ejemplos van cambiando (♭→♮, ♮→♯ · ♯→♮, ♮→♭) */
+          const asc = sol.dir === 'asc', nAf = (asc ? ORD_S : ORD_B)[0], ej = asc ? [['b', 'n'], ['n', '#']][k % 2] : [['#', 'n'], ['n', 'b']][k % 2];
+          const G = { b: '♭', n: '♮', '#': '♯' };
+          const card = el('div', 'mt-afx ' + sol.dir, '<p>' + (af.length === 1 ? 'Nota afectada: <b>' + nAf + '</b>. Si lleva' : 'Notas afectadas: <b>' + (asc ? ORD_S : ORD_B).slice(0, sol.n).join(', ') + '</b>. Si llevan') +
+            ' alteración accidental, ' + (af.length === 1 ? (asc ? 'sube' : 'baja') : (asc ? 'suben' : 'bajan')) + ' <b>medio tono</b>. Por ejemplo:</p>');
+          const fila = el('div', 'mt-afx-f'), n1 = el('div', 'mt-afx-n'), n2 = el('div', 'mt-afx-n');
+          fila.appendChild(n1); fila.appendChild(el('i', 'mt-afx-fl', '<span>' + (asc ? '↑' : '↓') + ' ½ tono</span>')); fila.appendChild(n2); card.appendChild(fila); paso3.appendChild(card);
+          T4.miniNota(n1, NOTA_K[nAf], ej[0], '#ffb547', nAf + G[ej[0]]); T4.miniNota(n2, NOTA_K[nAf], ej[1], '#7dffa8', nAf + G[ej[1]]);
+          requestAnimationFrame(() => card.classList.add('on'));
           sigueItem();
         };
       }
@@ -431,7 +467,7 @@
     api = E().panel(p, ex, { alterar: true, guiado: true, lado: true, porFila: 4, altoFila: 100,
       titulo: 'Pasa la parte de <b>clarinete en Si♭</b> a <b>saxo alto en Mi♭</b> · <b>' + ex.transp.lbl + '</b>',
       etiquetaOrig: 'Parte de Xoán · <b>clarinete en Si♭</b> · <b>' + ex.key.name + ' Mayor</b> (' + T4.arm(ex.key.fifths) + ')',
-      etiquetaAlu: '<b>Tu parte de saxo alto en Mi♭</b> · pulsa en el pentagrama para colocar cada nota; con ♭ ♮ ♯, sus alteraciones',
+      etiquetaAlu: '<b>Tu parte de saxo alto en Mi♭</b> · las notas, con <b>✎ Transcribir</b>; tú decides las que parpadean', soloTranscribir: true,
       sonOrig: { inst: 'clarinete', off: -2 }, sonAlu: { inst: 'saxo', off: -9 }, txtOrig: '▶ Clarinete', txtAlu: '▶ Tu saxo', juntos: '▶ Los dos a la vez',
       sinFantasma: true, alDecidir: alDecidir(() => api), alCambio: () => barraDudas(api), alCorregir: (pt, e) => corr(pt, e) });
     B._apiEscrito = api;
@@ -454,7 +490,13 @@
       sigue = res; c.alMorir.push(() => res(false));
       M().barraTexto(P0.barra || '<b>Paso 0</b> · elige la tonalidad y la armadura de tu parte de saxo.');
       paso0(p, { ex: ex, titulo: P0.titulo || 'Paso 0 · La tonalidad de tu parte', texto: P0.texto || '', validar: true, pistas: cfg.pistas, bien: P0.bien, diferencias: true, afectadas: true,
-        alListo: () => { api.fijaTonArm(); ponAfect(api, ex); bTra.style.display = ''; M().barraTexto((cfg.cartelCorto || 'Coloca cada nota una 5.ª justa más arriba. Después, <b>Corregir</b>.') + ' Si quieres, <b>✎ Transcribir</b> las escribe todas; las que llevan alteración accidental <b>parpadean</b> para que las definas.'); } });
+        /* (Iago 5-nov 09:16) «✎ Transcribir» en una ventana en el centro: es la ÚNICA forma de poner las notas (a mano sería muy tedioso) */
+        alListo: () => { api.fijaTonArm(); ponAfect(api, ex);
+          const n = Math.abs(ex.destino.fifths - ex.key.fifths), af = T4.afectadas(n, ex.destino.fifths > ex.key.fifths);
+          M().cartel('<b>Ahora, las notas.</b> Pulsa <b>✎ Transcribir</b> y se escribirán solas, cada una una <b>5.ª justa más arriba</b>. Las que llevan alteración accidental <b>parpadean</b>: púlsalas y decide si llevan ♭, ♮ o ♯. Recuerda: ' + (af.length === 1 ? 'la nota afectada es <b>' : 'las notas afectadas son <b>') + af.join(', ').toLowerCase() + '</b>.',
+            { boton: '✎ Transcribir', botones: [bSol], aulaSolo: false })
+            .then(() => { if (!api || !api.transcribe) return; api._transcrito = true; api.transcribe(); barraDudas(api); });
+        } });
     }));
   };
 
@@ -683,6 +725,35 @@
       if (n) B.viento.ui('ok');
     }));
   };
+  /* (Iago 5-nov 09:10) curiosidad: de bemoles a MENOS bemoles también es subir. La escala de alturas con el salto y, debajo,
+     las notas afectadas en el orden de los sostenidos: { titulo, de, a, t, pasos:[[s, n]…] } */
+  L.difAfect = function (box, s, c) {
+    L.escalaDif(box, { titulo: s.titulo, de: s.de, a: s.a, t: s.t, rotulos: false, todas: s.todas }, c);
+    L.afectadas(box, { orden: 's', pasos: s.pasos }, c);
+  };
+  /* (Iago 5-nov 09:21) refuerzo del narrador: «más ♯ o menos ♭ → ascendentes; más ♭ o menos ♯ → descendentes», con las alteraciones
+     apareciendo o desapareciendo una a una. s = { titulo, ens:{ arm, asc, s1, b1, desc, b2, s2 } } (s) */
+  L.reglaDif = function (box, s, c) {
+    if (s.titulo) box.appendChild(el('div', 'lam-tit', s.titulo));
+    const E = s.ens || {}, R = RAP(), cuando = t => B.espera(R ? .05 : t, c);
+    const top = el('div', 'rg-top', '<span>Re M <b class="sos">♯♯</b></span><i>→</i><span>La M <b class="sos">♯♯♯</b></span><em>1 alteración más · ' + flecha('asc', 26) + '</em>');
+    box.appendChild(top); cuando(E.arm || .4).then(ok => ok && top.classList.add('on'));
+    const cols = el('div', 'rg-cols'); box.appendChild(cols);
+    /* una fila: glifos que van de n0 a n1 (aparece uno nuevo o se va el último) */
+    const fila = (col, gl, n0, n1, txt, t) => {
+      const f = el('div', 'rg-f'), g = el('div', 'rg-g ' + (gl === '♯' ? 'sos' : 'bem'));
+      for (let i = 0; i < Math.max(n0, n1); i++) { const x = el('b', i < n0 ? 'ya' : 'nuevo', gl); g.appendChild(x); }
+      f.appendChild(g); f.appendChild(el('small', '', txt)); col.appendChild(f);
+      cuando(t).then(ok => { if (!ok) return; f.classList.add('on');
+        B.espera(R ? .05 : .7, c).then(o2 => { if (!o2) return; const bs = B.$$('b', g);
+          if (n1 > n0) bs.slice(n0).forEach(x => x.classList.add('entra')); else bs.slice(n1).forEach(x => x.classList.add('sale'));
+          try { B.viento.ui('ok'); } catch (e) { } }); });
+    };
+    const col = (d, t, tit, filas) => { const k = el('div', 'rg-col ' + d), h = el('div', 'rg-cab', flecha(d, 40) + '<b>' + tit + '</b>'); k.appendChild(h); cols.appendChild(k);
+      filas.forEach(x => fila(k, ...x)); cuando(t).then(ok => ok && k.classList.add('on')); };
+    col('asc', E.asc || 6.8, 'Ascendentes', [['♯', 2, 3, 'más sostenidos', E.s1 || 7.2], ['♭', 3, 2, 'menos bemoles', E.b1 || 8.3]]);
+    col('desc', E.desc || 10.5, 'Descendentes', [['♭', 1, 2, 'más bemoles', E.b2 || 11], ['♯', 3, 2, 'menos sostenidos', E.s2 || 12]]);
+  };
   /* la tabla resumen (como la de Teoría at home PRO): { titulo, ens } */
   L.tablaDif = function (box, s, c) {
     if (s.titulo) box.appendChild(el('div', 'lam-tit', s.titulo));
@@ -697,7 +768,7 @@
       ['Las demás alteraciones', 'se copian igual: <b>do♮ → sol♮</b> · <b>sol♯ → re♯</b>', 'se copian igual']
     ];
     filas.forEach((f, i) => {
-      const r = el('div', 'tdif-f' + (i === 0 ? ' cab' : '')); f.forEach((x, j) => r.appendChild(el('div', 'tdif-c' + (j === 0 ? ' et' : ''), x))); t.appendChild(r);
+      const r = el('div', 'tdif-f' + (i === 0 ? ' tdif-cab' : ''));   /* (Iago 5-nov 09:21) «cab» chocaba con la cabecera general (position:absolute) */ f.forEach((x, j) => r.appendChild(el('div', 'tdif-c' + (j === 0 ? ' et' : ''), x))); t.appendChild(r);
       const e = (s.ens || [])[i]; if (i === 0) r.classList.add('on'); else B.espera(e == null ? .4 + i * 1.4 : (e > 1 ? e : e * dur), c).then(ok => ok && r.classList.add('on'));
     });
   };

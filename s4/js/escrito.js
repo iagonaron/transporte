@@ -256,10 +256,10 @@
   /* (3-nov) dos pieles de tinta: «onda» (2100, futurista) y «época» (Santiago, 1730: tinta sepia sobre papel, resalte en almagre).
      La piel la decide el contenedor: si está dentro de .epoca, se pinta en tinta. */
   const PIEL = {
-    onda: { tinta: '#eaf3ff', resalte: '#ffb547', verde: '#7dffa8', rojo: '#ff6b6b', apagada: 'rgba(234,243,255,.35)', fantasma: 'rgba(99,230,255,.75)', fondoX: 'rgba(6,12,29,.92)' },
-    epoca: { tinta: '#26180c', resalte: '#a8321b', verde: '#2c6a27', rojo: '#c0261c', apagada: 'rgba(38,24,12,.3)', fantasma: 'rgba(38,24,12,.42)', fondoX: '#f3e6c6' },
+    onda: { tinta: '#eaf3ff', resalte: '#ffb547', verde: '#7dffa8', verdeOk: '#b4ffcc', rojo: '#ff6b6b', apagada: 'rgba(234,243,255,.35)', fantasma: 'rgba(99,230,255,.75)', fondoX: 'rgba(6,12,29,.92)' },
+    epoca: { tinta: '#26180c', resalte: '#a8321b', verde: '#2c6a27', verdeOk: '#4fae3f', rojo: '#c0261c', apagada: 'rgba(38,24,12,.3)', fantasma: 'rgba(38,24,12,.42)', fondoX: '#f3e6c6' },
     /* (T4) el cuaderno de pentagramas de Xoán (2070): grafito sobre papel blanco, resalte naranja */
-    cuaderno: { tinta: '#1f232b', resalte: '#d9480f', verde: '#1f7a3a', rojo: '#c92a2a', apagada: 'rgba(31,35,43,.3)', fantasma: 'rgba(31,35,43,.42)', fondoX: '#fbfaf6' } };
+    cuaderno: { tinta: '#1f232b', resalte: '#d9480f', verde: '#1f7a3a', verdeOk: '#25b553', rojo: '#c92a2a', apagada: 'rgba(31,35,43,.3)', fantasma: 'rgba(31,35,43,.42)', fondoX: '#fbfaf6' } };
   const pal = h => (h && h.closest && h.closest('.epoca')) ? PIEL.epoca : (h && h.closest && h.closest('.cuaderno')) ? PIEL.cuaderno : PIEL.onda;
   E.pal = pal;
   const baseDur = d => d === 'qd' ? 'q' : d === 'hd' ? 'h' : d, conPunto = d => d === 'qd' || d === 'hd';
@@ -300,7 +300,7 @@
           else if (accO[ki]) sn.addModifier(new VF.Accidental(accO[ki]), 0);
           if (op.corr) col = correctaAltura(ex, gi, nota) ? VERDE : ROJO;
           else if (alu && nota.malFlash) col = ROJO;
-          else if (alu && nota.bienDec) col = VERDE;
+          else if (alu && nota.bienDec) col = K.verdeOk || VERDE;   /* (Iago 5-nov 09:17) acierto: verde más clarito + ✓ */
           else if (gi === op.sel || gi === op.hl) col = AMBAR;
           else if (op.apagadas && op.apagadas.indexOf(gi) >= 0) col = K.apagada;
         } else {
@@ -332,7 +332,12 @@
          al fallar, un destello rojo y la sacudida */
       if (alu) mn.forEach((nn, ki) => { const nota = op.notas ? op.notas[gi0 + ki] : ex.aluNotas[gi0 + ki]; if (!nota || op.corr) return;
         const g = sns[ki].getSVGElement ? sns[ki].getSVGElement() : null; if (!g) return;
-        if (nota.malFlash) g.classList.add('esc-malflash'); else if (nota.duda) g.classList.add('esc-parpadea'); else if (nota.bienDec) g.classList.add('esc-biendec'); });
+        if (nota.malFlash) g.classList.add('esc-malflash'); else if (nota.duda) g.classList.add('esc-parpadea'); else if (nota.bienDec) { g.classList.add('esc-biendec');
+          try { const bb = g.getBBox(), xt = bb.x + bb.width / 2, yt = Math.min(st.getYForLine(0), bb.y) - 16, fresco = nota.ticT && Date.now() - nota.ticT < 1200;
+            const t = svgEl('g', { class: 'esc-tic', transform: 'translate(' + xt + ',' + yt + ')' }), ti = svgEl('g', { class: 'esc-tic-in' + (fresco ? ' nuevo' : '') }); t.appendChild(ti);
+            ti.appendChild(svgEl('circle', { r: 11, fill: K.verdeOk || VERDE }));
+            ti.appendChild(svgEl('path', { d: 'M -5 0 L -1.5 4 L 5.5 -4.5', fill: 'none', stroke: '#fff', 'stroke-width': 2.6, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+            (g.parentNode || g).appendChild(t); } catch (e) { } } });
       const cg = { stave: st, notes: [], fila: fila, cy: (st.getYForLine(0) + st.getYForLine(4)) / 2 };
       sns.forEach((sn, ki) => { let cx; try { cx = sn.getAbsoluteX() + 6; } catch (e) { cx = x + wC / 2; } cg.notes.push({ gi: gi0 + ki, x: cx, dur: mn[ki].dur, el: sn.getSVGElement ? sn.getSVGElement() : null }); });
       geo.comps.push(cg);
@@ -415,7 +420,7 @@
       E.pinta(hO, ex, { modo: 'orig', otroF: ex.aluArm, hl: hl == null || hl < 0 ? null : hl, porFila: cfg.porFila, alto: cfg.altoFila });
       geo = E.pinta(hA, ex, { modo: 'alu', otroF: ex.key.fifths, sel: corregido ? null : sel, corr: corregido, porFila: cfg.porFila, alto: cfg.altoFila ? cfg.altoFila + 8 : undefined });
       if (!bloqueado) engancha();
-      if (sel != null && ex.aluNotas[sel] && !corregido && !bloqueado) cruz();
+      if (sel != null && ex.aluNotas[sel] && !corregido && !bloqueado && !cfg.soloTranscribir) cruz();
       pintaAcc(); bDes.disabled = !ex.undo.length || bloqueado;
       if (abre != null && !bloqueado && !corregido && ex.aluNotas[abre] && ex.aluNotas[abre].duda) selector(abre); else abre = null;
       if (cfg.alCambio) cfg.alCambio(ex);
@@ -437,6 +442,7 @@
         const s = alturaY(b.cg.stave, pt.y), gi = b.nt.gi, prev = ex.aluNotas[gi];
         const ix = n => STEPS.indexOf(n.step) + n.octave * 7;
         if (prev && (prev.step === s.step && prev.octave === s.octave || (prev.duda && Math.abs(ix(prev) - ix(s)) <= 1))) { sel = gi; abre = prev.duda ? gi : null; redraw(); return; }   // (T4) con el dedo: a un grado de una nota «?» también abre su selector   // tocar la nota ya puesta: solo seleccionarla (si es «?», se abre su selector)
+        if (cfg.soloTranscribir) { if (prev) { sel = gi; abre = prev.duda ? gi : null; redraw(); } return; }   /* (Iago 5-nov 09:16, T4) las notas solo entran con «✎ Transcribir»: tocar solo selecciona */
         abre = null;
         ex.undo.push({ gi: gi, prev: prev ? Object.assign({}, prev) : null });
         ex.aluNotas[gi] = { step: s.step, octave: s.octave, alter: 0 };
@@ -511,7 +517,7 @@
       const ok = correctaAltura(ex, gi, a);
       if (a.primer == null) a.primer = ok;
       suenaNota(E.midiAlu(ex, a, gi)); limpiaCorr();
-      if (ok) { a.bienDec = true; B.viento.ui('ok'); redraw(); if (cfg.alDecidir) cfg.alDecidir(true, gi, ex); return; }
+      if (ok) { a.bienDec = true; a.ticT = Date.now(); B.viento.ui('ok'); redraw(); if (cfg.alDecidir) cfg.alDecidir(true, gi, ex); return; }
       a.malFlash = true; B.viento.ui('mal'); redraw();
       if (cfg.alDecidir) cfg.alDecidir(false, gi, ex);
       setTimeout(() => { a.malFlash = false; a.duda = true; redraw(); }, 900);
